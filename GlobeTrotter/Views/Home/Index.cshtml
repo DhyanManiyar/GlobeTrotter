@@ -29,12 +29,11 @@
         <!-- Nav Links -->
         <nav>
             <ul class="gt-nav-menu">
-                <li><a href="@Url.Action("Index", "Explore")" class="gt-nav-link">Explore & Search</a></li>
-                <li><a href="@Url.Action("Index", "Community")" class="gt-nav-link"><i class="fa-solid fa-users" style="margin-right: 5px; color: var(--gt-brand-primary);"></i>Community</a></li>
-                <li><a href="@Url.Action("Index", "Trips")" class="gt-nav-link">My Trips</a></li>
-                <li><a href="@Url.Action("Index", "Explore", new { tab = "activities" })" class="gt-nav-link">Activities</a></li>
+                <li><a href="@Url.Action("Index", "User")" class="gt-nav-link"><i class="fa-solid fa-gauge" style="margin-right: 5px; color: var(--gt-brand-primary);"></i>Dashboard</a></li>
+                <li><a href="@Url.Action("Trip", "User")" class="gt-nav-link">My Trips</a></li>
+                <li><a href="@Url.Action("Index", "Community")" class="gt-nav-link">Community</a></li>
+                <li><a href="@Url.Action("Index", "Explore")" class="gt-nav-link">Explore &amp; Search</a></li>
                 <li><a href="@Url.Action("Profile", "Manage")" class="gt-nav-link">Profile</a></li>
-                <li><a href="@Url.Action("About", "Home")" class="gt-nav-link">About</a></li>
             </ul>
         </nav>
 

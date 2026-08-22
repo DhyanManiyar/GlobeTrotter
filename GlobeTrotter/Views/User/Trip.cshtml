@@ -1,0 +1,214 @@
+@model GlobeTrotter.Models.TripDashboardViewModel
+@{
+    ViewBag.Title = "My Trips & Itinerary Management | GlobeTrotter";
+    string currentFilter = ViewBag.CurrentFilter as string ?? "All";
+    string searchQuery = ViewBag.SearchQuery as string ?? "";
+    string userName = Model.User?.FullName ?? Model.User?.UserName ?? User.Identity.Name;
+    string avatarUrl = string.IsNullOrWhiteSpace(Model.User?.AvatarUrl) ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" : Model.User.AvatarUrl;
+}
+
+<div style="padding-top: 85px; padding-bottom: 80px;">
+    <div class="gt-container">
+        
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="gt-val-summary" style="background: #ECFDF5; border-color: #A7F3D0; color: #065F46; margin-bottom: 20px; display:flex; align-items:center; justify-content:space-between;">
+                <div>
+                    <i class="fa-solid fa-circle-check" style="color: #10B981; margin-right: 8px;"></i>
+                    <span>@TempData["SuccessMessage"]</span>
+                </div>
+                <button type="button" onclick="this.parentElement.remove()" style="background:none; border:none; color:#065F46; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="gt-val-summary" style="margin-bottom: 20px; display:flex; align-items:center; justify-content:space-between;">
+                <div>
+                    <i class="fa-solid fa-circle-exclamation" style="margin-right: 8px;"></i>
+                    <span>@TempData["ErrorMessage"]</span>
+                </div>
+                <button type="button" onclick="this.parentElement.remove()" style="background:none; border:none; color:#DC2626; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        }
+
+        <!-- Top Header & Navigation -->
+        <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 24px 28px; box-shadow: var(--gt-shadow-card); margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <h1 style="font-size: 24px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.02em;">
+                        My Trips &amp; Itinerary Management
+                    </h1>
+                    <span class="gt-tier-tag" style="background: rgba(99, 102, 241, 0.08); color: var(--gt-brand-primary); font-weight: 700;">
+                        @Model.TotalTripsCount Total Trips
+                    </span>
+                </div>
+                <p style="font-size: 13.5px; color: var(--gt-zinc-500); margin-top: 4px;">
+                    Organize, edit, build multi-city sections, and track budgets across all your journeys.
+                </p>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <a href="@Url.Action("Index", "User")" class="gt-tag-btn" style="padding: 9px 16px; font-size: 13px; font-weight: 600;">
+                    <i class="fa-solid fa-gauge" style="margin-right: 5px;"></i> Dashboard
+                </a>
+                <a href="@Url.Action("Index", "Community")" class="gt-tag-btn" style="padding: 9px 16px; font-size: 13px; font-weight: 600;">
+                    <i class="fa-solid fa-users" style="margin-right: 5px; color: var(--gt-brand-primary);"></i> Community
+                </a>
+                <a href="@Url.Action("Create", "User")" class="gt-btn-add" style="padding: 9px 20px; font-size: 13.5px; font-weight: 700;">
+                    <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Plan New Trip
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter Tabs & Search Bar -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+            <!-- Status Tabs -->
+            <div style="display: flex; gap: 6px; background: #FFFFFF; border: 1px solid var(--gt-border); padding: 4px 6px; border-radius: var(--gt-radius-full); box-shadow: var(--gt-shadow-xs);">
+                <a href="@Url.Action("Trip", "User", new { status = "All", search = searchQuery })" class="gt-nav-link @(currentFilter == "All" ? "active" : "")">
+                    All (@Model.TotalTripsCount)
+                </a>
+                <a href="@Url.Action("Trip", "User", new { status = "Upcoming", search = searchQuery })" class="gt-nav-link @(currentFilter == "Upcoming" ? "active" : "")">
+                    Upcoming (@Model.UpcomingTripsCount)
+                </a>
+                <a href="@Url.Action("Trip", "User", new { status = "Active", search = searchQuery })" class="gt-nav-link @(currentFilter == "Active" ? "active" : "")">
+                    Active
+                </a>
+                <a href="@Url.Action("Trip", "User", new { status = "Completed", search = searchQuery })" class="gt-nav-link @(currentFilter == "Completed" ? "active" : "")">
+                    Completed (@Model.CompletedTripsCount)
+                </a>
+                <a href="@Url.Action("Trip", "User", new { status = "Draft", search = searchQuery })" class="gt-nav-link @(currentFilter == "Draft" ? "active" : "")">
+                    Draft
+                </a>
+            </div>
+
+            <!-- Search Form -->
+            @using (Html.BeginForm("Trip", "User", FormMethod.Get, new { style = "display: flex; gap: 8px; margin: 0;" }))
+            {
+                <input type="hidden" name="status" value="@currentFilter" />
+                <div style="position: relative; width: 260px;">
+                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--gt-zinc-400); font-size: 13px;"></i>
+                    <input type="text" name="search" value="@searchQuery" placeholder="Search trips or cities..." class="gt-auth-input" style="padding-left: 36px; height: 38px; font-size: 13px;" />
+                </div>
+                <button type="submit" class="gt-tag-btn" style="padding: 0 14px; height: 38px; font-weight: 700;">Filter</button>
+            }
+        </div>
+
+        <!-- Trips List -->
+        @if (Model.Trips.Count == 0)
+        {
+            <div style="background: #FFFFFF; border: 1px dashed var(--gt-zinc-300); border-radius: var(--gt-radius-xl); padding: 64px 20px; text-align: center;">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--gt-zinc-100); color: var(--gt-zinc-400); display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+                <h3 style="font-size: 18px; font-weight: 700; color: var(--gt-zinc-800); margin-bottom: 8px;">No trips found in this view</h3>
+                <p style="font-size: 14px; color: var(--gt-zinc-500); margin-bottom: 20px;">Start planning your next adventure or switch your filter above.</p>
+                <a href="@Url.Action("Create", "User")" class="gt-btn-auth-primary" style="display: inline-flex; width: auto; padding: 10px 24px;">
+                    <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Plan a New Trip
+                </a>
+            </div>
+        }
+        else
+        {
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px;">
+                @foreach (var trip in Model.Trips)
+                {
+                    <div class="gt-trip-card" style="background: #FFFFFF; border: 1.5px solid var(--gt-border); border-radius: var(--gt-radius-xl); overflow: hidden; box-shadow: var(--gt-shadow-card); display: flex; flex-direction: column; justify-content: space-between;">
+                        
+                        <!-- Card Header Image -->
+                        <div style="height: 180px; position: relative;">
+                            <img src="@trip.CoverImageUrl" alt="@trip.Title" style="width: 100%; height: 100%; object-fit: cover;" />
+                            <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 60%);"></div>
+
+                            <span class="gt-card-badge @(trip.Status == "Upcoming" ? "gt-badge-trending" : (trip.Status == "Active" ? "gt-badge-top" : "gt-tag-btn"))" style="position: absolute; top: 14px; left: 14px;">
+                                @trip.Status
+                            </span>
+
+                            <span style="position: absolute; top: 14px; right: 14px; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); color: #FFFFFF; padding: 4px 10px; border-radius: var(--gt-radius-full); font-size: 12px; font-weight: 700;">
+                                @trip.DurationDays Days
+                            </span>
+
+                            <div style="position: absolute; bottom: 12px; left: 16px; right: 16px; color: white;">
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.85);">
+                                    <i class="fa-regular fa-calendar" style="margin-right: 4px;"></i>
+                                    @trip.StartDate.ToString("MMM dd") - @trip.EndDate.ToString("MMM dd, yyyy")
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-zinc-950); margin-bottom: 8px; line-height: 1.35;">
+                                    @trip.Title
+                                </h3>
+
+                                <p style="font-size: 13px; color: var(--gt-zinc-600); line-height: 1.45; margin-bottom: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                    @(string.IsNullOrWhiteSpace(trip.Description) ? "Multi-city journey itinerary with activities and budget tracking." : trip.Description)
+                                </p>
+
+                                <!-- Stop Pills -->
+                                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;">
+                                    @foreach (var city in trip.StopCityNames)
+                                    {
+                                        <span style="background: var(--gt-zinc-100); color: var(--gt-zinc-800); padding: 3px 8px; border-radius: var(--gt-radius-sm); font-size: 11.5px; font-weight: 600;">
+                                            @city
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Financial Progress & Actions -->
+                            <div>
+                                <div style="border-top: 1px solid var(--gt-border-subtle); padding-top: 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <div style="font-size: 10.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Estimated Budget</div>
+                                        <div style="font-size: 16px; font-weight: 800; color: @(trip.IsOverBudget ? "#DC2626" : "var(--gt-zinc-950)");">
+                                            $@trip.EstimatedCost.ToString("N0") <span style="font-size: 11.5px; font-weight: 500; color: var(--gt-zinc-400);">/ $@trip.TotalBudget.ToString("N0")</span>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-size: 10.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Stops</div>
+                                        <div style="font-size: 15px; font-weight: 800; color: var(--gt-brand-primary);">
+                                            @trip.StopsCount Sections
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                                    <a href="@Url.Action("BuildItinerary", "User", new { id = trip.TripId })" class="gt-btn-auth-primary" style="flex: 1; padding: 8px 12px; font-size: 13px; font-weight: 700;">
+                                        <i class="fa-solid fa-pen-ruler" style="margin-right: 4px;"></i> Build Itinerary
+                                    </a>
+
+                                    <a href="@Url.Action("Edit", "User", new { id = trip.TripId })" class="gt-tag-btn" style="padding: 8px 10px;" title="Edit Trip">
+                                        <i class="fa-solid fa-gear"></i>
+                                    </a>
+
+                                    <!-- Duplicate -->
+                                    @using (Html.BeginForm("Duplicate", "User", new { id = trip.TripId }, FormMethod.Post, new { style = "margin:0;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="gt-tag-btn" style="padding: 8px 10px;" title="Duplicate Trip">
+                                            <i class="fa-regular fa-copy"></i>
+                                        </button>
+                                    }
+
+                                    <!-- Delete -->
+                                    @using (Html.BeginForm("Delete", "User", new { id = trip.TripId }, FormMethod.Post, new { style = "margin:0;", onsubmit = "return confirm('Delete trip " + trip.Title + "?');" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="gt-tag-btn" style="color: #DC2626; border-color: rgba(220,38,38,0.2); padding: 8px 10px;" title="Delete Trip">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+    </div>
+</div>

@@ -1,0 +1,264 @@
+@model GlobeTrotter.Models.CreateTripViewModel
+@{
+    ViewBag.Title = "Plan a New Trip | GlobeTrotter";
+    string userAvatar = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
+}
+
+<div class="gt-auth-page" style="padding: 40px 20px 80px; display: block; max-width: 960px; margin: 0 auto;">
+    <div class="gt-hero-ambient-glow" style="top: 2%;"></div>
+
+    <!-- Top App Navigation / Header Matching Wireframe -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding: 14px 20px; background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-xl); box-shadow: var(--gt-shadow-xs);">
+        <a href="@Url.Action("Index", "User")" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+            <div class="gt-brand-icon" style="width: 34px; height: 34px; font-size: 15px;">
+                <i class="fa-solid fa-earth-americas"></i>
+            </div>
+            <span style="font-family: var(--gt-font-display); font-size: 18px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.03em;">
+                GlobeTrotter
+            </span>
+        </a>
+
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <a href="@Url.Action("Trip", "User")" class="gt-tag-btn" style="padding: 6px 14px; font-size: 13px;">
+                <i class="fa-solid fa-arrow-left" style="margin-right: 4px;"></i> My Trips
+            </a>
+            <a href="@Url.Action("Profile", "Manage")" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 2px solid var(--gt-brand-light); box-shadow: var(--gt-shadow-xs); display: block;" title="My Profile">
+                <img src="@userAvatar" alt="User" style="width: 100%; height: 100%; object-fit: cover;" />
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Container Card -->
+    <div class="gt-auth-card" style="max-width: 100%; padding: 32px 36px;">
+        @using (Html.BeginForm("Create", "User", FormMethod.Post, new { role = "form", id = "screen4TripForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.CoverImageUrl, new { id = "hiddenCoverUrl" })
+            @Html.HiddenFor(m => m.SelectedActivityIdsJson, new { id = "selectedActivityIdsInput" })
+
+            if (!ViewData.ModelState.IsValid)
+            {
+                <div class="gt-val-summary">
+                    <i class="fa-solid fa-circle-exclamation"></i> Please check the required fields below.
+                    @Html.ValidationSummary(true, "")
+                </div>
+            }
+
+            <!-- ==========================================================
+                 SECTION A: PLAN A NEW TRIP FORM (SCREEN 4 WIREFRAME)
+                 ========================================================== -->
+            <div style="border-bottom: 2px solid var(--gt-zinc-100); padding-bottom: 24px; margin-bottom: 28px;">
+                <h3 style="font-size: 19px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.02em; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-plane-departure" style="color: var(--gt-brand-primary);"></i>
+                    Plan a new trip
+                </h3>
+
+                <div style="display: grid; grid-template-columns: 160px 1fr; gap: 16px 20px; align-items: center;">
+                    <!-- Starting Point / Trip Name -->
+                    <label class="gt-form-label" for="txtTripTitle" style="font-size: 13.5px; font-weight: 700; margin: 0;">
+                        Starting Point / Name :
+                    </label>
+                    <div>
+                        <div class="gt-input-box">
+                            <i class="fa-solid fa-pen-nib input-icon"></i>
+                            @Html.TextBoxFor(m => m.Title, new { 
+                                @class = "gt-auth-input", 
+                                id = "txtTripTitle", 
+                                placeholder = "e.g. European Explorer Journey",
+                                required = "required"
+                            })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.Title, "", new { @class = "field-validation-error" })
+                    </div>
+
+                    <!-- Select a Place -->
+                    <label class="gt-form-label" for="selPlaceCity" style="font-size: 13.5px; font-weight: 700; margin: 0;">
+                        Select a Place :
+                    </label>
+                    <div>
+                        <div class="gt-input-box">
+                            <i class="fa-solid fa-location-dot input-icon"></i>
+                            <select id="selPlaceCity" name="PlaceCityId" class="gt-auth-input" onchange="onPlaceSelectionChange(this.value)" required>
+                                @foreach (var city in Model.AvailableCities)
+                                {
+                                    <option value="@city.CityId" selected="@(city.CityId == Model.PlaceCityId)">
+                                        @city.Name, @city.Country (@city.Region) - Avg $@city.AvgDailyCost.ToString("N0")/day
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        @Html.ValidationMessageFor(m => m.PlaceCityId, "", new { @class = "field-validation-error" })
+                    </div>
+
+                    <!-- Start Date -->
+                    <label class="gt-form-label" for="txtStartDate" style="font-size: 13.5px; font-weight: 700; margin: 0;">
+                        Start Date:
+                    </label>
+                    <div>
+                        <div class="gt-input-box">
+                            <i class="fa-regular fa-calendar input-icon"></i>
+                            @Html.TextBoxFor(m => m.StartDate, "{0:yyyy-MM-dd}", new { 
+                                @class = "gt-auth-input", 
+                                id = "txtStartDate", 
+                                type = "date",
+                                required = "required"
+                            })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.StartDate, "", new { @class = "field-validation-error" })
+                    </div>
+
+                    <!-- End Date -->
+                    <label class="gt-form-label" for="txtEndDate" style="font-size: 13.5px; font-weight: 700; margin: 0;">
+                        End Date:
+                    </label>
+                    <div>
+                        <div class="gt-input-box">
+                            <i class="fa-regular fa-calendar-check input-icon"></i>
+                            @Html.TextBoxFor(m => m.EndDate, "{0:yyyy-MM-dd}", new { 
+                                @class = "gt-auth-input", 
+                                id = "txtEndDate", 
+                                type = "date",
+                                required = "required"
+                            })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.EndDate, "", new { @class = "field-validation-error" })
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================================
+                 SECTION B: SUGGESTION FOR PLACES / ACTIVITIES (6 CARDS GRID)
+                 ========================================================== -->
+            <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.02em; margin-bottom: 4px;">
+                            Suggestion for Places to Visit / Activities to perform
+                        </h3>
+                        <p style="font-size: 13px; color: var(--gt-zinc-500);">
+                            Click on cards to pre-select curated experiences for your first itinerary stop
+                        </p>
+                    </div>
+                    <span id="selectionCounterBadge" class="gt-tier-tag" style="background: rgba(99, 102, 241, 0.08); color: var(--gt-brand-primary); font-weight: 700;">
+                        0 activities selected
+                    </span>
+                </div>
+
+                <!-- 6 Suggestions Grid (3x2 matching Screen 4 wireframe) -->
+                <div id="suggestionsGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 32px;">
+                    @for (int i = 0; i < Model.Suggestions.Count; i++)
+                    {
+                        var item = Model.Suggestions[i];
+                        <div class="gt-suggestion-card" data-activity-id="@item.ActivityId" onclick="toggleActivitySelection(@item.ActivityId, this)" style="background: #FFFFFF; border: 1.5px solid var(--gt-border); border-radius: var(--gt-radius-lg); overflow: hidden; box-shadow: var(--gt-shadow-xs); cursor: pointer; transition: all 0.2s ease; position: relative;">
+                            <div style="height: 140px; position: relative; overflow: hidden; background: var(--gt-zinc-900);">
+                                <img src="@item.ImageUrl" alt="@item.Title" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;" />
+                                <span class="gt-act-cat-tag" style="position: absolute; bottom: 8px; left: 8px; font-size: 10px;">@item.Category</span>
+                                <div class="gt-select-indicator" style="position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); border: 2px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                                    <i class="fa-solid fa-plus"></i>
+                                </div>
+                            </div>
+                            <div style="padding: 12px 14px;">
+                                <h4 style="font-size: 14px; font-weight: 700; color: var(--gt-zinc-950); line-height: 1.3; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                    @item.Title
+                                </h4>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 12px;">
+                                    <span style="font-weight: 700; color: var(--gt-brand-emerald);">$@item.Cost.ToString("N0")</span>
+                                    <span style="color: var(--gt-zinc-400);"><i class="fa-regular fa-clock"></i> @item.DurationHours hrs</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Submit Action Button -->
+                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 14px; border-top: 1px solid var(--gt-border); padding-top: 20px;">
+                    <a href="@Url.Action("Trip", "User")" class="gt-tag-btn" style="padding: 12px 24px; font-weight: 600;">
+                        Cancel
+                    </a>
+                    <button type="submit" class="gt-btn-auth-primary" style="width: auto; padding: 12px 32px; font-size: 15px;">
+                        <span>Create Trip &amp; Build Itinerary</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        let selectedActivityIds = [];
+
+        function toggleActivitySelection(activityId, cardEl) {
+            const index = selectedActivityIds.indexOf(activityId);
+            const indicator = cardEl.querySelector('.gt-select-indicator');
+
+            if (index > -1) {
+                // Deselect
+                selectedActivityIds.splice(index, 1);
+                cardEl.style.borderColor = 'var(--gt-border)';
+                cardEl.style.boxShadow = 'var(--gt-shadow-xs)';
+                indicator.innerHTML = '<i class="fa-solid fa-plus"></i>';
+                indicator.style.background = 'rgba(0,0,0,0.5)';
+            } else {
+                // Select
+                selectedActivityIds.push(activityId);
+                cardEl.style.borderColor = 'var(--gt-brand-primary)';
+                cardEl.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.2)';
+                indicator.innerHTML = '<i class="fa-solid fa-check"></i>';
+                indicator.style.background = 'var(--gt-brand-primary)';
+            }
+
+            document.getElementById('selectedActivityIdsInput').value = selectedActivityIds.join(',');
+            document.getElementById('selectionCounterBadge').innerText = `${selectedActivityIds.length} activities selected`;
+        }
+
+        function onPlaceSelectionChange(cityId) {
+            $.get('@Url.Action("GetCityActivities", "User")', { cityId: cityId }, function(data) {
+                if (data && data.activities) {
+                    if (data.cityImage) {
+                        document.getElementById('hiddenCoverUrl').value = data.cityImage;
+                    }
+                    if (data.cityName) {
+                        const titleInput = document.getElementById('txtTripTitle');
+                        if (titleInput.value.includes('Getaway') || titleInput.value.includes('Explorer') || titleInput.value === '') {
+                            titleInput.value = data.cityName + ' Explorer Journey';
+                        }
+                    }
+
+                    selectedActivityIds = [];
+                    document.getElementById('selectedActivityIdsInput').value = '';
+                    document.getElementById('selectionCounterBadge').innerText = '0 activities selected';
+
+                    const grid = document.getElementById('suggestionsGrid');
+                    grid.innerHTML = '';
+
+                    data.activities.forEach(item => {
+                        const cardHtml = `
+                            <div class="gt-suggestion-card" data-activity-id="${item.ActivityId}" onclick="toggleActivitySelection(${item.ActivityId}, this)" style="background: #FFFFFF; border: 1.5px solid var(--gt-border); border-radius: var(--gt-radius-lg); overflow: hidden; box-shadow: var(--gt-shadow-xs); cursor: pointer; transition: all 0.2s ease; position: relative;">
+                                <div style="height: 140px; position: relative; overflow: hidden; background: var(--gt-zinc-900);">
+                                    <img src="${item.ImageUrl}" alt="${item.Title}" style="width: 100%; height: 100%; object-fit: cover;" />
+                                    <span class="gt-act-cat-tag" style="position: absolute; bottom: 8px; left: 8px; font-size: 10px;">${item.Category}</span>
+                                    <div class="gt-select-indicator" style="position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); border: 2px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </div>
+                                </div>
+                                <div style="padding: 12px 14px;">
+                                    <h4 style="font-size: 14px; font-weight: 700; color: var(--gt-zinc-950); line-height: 1.3; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        ${item.Title}
+                                    </h4>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 12px;">
+                                        <span style="font-weight: 700; color: var(--gt-brand-emerald);">$${Number(item.Cost).toLocaleString()}</span>
+                                        <span style="color: var(--gt-zinc-400);"><i class="fa-regular fa-clock"></i> ${item.DurationHours} hrs</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        grid.insertAdjacentHTML('beforeend', cardHtml);
+                    });
+                }
+            });
+        }
+    </script>
+}

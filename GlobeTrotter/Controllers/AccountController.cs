@@ -198,7 +198,7 @@ namespace GlobeTrotter.Controllers
                 if (result.Succeeded)
                 {
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    return RedirectToAction("Index", "Trips");
+                    return RedirectToAction("Index", "User");
                 }
                 AddErrors(result);
             }
@@ -505,7 +505,7 @@ namespace GlobeTrotter.Controllers
             {
                 return Redirect(returnUrl);
             }
-            return RedirectToAction("Index", "Trips");
+            return RedirectToAction("Index", "User");
         }
 
         internal class ChallengeResult : HttpUnauthorizedResult

@@ -1,0 +1,281 @@
+@model GlobeTrotter.Models.TripDashboardViewModel
+@{
+    ViewBag.Title = "User Dashboard - Traveler Hub | GlobeTrotter";
+    string userName = Model.User?.FullName ?? Model.User?.UserName ?? User.Identity.Name;
+    string avatarUrl = string.IsNullOrWhiteSpace(Model.User?.AvatarUrl) ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" : Model.User.AvatarUrl;
+    var upcomingTrips = Model.Trips.Where(t => t.Status == "Upcoming" || t.Status == "Active").Take(3).ToList();
+}
+
+<!-- Top Spacer -->
+<div style="padding-top: 85px; padding-bottom: 80px;">
+    <div class="gt-container">
+        
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="gt-val-summary" style="background: #ECFDF5; border-color: #A7F3D0; color: #065F46; margin-bottom: 20px; display:flex; align-items:center; justify-content:space-between;">
+                <div>
+                    <i class="fa-solid fa-circle-check" style="color: #10B981; margin-right: 8px;"></i>
+                    <span>@TempData["SuccessMessage"]</span>
+                </div>
+                <button type="button" onclick="this.parentElement.remove()" style="background:none; border:none; color:#065F46; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="gt-val-summary" style="margin-bottom: 20px; display:flex; align-items:center; justify-content:space-between;">
+                <div>
+                    <i class="fa-solid fa-circle-exclamation" style="margin-right: 8px;"></i>
+                    <span>@TempData["ErrorMessage"]</span>
+                </div>
+                <button type="button" onclick="this.parentElement.remove()" style="background:none; border:none; color:#DC2626; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        }
+
+        <!-- ==================================================================
+             1. USER DASHBOARD WELCOME BANNER (21st.dev Style)
+             ================================================================== -->
+        <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 28px 32px; box-shadow: var(--gt-shadow-card); margin-bottom: 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <a href="@Url.Action("Profile", "Manage")" title="View & Edit Profile" style="position: relative; display: block;">
+                    <img src="@avatarUrl" alt="@userName" style="width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gt-brand-light); box-shadow: var(--gt-shadow-md); transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
+                    <span style="position: absolute; bottom: 0; right: 0; background: var(--gt-brand-emerald); color: white; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: var(--gt-radius-full); border: 2px solid white;">PRO</span>
+                </a>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <a href="@Url.Action("Profile", "Manage")" style="text-decoration: none;">
+                            <h1 style="font-size: 26px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.03em;">
+                                Welcome back, @userName!
+                            </h1>
+                        </a>
+                        <span class="gt-tag-btn" style="background: rgba(99, 102, 241, 0.08); border-color: rgba(99, 102, 241, 0.2); color: var(--gt-brand-primary);">
+                            <i class="fa-solid fa-passport" style="margin-right: 4px;"></i> Traveler Dashboard
+                        </span>
+                    </div>
+                    <p style="font-size: 14px; color: var(--gt-zinc-500); margin-top: 4px;">
+                        @(string.IsNullOrWhiteSpace(Model.User?.Bio) ? "Ready to design your next multi-city journey across the globe." : Model.User.Bio)
+                    </p>
+                </div>
+            </div>
+
+            <!-- Primary Actions -->
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <a href="@Url.Action("Trip", "User")" class="gt-tag-btn" style="padding: 10px 16px; font-size: 13.5px; font-weight: 700; background: rgba(99,102,241,0.06); color: var(--gt-brand-primary); border-color: rgba(99,102,241,0.2);">
+                    <i class="fa-solid fa-route" style="margin-right: 6px;"></i> My Trips (@Model.TotalTripsCount)
+                </a>
+                <a href="@Url.Action("Index", "Community")" class="gt-tag-btn" style="padding: 10px 16px; font-size: 13.5px; font-weight: 600;">
+                    <i class="fa-solid fa-users" style="margin-right: 6px; color: var(--gt-brand-primary);"></i> Community
+                </a>
+                <a href="@Url.Action("Index", "Explore")" class="gt-tag-btn" style="padding: 10px 16px; font-size: 13.5px; font-weight: 600;">
+                    <i class="fa-solid fa-compass" style="margin-right: 6px; color: var(--gt-brand-primary);"></i> Explore
+                </a>
+                <a href="@Url.Action("Profile", "Manage")" class="gt-tag-btn" style="padding: 10px 16px; font-size: 13.5px; font-weight: 600;">
+                    <i class="fa-solid fa-user-gear" style="margin-right: 6px; color: var(--gt-zinc-500);"></i> Profile
+                </a>
+                <a href="@Url.Action("Create", "User")" class="gt-btn-add" style="padding: 10px 20px; font-size: 14px; font-weight: 700;">
+                    <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Plan Trip
+                </a>
+                @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { style = "margin: 0;" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <button type="submit" title="Log out" style="display: flex; align-items: center; gap: 6px; padding: 10px 16px; font-size: 13.5px; font-weight: 700; border-radius: var(--gt-radius-md); border: 1.5px solid rgba(220,38,38,0.25); background: rgba(220,38,38,0.06); color: #DC2626; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(220,38,38,0.12)'; this.style.borderColor='rgba(220,38,38,0.45)';" onmouseout="this.style.background='rgba(220,38,38,0.06)'; this.style.borderColor='rgba(220,38,38,0.25)';">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </button>
+                }
+            </div>
+        </div>
+
+        <!-- ==================================================================
+             2. TRAVEL METRICS & FINANCIAL HIGHLIGHTS
+             ================================================================== -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 32px;">
+            <!-- Stat 1 -->
+            <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-lg); padding: 20px; box-shadow: var(--gt-shadow-xs);">
+                <div style="display: flex; align-items: center; justify-content: space-between; color: var(--gt-zinc-400); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">
+                    <span>Total Itineraries</span>
+                    <i class="fa-solid fa-map-location-dot" style="color: var(--gt-brand-primary); font-size: 16px;"></i>
+                </div>
+                <div style="font-size: 28px; font-weight: 800; color: var(--gt-zinc-950); margin-top: 8px; letter-spacing: -0.03em;">
+                    @Model.TotalTripsCount
+                </div>
+                <div style="font-size: 12px; color: var(--gt-zinc-500); margin-top: 4px;">
+                    <span style="color: var(--gt-brand-emerald); font-weight: 700;">@Model.UpcomingTripsCount upcoming</span> • @Model.CompletedTripsCount completed
+                </div>
+            </div>
+
+            <!-- Stat 2 -->
+            <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-lg); padding: 20px; box-shadow: var(--gt-shadow-xs);">
+                <div style="display: flex; align-items: center; justify-content: space-between; color: var(--gt-zinc-400); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">
+                    <span>Cities Planned</span>
+                    <i class="fa-solid fa-city" style="color: #06B6D4; font-size: 16px;"></i>
+                </div>
+                <div style="font-size: 28px; font-weight: 800; color: var(--gt-zinc-950); margin-top: 8px; letter-spacing: -0.03em;">
+                    @Model.TotalCitiesPlanned
+                </div>
+                <div style="font-size: 12px; color: var(--gt-zinc-500); margin-top: 4px;">
+                    Across multi-city stops
+                </div>
+            </div>
+
+            <!-- Stat 3 -->
+            <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-lg); padding: 20px; box-shadow: var(--gt-shadow-xs);">
+                <div style="display: flex; align-items: center; justify-content: space-between; color: var(--gt-zinc-400); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">
+                    <span>Allocated Budget</span>
+                    <i class="fa-solid fa-wallet" style="color: #F59E0B; font-size: 16px;"></i>
+                </div>
+                <div style="font-size: 28px; font-weight: 800; color: var(--gt-zinc-950); margin-top: 8px; letter-spacing: -0.03em;">
+                    $@Model.TotalBudgetPlanned.ToString("N0")
+                </div>
+                <div style="font-size: 12px; color: var(--gt-zinc-500); margin-top: 4px;">
+                    Est. Cost: $@Model.TotalEstimatedCost.ToString("N0")
+                </div>
+            </div>
+
+            <!-- Stat 4 -->
+            <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-lg); padding: 20px; box-shadow: var(--gt-shadow-xs);">
+                <div style="display: flex; align-items: center; justify-content: space-between; color: var(--gt-zinc-400); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">
+                    <span>Saved Wishlist</span>
+                    <i class="fa-solid fa-heart" style="color: #F43F5E; font-size: 16px;"></i>
+                </div>
+                <div style="font-size: 28px; font-weight: 800; color: var(--gt-zinc-950); margin-top: 8px; letter-spacing: -0.03em;">
+                    @Model.SavedDestinationsCount
+                </div>
+                <div style="font-size: 12px; color: var(--gt-zinc-500); margin-top: 4px;">
+                    Saved bucket list cities
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================================================================
+             3. UPCOMING JOURNEYS & FAST ACCESS SECTION
+             ================================================================== -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h2 style="font-size: 22px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.02em;">
+                    Upcoming & Active Journeys
+                </h2>
+                <p style="font-size: 13.5px; color: var(--gt-zinc-500);">Your upcoming multi-stop travel plans and itineraries</p>
+            </div>
+            <a href="@Url.Action("Trip", "User")" class="gt-tag-btn" style="padding: 8px 16px; font-size: 13px; font-weight: 700;">
+                View All Trips (@Model.TotalTripsCount) <i class="fa-solid fa-arrow-right" style="margin-left: 4px;"></i>
+            </a>
+        </div>
+
+        @if (upcomingTrips.Count == 0)
+        {
+            <div style="background: #FFFFFF; border: 1px dashed var(--gt-zinc-300); border-radius: var(--gt-radius-xl); padding: 48px 20px; text-align: center; margin-bottom: 40px;">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--gt-zinc-100); color: var(--gt-zinc-400); display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;">
+                    <i class="fa-solid fa-plane-departure"></i>
+                </div>
+                <h3 style="font-size: 18px; font-weight: 700; color: var(--gt-zinc-800); margin-bottom: 8px;">No upcoming trips scheduled</h3>
+                <p style="font-size: 14px; color: var(--gt-zinc-500); margin-bottom: 20px;">Create your first multi-city trip or explore curated community itineraries.</p>
+                <a href="@Url.Action("Create", "User")" class="gt-btn-auth-primary" style="display: inline-flex; width: auto; padding: 10px 24px;">
+                    <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Plan Your First Trip
+                </a>
+            </div>
+        }
+        else
+        {
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; margin-bottom: 40px;">
+                @foreach (var trip in upcomingTrips)
+                {
+                    <div class="gt-trip-card" style="background: #FFFFFF; border: 1.5px solid var(--gt-border); border-radius: var(--gt-radius-xl); overflow: hidden; box-shadow: var(--gt-shadow-card); display: flex; flex-direction: column;">
+                        <!-- Cover Image -->
+                        <div style="height: 180px; position: relative;">
+                            <img src="@trip.CoverImageUrl" alt="@trip.Title" style="width: 100%; height: 100%; object-fit: cover;" />
+                            <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);"></div>
+
+                            <span class="gt-card-badge @(trip.Status == "Upcoming" ? "gt-badge-trending" : "gt-badge-top")" style="position: absolute; top: 14px; left: 14px;">
+                                @trip.Status
+                            </span>
+
+                            <span style="position: absolute; top: 14px; right: 14px; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); color: #FFFFFF; padding: 4px 10px; border-radius: var(--gt-radius-full); font-size: 12px; font-weight: 700;">
+                                @trip.DurationDays Days
+                            </span>
+
+                            <div style="position: absolute; bottom: 12px; left: 16px; right: 16px; color: white;">
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.85);">
+                                    <i class="fa-regular fa-calendar" style="margin-right: 4px;"></i>
+                                    @trip.StartDate.ToString("MMM dd") - @trip.EndDate.ToString("MMM dd, yyyy")
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Content -->
+                        <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <h3 style="font-size: 17px; font-weight: 800; color: var(--gt-zinc-950); margin-bottom: 8px;">
+                                    @trip.Title
+                                </h3>
+
+                                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;">
+                                    @foreach (var city in trip.StopCityNames)
+                                    {
+                                        <span style="background: var(--gt-zinc-100); color: var(--gt-zinc-800); padding: 3px 8px; border-radius: var(--gt-radius-sm); font-size: 11.5px; font-weight: 600;">
+                                            @city
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div style="border-top: 1px solid var(--gt-border-subtle); padding-top: 14px; display: flex; align-items: center; justify-content: space-between;">
+                                <div>
+                                    <div style="font-size: 10.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Budget</div>
+                                    <div style="font-size: 16px; font-weight: 800; color: var(--gt-brand-primary);">
+                                        $@trip.EstimatedCost.ToString("N0") <span style="font-size: 11.5px; font-weight: 500; color: var(--gt-zinc-400);">/ $@trip.TotalBudget.ToString("N0")</span>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 8px;">
+                                    <a href="@Url.Action("BuildItinerary", "User", new { id = trip.TripId })" class="gt-btn-auth-primary" style="width: auto; padding: 7px 16px; font-size: 12.5px; font-weight: 700;">
+                                        Itinerary <i class="fa-solid fa-arrow-right" style="margin-left: 4px;"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- ==================================================================
+             4. RECOMMENDED DESTINATIONS HUB
+             ================================================================== -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h2 style="font-size: 22px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.02em;">
+                    Curated Destinations for You
+                </h2>
+                <p style="font-size: 13.5px; color: var(--gt-zinc-500);">Popular cities with top-rated activities ready to be added to your plans</p>
+            </div>
+            <a href="@Url.Action("Index", "Explore")" class="gt-tag-btn" style="padding: 8px 16px; font-size: 13px; font-weight: 700;">
+                Explore All Destinations <i class="fa-solid fa-arrow-right" style="margin-left: 4px;"></i>
+            </a>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+            @foreach (var c in Model.RecommendedCities)
+            {
+                <div style="background: #FFFFFF; border: 1.5px solid var(--gt-border); border-radius: var(--gt-radius-xl); overflow: hidden; box-shadow: var(--gt-shadow-card); transition: transform 0.2s ease;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div style="height: 150px; position: relative;">
+                        <img src="@c.ImageUrl" alt="@c.Name" style="width: 100%; height: 100%; object-fit: cover;" />
+                        <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);"></div>
+                        <div style="position: absolute; bottom: 10px; left: 14px; color: white;">
+                            <h4 style="font-size: 16px; font-weight: 800;">@c.Name</h4>
+                            <span style="font-size: 11.5px; color: rgba(255,255,255,0.85);">@c.Country</span>
+                        </div>
+                    </div>
+                    <div style="padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 12px; color: var(--gt-zinc-600); font-weight: 600;">
+                            Avg. $@c.AvgDailyCost.ToString("N0")/day
+                        </span>
+                        <a href="@Url.Action("Index", "Explore", new { cityId = c.CityId })" class="gt-tag-btn" style="padding: 4px 10px; font-size: 11.5px; font-weight: 700;">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
