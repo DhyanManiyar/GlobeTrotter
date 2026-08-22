@@ -505,6 +505,13 @@ namespace GlobeTrotter.Controllers
             {
                 return Redirect(returnUrl);
             }
+
+            var userName = User?.Identity?.Name ?? "";
+            if (userName.ToLower().Contains("admin"))
+            {
+                return RedirectToAction("Index", "Admin");
+            }
+
             return RedirectToAction("Index", "User");
         }
 

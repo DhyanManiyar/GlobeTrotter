@@ -193,4 +193,57 @@ namespace GlobeTrotter.Models
 
         public string Notes { get; set; }
     }
+
+    // =========================================================================
+    // TRIP CALENDAR / TIMELINE VIEW MODELS
+    // =========================================================================
+    public class TripCalendarViewModel
+    {
+        public int SelectedTripId { get; set; }
+        public Trip SelectedTrip { get; set; }
+        public List<Trip> AllUserTrips { get; set; } = new List<Trip>();
+        public List<CalendarDayViewModel> Days { get; set; } = new List<CalendarDayViewModel>();
+        public int TotalDays { get; set; }
+        public decimal TotalCalculatedCost { get; set; }
+        public int TotalActivitiesCount { get; set; }
+        public int TotalCompletedActivities { get; set; }
+        public string ActiveViewMode { get; set; } = "timeline"; // "timeline", "calendar", "expanded"
+    }
+
+    public class CalendarDayViewModel
+    {
+        public int DayNumber { get; set; }
+        public DateTime Date { get; set; }
+        public string DateFormatted => Date.ToString("ddd, MMM dd, yyyy");
+        public string ShortDateFormatted => Date.ToString("MMM dd");
+        public string DayOfWeek => Date.ToString("dddd");
+        public int StopId { get; set; }
+        public int StopOrder { get; set; }
+        public string CityName { get; set; }
+        public string Country { get; set; }
+        public string CityImageUrl { get; set; }
+        public string AccommodationDetails { get; set; }
+        public decimal AccommodationCostPerDay { get; set; }
+        public string TransportMode { get; set; }
+        public decimal TransportCost { get; set; }
+        public string Notes { get; set; }
+        public bool IsFirstDayOfStop { get; set; }
+        public bool IsTransitDay { get; set; }
+        public decimal DailyBudgetTotal { get; set; }
+        public List<TripActivity> Activities { get; set; } = new List<TripActivity>();
+    }
+
+    public class QuickEditActivityViewModel
+    {
+        public int TripActivityId { get; set; }
+        public int TripId { get; set; }
+        public string Title { get; set; }
+        public string CategoryName { get; set; }
+        public decimal Cost { get; set; }
+        public decimal DurationHours { get; set; }
+        public string TimeOfDay { get; set; }
+        public string Notes { get; set; }
+        public bool IsCompleted { get; set; }
+    }
 }
+

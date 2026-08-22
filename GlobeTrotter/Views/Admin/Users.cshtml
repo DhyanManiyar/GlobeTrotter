@@ -1,0 +1,130 @@
+@model GlobeTrotter.Models.AdminUserListViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "User Management";
+    ViewBag.Subtitle = "View, search, and manage all platform users";
+}
+
+<!-- Action Bar & Stat Header -->
+<div class="gt-admin-table-container" style="margin-bottom: 24px;">
+    <div class="gt-admin-table-header">
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 320px;">
+            <form method="get" action="@Url.Action("Users", "Admin")" style="display: flex; align-items: center; gap: 8px; width: 100%; max-width: 440px;">
+                <div class="gt-input-box" style="margin: 0; width: 100%;">
+                    <i class="fa-solid fa-magnifying-glass input-icon"></i>
+                    <input type="text" name="search" value="@Model.SearchQuery" class="gt-auth-input" placeholder="Search by name, email, or username..." style="height: 40px;" />
+                </div>
+                <button type="submit" class="gt-tag-btn" style="padding: 9px 16px; font-weight: 700;">Search</button>
+            </form>
+
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <a href="@Url.Action("Users", "Admin", new { role = "All" })" class="gt-tag-btn @(Model.CurrentRoleFilter == "All" ? "active" : "")" style="padding: 7px 12px; font-size: 12px;">All (@Model.TotalUsers)</a>
+                <a href="@Url.Action("Users", "Admin", new { role = "Admin" })" class="gt-tag-btn @(Model.CurrentRoleFilter == "Admin" ? "active" : "")" style="padding: 7px 12px; font-size: 12px;">Admins (@Model.AdminCount)</a>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <button type="button" class="gt-tag-btn" onclick="showToast('Exporting user roster (CSV)...')" style="padding: 9px 16px; font-weight: 700;">
+                <i class="fa-solid fa-download" style="margin-right: 6px;"></i> Export
+            </button>
+            <button type="button" class="gt-btn-add" onclick="showToast('User invitation dialog opened.')" style="padding: 9px 18px; font-size: 13px; font-weight: 700;">
+                <i class="fa-solid fa-user-plus" style="margin-right: 6px;"></i> Add New User
+            </button>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div style="overflow-x: auto;">
+        <table class="gt-admin-table">
+            <thead>
+                <tr>
+                    <th style="width: 28%;">User Identity</th>
+                    <th style="width: 14%;">Platform Role</th>
+                    <th style="width: 12%;">Account Status</th>
+                    <th style="width: 10%; text-align: center;">Trips</th>
+                    <th style="width: 14%;">Registered</th>
+                    <th style="width: 12%;">Activity</th>
+                    <th style="width: 10%; text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Users.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 48px; color: var(--gt-admin-text-muted);">
+                            <i class="fa-solid fa-user-slash" style="font-size: 24px; margin-bottom: 8px; display: block; opacity: 0.5;"></i>
+                            No users matched your query.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var u in Model.Users)
+                    {
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <img src="@u.AvatarUrl" alt="@u.UserName" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gt-admin-border);" />
+                                    <div>
+                                        <div style="font-weight: 700; color: var(--gt-admin-text-main);">@u.FullName</div>
+                                        <div style="font-size: 12px; color: var(--gt-admin-text-muted);">@u.Email</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                @if (u.RoleName == "Admin")
+                                {
+                                    <span class="gt-admin-badge admin">
+                                        <i class="fa-solid fa-shield-halved" style="font-size: 10px;"></i> Administrator
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="gt-admin-badge" style="background: var(--gt-admin-border-subtle); color: var(--gt-admin-text-muted);">
+                                        Traveler
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <span class="gt-admin-badge active">
+                                    <i class="fa-solid fa-circle" style="font-size: 8px;"></i> Active
+                                </span>
+                            </td>
+                            <td style="text-align: center; font-weight: 700; color: var(--gt-admin-accent);">
+                                @u.TripsCount
+                            </td>
+                            <td style="font-size: 12.5px; color: var(--gt-admin-text-muted);">
+                                @u.CreatedAt.ToString("MMM dd, yyyy")
+                            </td>
+                            <td style="font-size: 12px; color: var(--gt-admin-text-subtle);">
+                                @u.LastLoginAgo
+                            </td>
+                            <td style="text-align: right;">
+                                <div style="display: inline-flex; align-items: center; gap: 4px;">
+                                    <!-- View Profile Drilldown -->
+                                    <a href="@Url.Action("UserDetail", "Admin", new { id = u.Id })" class="gt-tag-btn" style="padding: 6px 9px;" title="View User Detail">
+                                        <i class="fa-regular fa-eye"></i>
+                                    </a>
+                                    <!-- Suspend Toggle -->
+                                    <button type="button" class="gt-tag-btn" onclick="showToast('Status toggled for user @u.UserName')" style="padding: 6px 9px;" title="Toggle Status">
+                                        <i class="fa-solid fa-ban"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div style="padding: 16px 24px; border-top: 1px solid var(--gt-admin-border); display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--gt-admin-text-muted);">
+        <div>Showing <strong>@Model.Users.Count</strong> platform users</div>
+        <div style="display: flex; gap: 6px;">
+            <button class="gt-tag-btn" disabled style="opacity: 0.5;">Previous</button>
+            <button class="gt-tag-btn active" style="background: var(--gt-admin-accent); color: white; border-color: var(--gt-admin-accent);">1</button>
+            <button class="gt-tag-btn" disabled style="opacity: 0.5;">Next</button>
+        </div>
+    </div>
+</div>

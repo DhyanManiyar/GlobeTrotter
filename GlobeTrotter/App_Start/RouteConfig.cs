@@ -26,9 +26,27 @@ namespace GlobeTrotter
             );
 
             routes.MapRoute(
+                name: "UserCalendar",
+                url: "User/calendar",
+                defaults: new { controller = "User", action = "Calendar" }
+            );
+
+            routes.MapRoute(
+                name: "UserTimeline",
+                url: "User/timeline",
+                defaults: new { controller = "User", action = "Timeline" }
+            );
+
+            routes.MapRoute(
                 name: "UserDashboard",
                 url: "User",
                 defaults: new { controller = "User", action = "Index" }
+            );
+
+            routes.MapRoute(
+                name: "AdminDashboard",
+                url: "Admin",
+                defaults: new { controller = "Admin", action = "Index" }
             );
 
             routes.MapRoute(

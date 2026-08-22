@@ -1,0 +1,147 @@
+@model GlobeTrotter.Models.AdminAnalyticsViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Analytics & Platform Funnels";
+    ViewBag.Subtitle = "Deep insights into traveler behavior, conversion funnels, and destination metrics";
+}
+
+<!-- Top Controls: Date Range Presets -->
+<div style="background: #FFFFFF; border: 1px solid var(--gt-admin-border); border-radius: 12px; padding: 18px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <span style="font-size: 13px; font-weight: 700; color: var(--gt-admin-text-muted);">Reporting Window:</span>
+        <span style="font-size: 14px; font-weight: 800; color: var(--gt-admin-text-main); margin-left: 6px;">Last 30 Days (Real-Time)</span>
+    </div>
+
+    <div style="display: flex; gap: 6px;">
+        <a href="@Url.Action("Analytics", "Admin", new { range = "7d" })" class="gt-tag-btn @(Model.DateRange == "7d" ? "active" : "")" style="padding: 7px 14px; font-size: 12px;">Last 7 Days</a>
+        <a href="@Url.Action("Analytics", "Admin", new { range = "30d" })" class="gt-tag-btn @(Model.DateRange == "30d" ? "active" : "")" style="padding: 7px 14px; font-size: 12px;">Last 30 Days</a>
+        <a href="@Url.Action("Analytics", "Admin", new { range = "90d" })" class="gt-tag-btn @(Model.DateRange == "90d" ? "active" : "")" style="padding: 7px 14px; font-size: 12px;">Quarterly</a>
+        <button type="button" class="gt-tag-btn" onclick="showToast('Exporting Analytics PDF dossier...')" style="padding: 7px 14px; font-size: 12px; font-weight: 700;">
+            <i class="fa-solid fa-file-pdf" style="margin-right: 4px;"></i> Export PDF
+        </button>
+    </div>
+</div>
+
+<!-- 3 Large Stat Metrics -->
+<div class="gt-admin-metrics-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 28px;">
+    <div class="gt-admin-metric-card">
+        <div class="gt-admin-metric-header">
+            <span class="gt-admin-metric-label">Total Multi-City Trips</span>
+            <div class="gt-admin-metric-icon"><i class="fa-solid fa-route" style="color: #3B82F6;"></i></div>
+        </div>
+        <div class="gt-admin-metric-value">@Model.TotalTripsCount.ToString("N0")</div>
+        <div class="gt-admin-metric-trend positive"><i class="fa-solid fa-arrow-trend-up"></i> +8.3% vs previous period</div>
+    </div>
+
+    <div class="gt-admin-metric-card">
+        <div class="gt-admin-metric-header">
+            <span class="gt-admin-metric-label">Active Traveler Sessions</span>
+            <div class="gt-admin-metric-icon"><i class="fa-solid fa-users" style="color: #10B981;"></i></div>
+        </div>
+        <div class="gt-admin-metric-value">@Model.ActiveUsersCount.ToString("N0")</div>
+        <div class="gt-admin-metric-trend positive"><i class="fa-solid fa-arrow-trend-up"></i> +12.5% user activity</div>
+    </div>
+
+    <div class="gt-admin-metric-card">
+        <div class="gt-admin-metric-header">
+            <span class="gt-admin-metric-label">Avg. Planning Duration</span>
+            <div class="gt-admin-metric-icon"><i class="fa-solid fa-stopwatch" style="color: #6366F1;"></i></div>
+        </div>
+        <div class="gt-admin-metric-value">@Model.AvgSessionDuration</div>
+        <div class="gt-admin-metric-trend positive"><i class="fa-solid fa-arrow-trend-up"></i> +3.2% engagement</div>
+    </div>
+</div>
+
+<!-- User Engagement Funnel -->
+<div style="background: #FFFFFF; border: 1px solid var(--gt-admin-border); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); margin-bottom: 28px;">
+    <h3 style="font-size: 16px; font-weight: 800; color: var(--gt-admin-text-main); margin-bottom: 20px;">
+        Traveler Conversion Funnel (Discovery to Completed Itinerary)
+    </h3>
+
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+        @foreach (var step in Model.FunnelSteps)
+        {
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 6px;">
+                    <span style="color: var(--gt-admin-text-main);">@step.StepName</span>
+                    <span style="color: var(--gt-admin-accent);">@step.UserCount.ToString("N0") travelers (@step.ConversionPercentage%)</span>
+                </div>
+                <div style="height: 10px; background: #F1F5F9; border-radius: 6px; overflow: hidden;">
+                    <div style="width: @(step.ConversionPercentage)%; height: 100%; background: linear-gradient(90deg, #3B82F6, #06B6D4); border-radius: 6px;"></div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- 2 Charts Grid: Popular Cities & Activity Distribution -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- Top Destinations -->
+    <div style="background: #FFFFFF; border: 1px solid var(--gt-admin-border); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        <h3 style="font-size: 16px; font-weight: 800; color: var(--gt-admin-text-main); margin-bottom: 16px;">
+            Top Destination Cities Ranked
+        </h3>
+        <div style="height: 260px; position: relative;">
+            <canvas id="topCitiesChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Category Distribution Donut -->
+    <div style="background: #FFFFFF; border: 1px solid var(--gt-admin-border); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        <h3 style="font-size: 16px; font-weight: 800; color: var(--gt-admin-text-main); margin-bottom: 16px;">
+            Activity Category Distribution
+        </h3>
+        <div style="height: 260px; position: relative;">
+            <canvas id="categoryDonutChart"></canvas>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // Top Cities Horizontal Bar Chart
+        const ctxCities = document.getElementById('topCitiesChart').getContext('2d');
+        new Chart(ctxCities, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.TopCitiesLabels)),
+                datasets: [{
+                    label: 'Popularity Score',
+                    data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.TopCitiesCounts)),
+                    backgroundColor: '#3B82F6',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { color: '#F1F5F9' }, max: 100 },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Category Donut Chart
+        const ctxDonut = document.getElementById('categoryDonutChart').getContext('2d');
+        new Chart(ctxDonut, {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.CategoryLabels)),
+                datasets: [{
+                    data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.CategoryCounts)),
+                    backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#6366F1', '#EC4899']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { boxWidth: 12, font: { weight: '600', size: 12 } } }
+                }
+            }
+        });
+    </script>
+}

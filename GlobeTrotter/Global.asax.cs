@@ -31,19 +31,12 @@ namespace GlobeTrotter
         }
 
         /// <summary>
-        /// Ensures demo users have a valid ASP.NET Identity v3 password hash
-        /// so they can actually log in. Safe to re-run — checks the hash version first.
+        /// Ensures demo users and system administrator have a valid ASP.NET Identity v3 password hash
+        /// so they can log in immediately.
         /// </summary>
         private static async Task SeedDemoUserPasswordsAsync()
         {
             const string demoPassword = "Pass@123";
-
-            // Known demo email addresses seeded via SQL
-            var demoEmails = new[]
-            {
-                "alex.traveler@globetrotter.com",
-                "elena.wander@globetrotter.com"
-            };
 
             using (var db = new ApplicationDbContext())
             {
@@ -55,16 +48,52 @@ namespace GlobeTrotter
                     RequireUniqueEmail = true
                 };
                 manager.PasswordValidator = new PasswordValidator { RequiredLength = 6 };
-
                 var hasher = new PasswordHasher();
+
+                // 1. Ensure Admin Account exists
+                var adminUser = await manager.FindByEmailAsync("admin@globetrotter.io");
+                if (adminUser == null)
+                {
+                    adminUser = new ApplicationUser
+                    {
+                        UserName = "admin@globetrotter.io",
+                        Email = "admin@globetrotter.io",
+                        FullName = "System Administrator",
+                        EmailConfirmed = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    await manager.CreateAsync(adminUser, demoPassword);
+                }
+                else if (adminUser.PasswordHash == null || adminUser.PasswordHash.Length < 80)
+                {
+                    adminUser.PasswordHash = hasher.HashPassword(demoPassword);
+                    await store.UpdateAsync(adminUser);
+                }
+
+                // 2. Known demo traveler accounts seeded via SQL
+                var demoEmails = new[]
+                {
+                    "alex.traveler@globetrotter.com",
+                    "elena.wander@globetrotter.com",
+                    "marcus.globe@globetrotter.com"
+                };
 
                 foreach (var email in demoEmails)
                 {
                     var user = await manager.FindByEmailAsync(email);
-                    if (user == null) continue;
-
-                    // v2 hashes are 68 chars, v3 are longer — rehash only if needed
-                    if (user.PasswordHash == null || user.PasswordHash.Length < 80)
+                    if (user == null)
+                    {
+                        var newUser = new ApplicationUser
+                        {
+                            UserName = email,
+                            Email = email,
+                            FullName = email.Split('@')[0].Replace('.', ' '),
+                            EmailConfirmed = true,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        await manager.CreateAsync(newUser, demoPassword);
+                    }
+                    else if (user.PasswordHash == null || user.PasswordHash.Length < 80)
                     {
                         user.PasswordHash = hasher.HashPassword(demoPassword);
                         await store.UpdateAsync(user);

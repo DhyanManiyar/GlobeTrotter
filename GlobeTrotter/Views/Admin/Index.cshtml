@@ -1,0 +1,282 @@
+@model GlobeTrotter.Models.AdminDashboardViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Dashboard";
+    ViewBag.Subtitle = "Overview of platform performance and key metrics";
+}
+
+<!-- ==========================================================================
+     1. METRICS ROW (4 Cards Grid)
+     ========================================================================== -->
+<div class="gt-admin-metrics-grid">
+    <!-- Card 1: Total Users -->
+    <div class="gt-admin-metric-card">
+        <div class="gt-admin-metric-header">
+            <span class="gt-admin-metric-label">Total Users</span>
+            <div class="gt-admin-metric-icon">
+                <i class="fa-solid fa-users" style="color: #64748B;"></i>
+            </div>
+        </div>
+        <div class="gt-admin-metric-value">@Model.TotalUsersCount.ToString("N0")</div>
+        <div class="gt-admin-metric-trend positive">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+            <span>+@Model.UserGrowthRate% from last month</span>
+        </div>
+    </div>
+
+    <!-- Card 2: Total Trips -->
+    <div class="gt-admin-metric-card">
+        <div class="gt-admin-metric-header">
+            <span class="gt-admin-metric-label">Total Trips Planned</span>
+            <div class="gt-admin-metric-icon">
+                <i class="fa-solid fa-route" style="color: #3B82F6;"></i>
+            </div>
+        </div>
+        <div class="gt-admin-metric-value">@Model.TotalTripsCount.ToString("N0")</div>
+        <div class="gt-admin-metric-trend positive">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+            <span>+@Model.TripGrowthRate% from last month</span>
+        </div>
+    </div>
+
+    <!-- Card 3: Active Users Today -->
+    <div class="gt-admin-metric-card">
+        <div class="gt-admin-metric-header">
+            <span class="gt-admin-metric-label">Active Users Today</span>
+            <div class="gt-admin-metric-icon">
+                <i class="fa-solid fa-circle" style="color: #10B981; font-size: 11px;"></i>
+            </div>
+        </div>
+        <div class="gt-admin-metric-value">@Model.ActiveUsersTodayCount.ToString("N0")</div>
+        <div class="gt-admin-metric-trend" style="color: #64748B;">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>@Model.BounceRate% bounce rate</span>
+        </div>
+    </div>
+
+    <!-- Card 4: Monthly Revenue -->
+    <div class="gt-admin-metric-card">
+        <div class="gt-admin-metric-header">
+            <span class="gt-admin-metric-label">Est. Platform Volume (GMV)</span>
+            <div class="gt-admin-metric-icon">
+                <i class="fa-solid fa-sack-dollar" style="color: #10B981;"></i>
+            </div>
+        </div>
+        <div class="gt-admin-metric-value">$@Model.EstimatedMonthlyRevenue.ToString("N0")</div>
+        <div class="gt-admin-metric-trend positive">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+            <span>+@Model.RevenueGrowthRate% from last month</span>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     2. CHARTS SECTION (2 Columns: Left 60% User Growth, Right 40% Trips Created)
+     ========================================================================== -->
+<div style="display: grid; grid-template-columns: 6fr 4fr; gap: 20px; margin-bottom: 28px;">
+    <!-- Left Chart: User Growth -->
+    <div style="background: #FFFFFF; border: 1px solid var(--gt-admin-border); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h3 style="font-size: 16px; font-weight: 800; color: var(--gt-admin-text-main);">User Growth Dynamics</h3>
+                <p style="font-size: 12.5px; color: var(--gt-admin-text-muted);">New vs. returning platform travelers</p>
+            </div>
+            <button type="button" class="gt-tag-btn" onclick="showToast('Exporting User Growth dataset (CSV)...')" style="padding: 6px 12px; font-size: 12px; font-weight: 700;">
+                <i class="fa-solid fa-download" style="margin-right: 4px;"></i> Export Chart
+            </button>
+        </div>
+        <div style="height: 280px; position: relative;">
+            <canvas id="userGrowthChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Right Chart: Trip Creation -->
+    <div style="background: #FFFFFF; border: 1px solid var(--gt-admin-border); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h3 style="font-size: 16px; font-weight: 800; color: var(--gt-admin-text-main);">Trip Creation Rate</h3>
+                <p style="font-size: 12.5px; color: var(--gt-admin-text-muted);">Multi-city itineraries created per day</p>
+            </div>
+        </div>
+        <div style="height: 280px; position: relative;">
+            <canvas id="tripCreationChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     3. BOTTOM SECTION: RECENT ACTIVITY (35%) + QUICK ACTIONS (65%)
+     ========================================================================== -->
+<div style="display: grid; grid-template-columns: 3.5fr 6.5fr; gap: 20px;">
+    <!-- Recent Activity Feed -->
+    <div style="background: #FFFFFF; border: 1px solid var(--gt-admin-border); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid var(--gt-admin-border-subtle); padding-bottom: 12px;">
+            <h3 style="font-size: 16px; font-weight: 800; color: var(--gt-admin-text-main);">Recent Activity</h3>
+            <a href="@Url.Action("Users", "Admin")" style="font-size: 12px; font-weight: 700; color: var(--gt-admin-accent); text-decoration: none;">View All</a>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            @foreach (var act in Model.RecentActivities)
+            {
+                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <img src="@act.UserAvatar" alt="@act.UserName" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover;" />
+                    <div style="flex: 1; font-size: 13px;">
+                        <div>
+                            <strong style="color: var(--gt-admin-text-main);">@act.UserName</strong>
+                            <span style="color: var(--gt-admin-text-muted);">@act.ActionText</span>
+                            <span style="font-weight: 600; color: var(--gt-admin-accent);">"@act.TargetTitle"</span>
+                        </div>
+                        <div style="font-size: 11.5px; color: var(--gt-admin-text-subtle); margin-top: 2px;">@act.TimeAgo</div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Quick Actions (2 rows x 3 columns grid) -->
+    <div style="background: #FFFFFF; border: 1px solid var(--gt-admin-border); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        <h3 style="font-size: 16px; font-weight: 800; color: var(--gt-admin-text-main); margin-bottom: 18px; border-bottom: 1px solid var(--gt-admin-border-subtle); padding-bottom: 12px;">
+            Administrative Quick Actions
+        </h3>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+            <!-- Action 1: Add New City -->
+            <a href="@Url.Action("Content", "Admin", new { tab = "cities" })" class="gt-admin-quick-action-btn">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(59, 130, 246, 0.1); color: #3B82F6; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <div>
+                    <div>Add New City</div>
+                    <div style="font-size: 11px; color: var(--gt-admin-text-muted); font-weight: normal;">Expand destination catalog</div>
+                </div>
+            </a>
+
+            <!-- Action 2: Add New Activity -->
+            <a href="@Url.Action("Content", "Admin", new { tab = "activities" })" class="gt-admin-quick-action-btn">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(16, 185, 129, 0.1); color: #10B981; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                    <i class="fa-solid fa-bullseye"></i>
+                </div>
+                <div>
+                    <div>Add Activity</div>
+                    <div style="font-size: 11px; color: var(--gt-admin-text-muted); font-weight: normal;">Curate city experiences</div>
+                </div>
+            </a>
+
+            <!-- Action 3: Manage Users -->
+            <a href="@Url.Action("Users", "Admin")" class="gt-admin-quick-action-btn">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(99, 102, 241, 0.1); color: #6366F1; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <div>
+                    <div>Manage Users</div>
+                    <div style="font-size: 11px; color: var(--gt-admin-text-muted); font-weight: normal;">Roles, permissions &amp; status</div>
+                </div>
+            </a>
+
+            <!-- Action 4: Review Content -->
+            <a href="@Url.Action("Moderation", "Admin")" class="gt-admin-quick-action-btn">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(245, 158, 11, 0.1); color: #F59E0B; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div>
+                    <div>Review Queue</div>
+                    <div style="font-size: 11px; color: var(--gt-admin-text-muted); font-weight: normal;">@Model.PendingModerationCount flagged submissions</div>
+                </div>
+            </a>
+
+            <!-- Action 5: Export Data -->
+            <a href="@Url.Action("Analytics", "Admin")" class="gt-admin-quick-action-btn" onclick="showToast('Exporting global platform data archive...'); return false;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(14, 165, 233, 0.1); color: #0EA5E9; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                    <i class="fa-solid fa-file-export"></i>
+                </div>
+                <div>
+                    <div>Export Data</div>
+                    <div style="font-size: 11px; color: var(--gt-admin-text-muted); font-weight: normal;">CSV / JSON schema export</div>
+                </div>
+            </a>
+
+            <!-- Action 6: Platform Settings -->
+            <a href="@Url.Action("Settings", "Admin")" class="gt-admin-quick-action-btn">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(100, 116, 139, 0.1); color: #64748B; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                    <i class="fa-solid fa-sliders"></i>
+                </div>
+                <div>
+                    <div>Platform Settings</div>
+                    <div style="font-size: 11px; color: var(--gt-admin-text-muted); font-weight: normal;">API keys &amp; feature flags</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // User Growth Line Chart
+        const ctxUser = document.getElementById('userGrowthChart').getContext('2d');
+        new Chart(ctxUser, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ChartDaysLabels)),
+                datasets: [
+                    {
+                        label: 'New Users',
+                        data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.NewUsersSeries)),
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.08)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Returning Users',
+                        data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ReturningUsersSeries)),
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.04)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { boxWidth: 12, font: { weight: '600', size: 12 } } }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { grid: { color: '#F1F5F9' }, beginAtZero: true }
+                }
+            }
+        });
+
+        // Trip Creation Bar Chart
+        const ctxTrip = document.getElementById('tripCreationChart').getContext('2d');
+        new Chart(ctxTrip, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ChartDaysLabels)),
+                datasets: [
+                    {
+                        label: 'Trips Created',
+                        data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.TripsCreatedSeries)),
+                        backgroundColor: '#0F172A',
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { grid: { color: '#F1F5F9' }, beginAtZero: true }
+                }
+            }
+        });
+    </script>
+}

@@ -1,0 +1,89 @@
+@model GlobeTrotter.Models.AdminModerationViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Moderation Queue";
+    ViewBag.Subtitle = "Review flagged user itineraries, activity reviews, and community content";
+}
+
+<div class="gt-admin-table-container">
+    <div class="gt-admin-table-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <a href="@Url.Action("Moderation", "Admin", new { status = "Pending" })" class="gt-tag-btn @(Model.CurrentStatusFilter == "Pending" ? "active" : "")" style="padding: 8px 14px; font-weight: 700; font-size: 13px;">
+                Pending Review (@Model.PendingCount)
+            </a>
+            <a href="@Url.Action("Moderation", "Admin", new { status = "In Review" })" class="gt-tag-btn @(Model.CurrentStatusFilter == "In Review" ? "active" : "")" style="padding: 8px 14px; font-weight: 700; font-size: 13px;">
+                In Review (@Model.InReviewCount)
+            </a>
+            <a href="@Url.Action("Moderation", "Admin", new { status = "All" })" class="gt-tag-btn @(Model.CurrentStatusFilter == "All" ? "active" : "")" style="padding: 8px 14px; font-weight: 700; font-size: 13px;">
+                All Flagged Items
+            </a>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+            <button type="button" class="gt-tag-btn" onclick="showToast('Bulk dismiss applied.')" style="padding: 8px 14px; font-weight: 700;">
+                <i class="fa-solid fa-check-double" style="margin-right: 4px;"></i> Bulk Resolve
+            </button>
+        </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="gt-admin-table">
+            <thead>
+                <tr>
+                    <th style="width: 15%;">Content Type</th>
+                    <th style="width: 25%;">Flagged Content</th>
+                    <th style="width: 15%;">Reported By</th>
+                    <th style="width: 15%;">Flag Reason</th>
+                    <th style="width: 10%;">Priority</th>
+                    <th style="width: 10%;">Status</th>
+                    <th style="width: 10%; text-align: right;">Resolution</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            <span class="gt-admin-badge" style="background: var(--gt-admin-border-subtle); color: var(--gt-admin-text-main);">
+                                <i class="fa-solid fa-tag" style="margin-right: 4px; font-size: 10px;"></i> @item.ContentType
+                            </span>
+                        </td>
+                        <td>
+                            <div style="font-weight: 800; color: var(--gt-admin-text-main);">@item.ContentTitle</div>
+                            <div style="font-size: 11.5px; color: var(--gt-admin-text-muted);">Report #@item.ReportId • @item.SubmittedAt.ToString("MMM dd, HH:mm")</div>
+                        </td>
+                        <td style="font-size: 13px; font-weight: 600; color: var(--gt-admin-text-main);">
+                            @@@item.ReportedBy
+                        </td>
+                        <td>
+                            <span style="font-size: 12.5px; color: var(--gt-admin-text-muted);">@item.Reason</span>
+                        </td>
+                        <td>
+                            @if (item.Priority == "High")
+                            {
+                                <span class="gt-admin-badge suspended">High</span>
+                            }
+                            else
+                            {
+                                <span class="gt-admin-badge pending">Medium</span>
+                            }
+                        </td>
+                        <td>
+                            <span class="gt-admin-badge active">@item.Status</span>
+                        </td>
+                        <td style="text-align: right;">
+                            <div style="display: inline-flex; gap: 4px;">
+                                <button type="button" class="gt-tag-btn" onclick="showToast('Item approved & report dismissed.'); this.closest('tr').remove();" style="padding: 6px 10px; color: #059669;" title="Approve / Dismiss">
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+                                <button type="button" class="gt-tag-btn" onclick="showToast('Content removed.'); this.closest('tr').remove();" style="padding: 6px 10px; color: #DC2626; border-color: rgba(220,38,38,0.2);" title="Remove Content">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

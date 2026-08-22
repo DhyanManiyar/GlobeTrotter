@@ -52,6 +52,9 @@
                 <a href="@Url.Action("Index", "User")" class="gt-tag-btn" style="padding: 9px 16px; font-size: 13px; font-weight: 600;">
                     <i class="fa-solid fa-gauge" style="margin-right: 5px;"></i> Dashboard
                 </a>
+                <a href="@Url.Action("Calendar", "User")" class="gt-tag-btn" style="padding: 9px 16px; font-size: 13px; font-weight: 700; background: rgba(6,182,212,0.06); color: #0891B2; border-color: rgba(6,182,212,0.25);">
+                    <i class="fa-regular fa-calendar-days" style="margin-right: 5px;"></i> Timeline &amp; Calendar
+                </a>
                 <a href="@Url.Action("Index", "Community")" class="gt-tag-btn" style="padding: 9px 16px; font-size: 13px; font-weight: 600;">
                     <i class="fa-solid fa-users" style="margin-right: 5px; color: var(--gt-brand-primary);"></i> Community
                 </a>
@@ -178,7 +181,11 @@
                                 <!-- Action Buttons -->
                                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
                                     <a href="@Url.Action("BuildItinerary", "User", new { id = trip.TripId })" class="gt-btn-auth-primary" style="flex: 1; padding: 8px 12px; font-size: 13px; font-weight: 700;">
-                                        <i class="fa-solid fa-pen-ruler" style="margin-right: 4px;"></i> Build Itinerary
+                                        <i class="fa-solid fa-pen-ruler" style="margin-right: 4px;"></i> Itinerary
+                                    </a>
+
+                                    <a href="@Url.Action("Calendar", "User", new { tripId = trip.TripId })" class="gt-tag-btn" style="padding: 8px 10px; color: #0891B2; border-color: rgba(6,182,212,0.3); background: rgba(6,182,212,0.06);" title="View Timeline & Calendar">
+                                        <i class="fa-regular fa-calendar-days"></i>
                                     </a>
 
                                     <a href="@Url.Action("Edit", "User", new { id = trip.TripId })" class="gt-tag-btn" style="padding: 8px 10px;" title="Edit Trip">

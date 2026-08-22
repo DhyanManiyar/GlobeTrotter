@@ -122,23 +122,26 @@ a:hover {
 }
 
 .gt-nav-capsule {
-    max-width: 1140px;
+    max-width: 1260px;
+    width: 96%;
     margin: 0 auto;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.90);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
     border: 1px solid rgba(228, 228, 231, 0.8);
     border-radius: var(--gt-radius-full);
-    padding: 8px 16px 8px 20px;
+    padding: 8px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.02);
     transition: all 0.25s ease;
+    flex-wrap: nowrap;
+    gap: 16px;
 }
 
 .gt-navbar.scrolled .gt-nav-capsule {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.96);
     box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
 
@@ -148,6 +151,8 @@ a:hover {
     align-items: center;
     gap: 10px;
     text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .gt-brand-logo-wrap {
@@ -160,6 +165,7 @@ a:hover {
     justify-content: center;
     border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
 }
 
 .gt-brand-logo-wrap svg {
@@ -173,6 +179,7 @@ a:hover {
     color: var(--gt-zinc-950);
     letter-spacing: -0.03em;
     font-family: 'Plus Jakarta Sans', sans-serif;
+    white-space: nowrap;
 }
 
 .gt-brand-badge {
@@ -185,28 +192,47 @@ a:hover {
     border: 1px solid var(--gt-zinc-200);
     letter-spacing: 0.02em;
     text-transform: uppercase;
+    white-space: nowrap;
 }
 
 /* Nav Menu */
 .gt-nav-menu {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: nowrap;
+}
+
+.gt-nav-menu li {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .gt-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     font-size: 13.5px;
     font-weight: 600;
     color: var(--gt-zinc-600);
-    padding: 6px 14px;
+    padding: 6px 12px;
     border-radius: var(--gt-radius-full);
+    text-decoration: none;
+    white-space: nowrap;
+    line-height: 1.4;
     transition: all 0.15s ease;
+    flex-shrink: 0;
 }
 
 .gt-nav-link:hover {
     color: var(--gt-zinc-950);
     background: var(--gt-zinc-100);
+    text-decoration: none;
 }
 
 .gt-nav-link.active {
@@ -219,6 +245,8 @@ a:hover {
     display: flex;
     align-items: center;
     gap: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .gt-icon-btn {
@@ -233,6 +261,9 @@ a:hover {
     color: var(--gt-zinc-700);
     cursor: pointer;
     position: relative;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
     transition: all 0.15s ease;
 }
 

@@ -1,0 +1,311 @@
+@model GlobeTrotter.Models.AdminContentViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Content Management";
+    ViewBag.Subtitle = "Manage global destination cities, activities, and taxonomy";
+}
+
+<!-- Top Action Header & Tab Switcher -->
+<div class="gt-admin-table-container" style="margin-bottom: 24px;">
+    <div class="gt-admin-table-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <a href="@Url.Action("Content", "Admin", new { tab = "cities" })" class="gt-tag-btn @(Model.ActiveTab == "cities" ? "active" : "")" style="padding: 8px 16px; font-weight: 700; font-size: 13px;">
+                <i class="fa-solid fa-city" style="margin-right: 6px;"></i> Destination Cities (@Model.Cities.Count)
+            </a>
+            <a href="@Url.Action("Content", "Admin", new { tab = "activities" })" class="gt-tag-btn @(Model.ActiveTab == "activities" ? "active" : "")" style="padding: 8px 16px; font-weight: 700; font-size: 13px;">
+                <i class="fa-solid fa-bullseye" style="margin-right: 6px;"></i> Activities Inventory (@Model.Activities.Count)
+            </a>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+            @if (Model.ActiveTab == "cities")
+            {
+                <button type="button" class="gt-btn-add" onclick="openAddCityModal()" style="padding: 9px 18px; font-size: 13px; font-weight: 700;">
+                    <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Add New City
+                </button>
+            }
+            else
+            {
+                <button type="button" class="gt-btn-add" onclick="openAddActivityModal()" style="padding: 9px 18px; font-size: 13px; font-weight: 700;">
+                    <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Add New Activity
+                </button>
+            }
+        </div>
+    </div>
+
+    @if (Model.ActiveTab == "cities")
+    {
+        <!-- CITIES TABLE -->
+        <div style="overflow-x: auto;">
+            <table class="gt-admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Destination City</th>
+                        <th style="width: 15%;">Region</th>
+                        <th style="width: 15%;">Cost Index</th>
+                        <th style="width: 15%;">Avg Daily Cost</th>
+                        <th style="width: 15%;">Popularity Score</th>
+                        <th style="width: 10%; text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var city in Model.Cities)
+                    {
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <img src="@city.ImageUrl" alt="@city.Name" style="width: 44px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid var(--gt-admin-border);" />
+                                    <div>
+                                        <div style="font-weight: 800; color: var(--gt-admin-text-main);">@city.Name</div>
+                                        <div style="font-size: 12px; color: var(--gt-admin-text-muted);">@city.Country</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="gt-admin-badge" style="background: var(--gt-admin-border-subtle); color: var(--gt-admin-text-muted);">
+                                    @city.Region
+                                </span>
+                            </td>
+                            <td>
+                                <span class="gt-admin-badge active">
+                                    @(city.CostIndex ?? "Moderate")
+                                </span>
+                            </td>
+                            <td style="font-weight: 700; color: var(--gt-admin-emerald);">
+                                $@city.AvgDailyCost.ToString("N0") / day
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <div style="flex: 1; height: 6px; background: #E2E8F0; border-radius: 4px; overflow: hidden; max-width: 60px;">
+                                        <div style="width: @(city.PopularityScore)%; height: 100%; background: var(--gt-admin-accent);"></div>
+                                    </div>
+                                    <span style="font-size: 12px; font-weight: 700;">@city.PopularityScore%</span>
+                                </div>
+                            </td>
+                            <td style="text-align: right;">
+                                <button type="button" class="gt-tag-btn" onclick="deleteCityAjax(@city.CityId, this)" style="padding: 6px 9px; color: #DC2626; border-color: rgba(220,38,38,0.2);" title="Delete City">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <!-- ACTIVITIES TABLE -->
+        <div style="overflow-x: auto;">
+            <table class="gt-admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 32%;">Activity Title</th>
+                        <th style="width: 18%;">City Location</th>
+                        <th style="width: 16%;">Category</th>
+                        <th style="width: 14%;">Estimated Cost</th>
+                        <th style="width: 10%;">Duration</th>
+                        <th style="width: 10%; text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var act in Model.Activities)
+                    {
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <img src="@act.ImageUrl" alt="@act.Title" style="width: 40px; height: 32px; border-radius: 6px; object-fit: cover;" />
+                                    <div style="font-weight: 700; color: var(--gt-admin-text-main);">@act.Title</div>
+                                </div>
+                            </td>
+                            <td>@(act.DestinationCity?.Name ?? "General"), @(act.DestinationCity?.Country ?? "")</td>
+                            <td>
+                                <span class="gt-admin-badge" style="background: rgba(99,102,241,0.08); color: #4F46E5;">
+                                    @(act.ActivityCategory?.CategoryName ?? "Sightseeing")
+                                </span>
+                            </td>
+                            <td style="font-weight: 700; color: var(--gt-admin-emerald);">$@act.EstimatedCost.ToString("N0")</td>
+                            <td style="font-size: 12.5px; color: var(--gt-admin-text-muted);">@act.DurationHours hrs</td>
+                            <td style="text-align: right;">
+                                <button type="button" class="gt-tag-btn" onclick="deleteActivityAjax(@act.ActivityId, this)" style="padding: 6px 9px; color: #DC2626; border-color: rgba(220,38,38,0.2);" title="Delete Activity">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- ==========================================================================
+     ADD CITY MODAL (Tabs: General Info, Media, Location, Meta)
+     ========================================================================== -->
+<div class="gt-admin-modal-backdrop" id="addCityModal" onclick="if(event.target === this) closeAddCityModal();">
+    <div class="gt-admin-modal-card" style="max-width: 580px;">
+        <div style="padding: 18px 24px; border-bottom: 1px solid var(--gt-admin-border); display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 17px; font-weight: 800; color: var(--gt-admin-text-main);">Add New Destination City</h3>
+            <button type="button" onclick="closeAddCityModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gt-admin-text-muted);">&times;</button>
+        </div>
+
+        @using (Html.BeginForm("CreateCity", "Admin", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <div style="padding: 24px; display: flex; flex-direction: column; gap: 14px; max-height: 480px; overflow-y: auto;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">City Name *</label>
+                        <input type="text" name="Name" class="gt-auth-input" placeholder="e.g. Florence" required />
+                    </div>
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">Country *</label>
+                        <input type="text" name="Country" class="gt-auth-input" placeholder="e.g. Italy" required />
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">Region</label>
+                        <select name="Region" class="gt-auth-input">
+                            <option value="Europe">Europe</option>
+                            <option value="Asia">Asia</option>
+                            <option value="Americas">Americas</option>
+                            <option value="Oceania">Oceania</option>
+                            <option value="Africa">Africa</option>
+                        </select>
+                    </div>
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">Cost Index</label>
+                        <select name="CostIndex" class="gt-auth-input">
+                            <option value="Budget">Budget</option>
+                            <option value="Moderate" selected>Moderate</option>
+                            <option value="Luxury">Luxury</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">Avg Daily Cost ($)</label>
+                        <input type="number" name="AvgDailyCost" class="gt-auth-input" value="160" />
+                    </div>
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">Popularity Score (1-100)</label>
+                        <input type="number" name="PopularityScore" class="gt-auth-input" value="90" min="1" max="100" />
+                    </div>
+                </div>
+
+                <div class="gt-form-group">
+                    <label class="gt-form-label">Cover Photography URL</label>
+                    <input type="url" name="ImageUrl" class="gt-auth-input" placeholder="https://images.unsplash.com/..." />
+                </div>
+
+                <div class="gt-form-group">
+                    <label class="gt-form-label">Description</label>
+                    <textarea name="Description" class="gt-auth-textarea" rows="2" placeholder="Destination highlights and attractions..."></textarea>
+                </div>
+            </div>
+
+            <div style="padding: 16px 24px; border-top: 1px solid var(--gt-admin-border); background: var(--gt-admin-bg); display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="gt-tag-btn" onclick="closeAddCityModal()">Cancel</button>
+                <button type="submit" class="gt-btn-add" style="padding: 9px 20px; font-weight: 700;">Save Destination</button>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ADD ACTIVITY MODAL -->
+<div class="gt-admin-modal-backdrop" id="addActivityModal" onclick="if(event.target === this) closeAddActivityModal();">
+    <div class="gt-admin-modal-card" style="max-width: 540px;">
+        <div style="padding: 18px 24px; border-bottom: 1px solid var(--gt-admin-border); display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 17px; font-weight: 800; color: var(--gt-admin-text-main);">Add Activity Experience</h3>
+            <button type="button" onclick="closeAddActivityModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gt-admin-text-muted);">&times;</button>
+        </div>
+
+        @using (Html.BeginForm("CreateActivity", "Admin", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <div style="padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+                <div class="gt-form-group">
+                    <label class="gt-form-label">Activity Title *</label>
+                    <input type="text" name="Title" class="gt-auth-input" placeholder="e.g. Uffizi Gallery Guided Tour" required />
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">City *</label>
+                        <select name="CityId" class="gt-auth-input" required>
+                            @foreach (var c in Model.Cities)
+                            {
+                                <option value="@c.CityId">@c.Name, @c.Country</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">Category</label>
+                        <select name="CategoryId" class="gt-auth-input">
+                            @foreach (var cat in Model.Categories)
+                            {
+                                <option value="@cat.CategoryId">@cat.CategoryName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">Cost ($)</label>
+                        <input type="number" name="EstimatedCost" class="gt-auth-input" value="45" />
+                    </div>
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">Duration (hrs)</label>
+                        <input type="number" name="DurationHours" class="gt-auth-input" value="2.5" step="0.5" />
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding: 16px 24px; border-top: 1px solid var(--gt-admin-border); background: var(--gt-admin-bg); display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="gt-tag-btn" onclick="closeAddActivityModal()">Cancel</button>
+                <button type="submit" class="gt-btn-add" style="padding: 9px 20px; font-weight: 700;">Save Activity</button>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function openAddCityModal() {
+            document.getElementById('addCityModal').style.display = 'flex';
+        }
+        function closeAddCityModal() {
+            document.getElementById('addCityModal').style.display = 'none';
+        }
+        function openAddActivityModal() {
+            document.getElementById('addActivityModal').style.display = 'flex';
+        }
+        function closeAddActivityModal() {
+            document.getElementById('addActivityModal').style.display = 'none';
+        }
+
+        function deleteCityAjax(id, btn) {
+            if (!confirm('Are you sure you want to delete this city?')) return;
+            $.post('@Url.Action("DeleteCity", "Admin")', { id: id }, function (res) {
+                if (res.success) {
+                    btn.closest('tr').remove();
+                    showToast('City deleted successfully.');
+                }
+            });
+        }
+
+        function deleteActivityAjax(id, btn) {
+            if (!confirm('Are you sure you want to delete this activity?')) return;
+            $.post('@Url.Action("DeleteActivity", "Admin")', { id: id }, function (res) {
+                if (res.success) {
+                    btn.closest('tr').remove();
+                    showToast('Activity deleted successfully.');
+                }
+            });
+        }
+    </script>
+}

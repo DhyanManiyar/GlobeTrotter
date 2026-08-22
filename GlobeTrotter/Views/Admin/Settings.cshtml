@@ -1,0 +1,227 @@
+@model GlobeTrotter.Models.AdminSettingsViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Platform Settings";
+    ViewBag.Subtitle = "System parameters, transactional emails, API integrations, and feature toggles";
+}
+
+<div style="display: grid; grid-template-columns: 2.8fr 7.2fr; gap: 24px;">
+    <!-- Settings Sub-Navigation Menu -->
+    <div style="background: #FFFFFF; border: 1px solid var(--gt-admin-border); border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); height: fit-content;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+            <button type="button" class="gt-admin-nav-item active" id="tabNavGeneral" onclick="switchSettingsTab('general')" style="color: var(--gt-admin-text-main);">
+                <div style="display: flex; align-items: center;">
+                    <i class="fa-solid fa-sliders gt-admin-nav-item-icon" style="color: var(--gt-admin-accent);"></i>
+                    <span>General Platform</span>
+                </div>
+            </button>
+
+            <button type="button" class="gt-admin-nav-item" id="tabNavEmails" onclick="switchSettingsTab('emails')" style="color: var(--gt-admin-text-main);">
+                <div style="display: flex; align-items: center;">
+                    <i class="fa-regular fa-envelope gt-admin-nav-item-icon"></i>
+                    <span>Email Templates</span>
+                </div>
+            </button>
+
+            <button type="button" class="gt-admin-nav-item" id="tabNavApis" onclick="switchSettingsTab('apis')" style="color: var(--gt-admin-text-main);">
+                <div style="display: flex; align-items: center;">
+                    <i class="fa-solid fa-plug gt-admin-nav-item-icon"></i>
+                    <span>API Integrations</span>
+                </div>
+            </button>
+
+            <button type="button" class="gt-admin-nav-item" id="tabNavToggles" onclick="switchSettingsTab('toggles')" style="color: var(--gt-admin-text-main);">
+                <div style="display: flex; align-items: center;">
+                    <i class="fa-solid fa-toggle-on gt-admin-nav-item-icon"></i>
+                    <span>Feature Toggles</span>
+                </div>
+            </button>
+
+            <button type="button" class="gt-admin-nav-item" id="tabNavExport" onclick="switchSettingsTab('export')" style="color: var(--gt-admin-text-main);">
+                <div style="display: flex; align-items: center;">
+                    <i class="fa-solid fa-database gt-admin-nav-item-icon"></i>
+                    <span>Data Archive &amp; Export</span>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Settings Content Panels -->
+    <div style="background: #FFFFFF; border: 1px solid var(--gt-admin-border); border-radius: 12px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        
+        @using (Html.BeginForm("SaveSettings", "Admin", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="ActiveTab" id="hiddenActiveTab" value="general" />
+
+            <!-- PANEL 1: GENERAL -->
+            <div id="panelGeneral">
+                <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-admin-text-main); margin-bottom: 6px;">General Platform Parameters</h3>
+                <p style="font-size: 13px; color: var(--gt-admin-text-muted); margin-bottom: 20px; border-bottom: 1px solid var(--gt-admin-border-subtle); padding-bottom: 12px;">Core operational defaults and constraints for GlobeTrotter SaaS</p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">Platform Name</label>
+                        <input type="text" name="PlatformName" value="@Model.PlatformName" class="gt-auth-input" />
+                    </div>
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">Default Currency</label>
+                        <select name="DefaultCurrency" class="gt-auth-input">
+                            <option value="USD" selected>USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="GBP">GBP (£)</option>
+                            <option value="JPY">JPY (¥)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="gt-form-group" style="margin-bottom: 16px;">
+                    <label class="gt-form-label">Tagline &amp; SEO Meta Description</label>
+                    <input type="text" name="Tagline" value="@Model.Tagline" class="gt-auth-input" />
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">Max Trip Duration (Days)</label>
+                        <input type="number" name="MaxTripDurationDays" value="@Model.MaxTripDurationDays" class="gt-auth-input" />
+                    </div>
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">Max Sections Per Itinerary</label>
+                        <input type="number" name="MaxStopsPerTrip" value="@Model.MaxStopsPerTrip" class="gt-auth-input" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL 2: EMAIL TEMPLATES -->
+            <div id="panelEmails" style="display: none;">
+                <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-admin-text-main); margin-bottom: 6px;">Transactional Email Templates</h3>
+                <p style="font-size: 13px; color: var(--gt-admin-text-muted); margin-bottom: 20px; border-bottom: 1px solid var(--gt-admin-border-subtle); padding-bottom: 12px;">Customer notification and onboarding email triggers</p>
+
+                <div class="gt-form-group" style="margin-bottom: 16px;">
+                    <label class="gt-form-label">Welcome Email Subject</label>
+                    <input type="text" name="WelcomeEmailSubject" value="@Model.WelcomeEmailSubject" class="gt-auth-input" />
+                </div>
+
+                <div class="gt-form-group" style="margin-bottom: 20px;">
+                    <label class="gt-form-label">Welcome Email Body (Markdown &amp; Variables)</label>
+                    <textarea name="WelcomeEmailBody" class="gt-auth-textarea" rows="4">@Model.WelcomeEmailBody</textarea>
+                </div>
+            </div>
+
+            <!-- PANEL 3: API INTEGRATIONS -->
+            <div id="panelApis" style="display: none;">
+                <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-admin-text-main); margin-bottom: 6px;">External API Integrations</h3>
+                <p style="font-size: 13px; color: var(--gt-admin-text-muted); margin-bottom: 20px; border-bottom: 1px solid var(--gt-admin-border-subtle); padding-bottom: 12px;">Maps, weather forecasting, and real-time currency converters</p>
+
+                <div class="gt-form-group" style="margin-bottom: 16px;">
+                    <label class="gt-form-label">Google Maps Platform API Key</label>
+                    <input type="text" name="GoogleMapsApiKey" value="@Model.GoogleMapsApiKey" class="gt-auth-input" style="font-family: 'JetBrains Mono', monospace;" />
+                </div>
+
+                <div class="gt-form-group" style="margin-bottom: 20px;">
+                    <label class="gt-form-label">Real-Time Currency Exchange Rate Key</label>
+                    <input type="text" name="CurrencyExchangeApiKey" value="@Model.CurrencyExchangeApiKey" class="gt-auth-input" style="font-family: 'JetBrains Mono', monospace;" />
+                </div>
+            </div>
+
+            <!-- PANEL 4: FEATURE TOGGLES -->
+            <div id="panelToggles" style="display: none;">
+                <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-admin-text-main); margin-bottom: 6px;">Feature Flags &amp; Experiments</h3>
+                <p style="font-size: 13px; color: var(--gt-admin-text-muted); margin-bottom: 20px; border-bottom: 1px solid var(--gt-admin-border-subtle); padding-bottom: 12px;">Toggle platform modules in real-time</p>
+
+                <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
+                    <label class="gt-checkbox-label" style="background: var(--gt-admin-bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--gt-admin-border);">
+                        @Html.CheckBoxFor(m => m.EnableCommunitySharing)
+                        <div>
+                            <div style="font-weight: 700; color: var(--gt-admin-text-main);">Public Community Feed &amp; Sharing</div>
+                            <div style="font-size: 12px; color: var(--gt-admin-text-muted);">Allow travelers to publish and explore public itineraries.</div>
+                        </div>
+                    </label>
+
+                    <label class="gt-checkbox-label" style="background: var(--gt-admin-bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--gt-admin-border);">
+                        @Html.CheckBoxFor(m => m.EnablePublicTripCloning)
+                        <div>
+                            <div style="font-weight: 700; color: var(--gt-admin-text-main);">1-Click Itinerary Cloning</div>
+                            <div style="font-size: 12px; color: var(--gt-admin-text-muted);">Enable users to fork public multi-city templates into their personal builder.</div>
+                        </div>
+                    </label>
+
+                    <label class="gt-checkbox-label" style="background: var(--gt-admin-bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--gt-admin-border);">
+                        @Html.CheckBoxFor(m => m.EnableAiItineraryGenerator)
+                        <div>
+                            <div style="font-weight: 700; color: var(--gt-admin-text-main);">AI Travel Route Optimizer</div>
+                            <div style="font-size: 12px; color: var(--gt-admin-text-muted);">Enable intelligent budget estimation and stop sequencing.</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- PANEL 5: DATA EXPORT -->
+            <div id="panelExport" style="display: none;">
+                <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-admin-text-main); margin-bottom: 6px;">Data Archive &amp; Schema Export</h3>
+                <p style="font-size: 13px; color: var(--gt-admin-text-muted); margin-bottom: 20px; border-bottom: 1px solid var(--gt-admin-border-subtle); padding-bottom: 12px;">Export database snapshots for regulatory backups</p>
+
+                <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                    <button type="button" class="gt-tag-btn" onclick="showToast('Initiating full JSON export...')" style="padding: 12px 20px; font-weight: 700;">
+                        <i class="fa-solid fa-file-code" style="margin-right: 6px;"></i> Export Full JSON Snapshot
+                    </button>
+                    <button type="button" class="gt-tag-btn" onclick="showToast('Exporting SQL dump...')" style="padding: 12px 20px; font-weight: 700;">
+                        <i class="fa-solid fa-database" style="margin-right: 6px;"></i> Export Relational SQL
+                    </button>
+                </div>
+            </div>
+
+            <!-- Save Action Button -->
+            <div style="display: flex; justify-content: flex-end; border-top: 1px solid var(--gt-admin-border-subtle); padding-top: 18px;">
+                <button type="submit" class="gt-btn-add" style="padding: 10px 24px; font-weight: 700; font-size: 14px;">
+                    <i class="fa-solid fa-floppy-disk" style="margin-right: 6px;"></i> Save Platform Settings
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function switchSettingsTab(tab) {
+            document.querySelectorAll('#tabNavGeneral, #tabNavEmails, #tabNavApis, #tabNavToggles, #tabNavExport').forEach(b => {
+                b.classList.remove('active');
+                b.querySelector('.gt-admin-nav-item-icon').style.color = '#64748B';
+            });
+            document.getElementById('panelGeneral').style.display = 'none';
+            document.getElementById('panelEmails').style.display = 'none';
+            document.getElementById('panelApis').style.display = 'none';
+            document.getElementById('panelToggles').style.display = 'none';
+            document.getElementById('panelExport').style.display = 'none';
+
+            document.getElementById('hiddenActiveTab').value = tab;
+
+            if (tab === 'emails') {
+                const btn = document.getElementById('tabNavEmails');
+                btn.classList.add('active');
+                btn.querySelector('.gt-admin-nav-item-icon').style.color = 'var(--gt-admin-accent)';
+                document.getElementById('panelEmails').style.display = 'block';
+            } else if (tab === 'apis') {
+                const btn = document.getElementById('tabNavApis');
+                btn.classList.add('active');
+                btn.querySelector('.gt-admin-nav-item-icon').style.color = 'var(--gt-admin-accent)';
+                document.getElementById('panelApis').style.display = 'block';
+            } else if (tab === 'toggles') {
+                const btn = document.getElementById('tabNavToggles');
+                btn.classList.add('active');
+                btn.querySelector('.gt-admin-nav-item-icon').style.color = 'var(--gt-admin-accent)';
+                document.getElementById('panelToggles').style.display = 'block';
+            } else if (tab === 'export') {
+                const btn = document.getElementById('tabNavExport');
+                btn.classList.add('active');
+                btn.querySelector('.gt-admin-nav-item-icon').style.color = 'var(--gt-admin-accent)';
+                document.getElementById('panelExport').style.display = 'block';
+            } else {
+                const btn = document.getElementById('tabNavGeneral');
+                btn.classList.add('active');
+                btn.querySelector('.gt-admin-nav-item-icon').style.color = 'var(--gt-admin-accent)';
+                document.getElementById('panelGeneral').style.display = 'block';
+            }
+        }
+    </script>
+}

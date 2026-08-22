@@ -1,0 +1,200 @@
+@model GlobeTrotter.Models.AdminUserDetailViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "User Profile: " + (Model.User.FullName ?? Model.User.UserName);
+    ViewBag.Subtitle = "Account details, trip history, and security logs";
+}
+
+<div style="display: grid; grid-template-columns: 3.8fr 6.2fr; gap: 24px;">
+    <!-- ==============================================================
+         LEFT COLUMN (40%): USER PROFILE & STATS CARD
+         ============================================================== -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div style="background: #FFFFFF; border: 1px solid var(--gt-admin-border); border-radius: 12px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); text-align: center;">
+            <!-- Avatar -->
+            <div style="position: relative; display: inline-block; margin-bottom: 16px;">
+                <img src="@(string.IsNullOrWhiteSpace(Model.User.AvatarUrl) ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" : Model.User.AvatarUrl)" alt="@Model.User.UserName" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gt-admin-border);" />
+                <span class="gt-admin-badge active" style="position: absolute; bottom: 4px; right: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+                    @Model.Status
+                </span>
+            </div>
+
+            <!-- Identity -->
+            <h2 style="font-size: 22px; font-weight: 800; color: var(--gt-admin-text-main); margin-bottom: 4px;">
+                @(Model.User.FullName ?? Model.User.UserName)
+            </h2>
+            <div style="font-size: 13.5px; color: var(--gt-admin-text-muted); margin-bottom: 14px;">
+                @Model.User.Email
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.User.Bio))
+            {
+                <p style="font-size: 13px; color: var(--gt-admin-text-muted); background: var(--gt-admin-bg); padding: 12px; border-radius: 8px; margin-bottom: 18px; text-align: left;">
+                    @Model.User.Bio
+                </p>
+            }
+
+            <!-- 3 Stat Metrics -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; border-top: 1px solid var(--gt-admin-border-subtle); border-bottom: 1px solid var(--gt-admin-border-subtle); padding: 14px 0; margin-bottom: 20px;">
+                <div>
+                    <div style="font-size: 18px; font-weight: 800; color: var(--gt-admin-accent);">@Model.TotalTrips</div>
+                    <div style="font-size: 11px; color: var(--gt-admin-text-muted); text-transform: uppercase;">Trips</div>
+                </div>
+                <div>
+                    <div style="font-size: 18px; font-weight: 800; color: var(--gt-admin-emerald);">@Model.SavedDestinationsCount</div>
+                    <div style="font-size: 11px; color: var(--gt-admin-text-muted); text-transform: uppercase;">Saved</div>
+                </div>
+                <div>
+                    <div style="font-size: 18px; font-weight: 800; color: var(--gt-admin-text-main);">$@Model.TotalTripBudgetSpent.ToString("N0")</div>
+                    <div style="font-size: 11px; color: var(--gt-admin-text-muted); text-transform: uppercase;">Budgets</div>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button type="button" class="gt-tag-btn" onclick="showToast('Password reset link dispatched.')" style="padding: 10px; font-weight: 700;">
+                    <i class="fa-solid fa-key" style="margin-right: 6px;"></i> Send Password Reset
+                </button>
+                <button type="button" class="gt-tag-btn" onclick="showToast('Account status toggled.')" style="padding: 10px; font-weight: 700; color: #D97706; border-color: rgba(245,158,11,0.3);">
+                    <i class="fa-solid fa-ban" style="margin-right: 6px;"></i> Suspend Account
+                </button>
+            </div>
+        </div>
+
+        <!-- Meta Details Box -->
+        <div style="background: #FFFFFF; border: 1px solid var(--gt-admin-border); border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); font-size: 13px;">
+            <div style="font-weight: 700; color: var(--gt-admin-text-main); margin-bottom: 12px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Metadata</div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--gt-admin-text-muted);">User ID:</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px;">@Model.User.Id.Substring(0, Math.Min(12, Model.User.Id.Length))...</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--gt-admin-text-muted);">Registered:</span>
+                <span>@Model.User.CreatedAt.ToString("MMM dd, yyyy")</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--gt-admin-text-muted);">Currency:</span>
+                <span>@(Model.User.PreferredCurrency ?? "USD")</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         RIGHT COLUMN (60%): TABBED CONTENT (TRIPS, WISHLIST, AUDIT LOG)
+         ============================================================== -->
+    <div style="background: #FFFFFF; border: 1px solid var(--gt-admin-border); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); overflow: hidden;">
+        <!-- Tabs Header -->
+        <div style="border-bottom: 1px solid var(--gt-admin-border); padding: 0 20px; display: flex; gap: 8px; background: #F8FAFC;">
+            <button type="button" class="gt-nav-link active" id="tabBtnTrips" onclick="switchDetailTab('trips')" style="border-radius: 0; padding: 16px 14px; border-bottom: 2px solid var(--gt-admin-accent);">
+                <i class="fa-solid fa-route" style="margin-right: 6px;"></i> Trips Planned (@Model.UserTrips.Count)
+            </button>
+            <button type="button" class="gt-nav-link" id="tabBtnWishlist" onclick="switchDetailTab('wishlist')" style="border-radius: 0; padding: 16px 14px;">
+                <i class="fa-solid fa-bookmark" style="margin-right: 6px;"></i> Saved Wishlist (@Model.SavedDestinations.Count)
+            </button>
+            <button type="button" class="gt-nav-link" id="tabBtnAudit" onclick="switchDetailTab('audit')" style="border-radius: 0; padding: 16px 14px;">
+                <i class="fa-solid fa-clock-rotate-left" style="margin-right: 6px;"></i> Activity Audit Log
+            </button>
+        </div>
+
+        <!-- Tab 1: Trips -->
+        <div id="tabContentTrips" style="padding: 24px;">
+            @if (Model.UserTrips.Count == 0)
+            {
+                <div style="text-align: center; padding: 32px; color: var(--gt-admin-text-muted);">
+                    No trips created by this user yet.
+                </div>
+            }
+            else
+            {
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    @foreach (var t in Model.UserTrips)
+                    {
+                        <div style="border: 1px solid var(--gt-admin-border); border-radius: 10px; padding: 16px; display: flex; justify-content: space-between; align-items: center; background: var(--gt-admin-bg);">
+                            <div>
+                                <h4 style="font-size: 15px; font-weight: 800; color: var(--gt-admin-text-main); margin-bottom: 4px;">@t.Title</h4>
+                                <div style="font-size: 12.5px; color: var(--gt-admin-text-muted);">
+                                    @t.StartDate.ToString("MMM dd") - @t.EndDate.ToString("MMM dd, yyyy") • @t.TripStops.Count stops
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: 800; color: var(--gt-admin-emerald); font-size: 15px;">$@t.TotalBudget.ToString("N0")</div>
+                                <span class="gt-admin-badge" style="background: rgba(59,130,246,0.1); color: var(--gt-admin-accent); font-size: 11px;">
+                                    @(t.IsPublic ? "Public" : "Private")
+                                </span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Tab 2: Wishlist -->
+        <div id="tabContentWishlist" style="display: none; padding: 24px;">
+            @if (Model.SavedDestinations.Count == 0)
+            {
+                <div style="text-align: center; padding: 32px; color: var(--gt-admin-text-muted);">
+                    No saved destinations in user's wishlist.
+                </div>
+            }
+            else
+            {
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
+                    @foreach (var sd in Model.SavedDestinations)
+                    {
+                        <div style="border: 1px solid var(--gt-admin-border); border-radius: 10px; overflow: hidden;">
+                            <img src="@(sd.DestinationCity?.ImageUrl ?? "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=400&q=80")" alt="@sd.DestinationCity?.Name" style="width: 100%; height: 100px; object-fit: cover;" />
+                            <div style="padding: 12px;">
+                                <div style="font-weight: 700; color: var(--gt-admin-text-main);">@sd.DestinationCity?.Name, @sd.DestinationCity?.Country</div>
+                                <div style="font-size: 11.5px; color: var(--gt-admin-text-muted);">Saved on @sd.SavedAt.ToString("MMM dd, yyyy")</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Tab 3: Activity Log -->
+        <div id="tabContentAudit" style="display: none; padding: 24px;">
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                @foreach (var log in Model.AuditLogs)
+                {
+                    <div style="display: flex; align-items: flex-start; gap: 12px; font-size: 13px; border-left: 2px solid var(--gt-admin-accent); padding-left: 12px;">
+                        <div>
+                            <div style="font-weight: 700; color: var(--gt-admin-text-main);">@log.ActionType</div>
+                            <div style="color: var(--gt-admin-text-muted); font-size: 12px;">@log.Details • IP: @log.IpAddress</div>
+                            <div style="color: var(--gt-admin-text-subtle); font-size: 11px;">@log.Timestamp.ToString("MMM dd, yyyy HH:mm:ss")</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function switchDetailTab(tab) {
+            document.querySelectorAll('#tabBtnTrips, #tabBtnWishlist, #tabBtnAudit').forEach(b => {
+                b.classList.remove('active');
+                b.style.borderBottom = 'none';
+            });
+            document.getElementById('tabContentTrips').style.display = 'none';
+            document.getElementById('tabContentWishlist').style.display = 'none';
+            document.getElementById('tabContentAudit').style.display = 'none';
+
+            if (tab === 'wishlist') {
+                document.getElementById('tabBtnWishlist').classList.add('active');
+                document.getElementById('tabBtnWishlist').style.borderBottom = '2px solid var(--gt-admin-accent)';
+                document.getElementById('tabContentWishlist').style.display = 'block';
+            } else if (tab === 'audit') {
+                document.getElementById('tabBtnAudit').classList.add('active');
+                document.getElementById('tabBtnAudit').style.borderBottom = '2px solid var(--gt-admin-accent)';
+                document.getElementById('tabContentAudit').style.display = 'block';
+            } else {
+                document.getElementById('tabBtnTrips').classList.add('active');
+                document.getElementById('tabBtnTrips').style.borderBottom = '2px solid var(--gt-admin-accent)';
+                document.getElementById('tabContentTrips').style.display = 'block';
+            }
+        }
+    </script>
+}

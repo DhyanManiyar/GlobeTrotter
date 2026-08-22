@@ -1,0 +1,649 @@
+@model GlobeTrotter.Models.TripCalendarViewModel
+@{
+    ViewBag.Title = "Trip Calendar & Vertical Timeline | GlobeTrotter";
+    string userAvatar = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
+    decimal budgetPercent = (Model.SelectedTrip != null && Model.SelectedTrip.TotalBudget > 0) 
+        ? Math.Min(100, Math.Round((Model.TotalCalculatedCost / Model.SelectedTrip.TotalBudget) * 100)) : 0;
+    int progressPercent = Model.TotalActivitiesCount > 0 
+        ? (int)Math.Round(((double)Model.TotalCompletedActivities / Model.TotalActivitiesCount) * 100) : 0;
+}
+
+<div style="padding-top: 85px; padding-bottom: 80px;">
+    <div class="gt-container" style="max-width: 1080px;">
+
+        <!-- Top Navigation / Header Bar -->
+        <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 20px 28px; box-shadow: var(--gt-shadow-card); margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <h1 style="font-size: 24px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.02em;">
+                        Trip Calendar &amp; Journey Timeline
+                    </h1>
+                    <span class="gt-tier-tag" style="background: rgba(99, 102, 241, 0.08); color: var(--gt-brand-primary); font-weight: 700;">
+                        Visual Day Planner
+                    </span>
+                </div>
+                <p style="font-size: 13.5px; color: var(--gt-zinc-500); margin-top: 4px;">
+                    Expandable daily views, drag-to-reorder activity scheduling, and visual timeline flow.
+                </p>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <a href="@Url.Action("Index", "User")" class="gt-tag-btn" style="padding: 8px 14px; font-size: 13px;">
+                    <i class="fa-solid fa-gauge" style="margin-right: 4px;"></i> Dashboard
+                </a>
+                <a href="@Url.Action("Trip", "User")" class="gt-tag-btn" style="padding: 8px 14px; font-size: 13px;">
+                    <i class="fa-solid fa-route" style="margin-right: 4px;"></i> My Trips
+                </a>
+                <a href="@Url.Action("Create", "User")" class="gt-btn-add" style="padding: 8px 18px; font-size: 13px; font-weight: 700;">
+                    <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Plan New Trip
+                </a>
+            </div>
+        </div>
+
+        @if (Model.AllUserTrips.Count == 0)
+        {
+            <div style="background: #FFFFFF; border: 1px dashed var(--gt-zinc-300); border-radius: var(--gt-radius-xl); padding: 64px 20px; text-align: center;">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--gt-zinc-100); color: var(--gt-zinc-400); display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;">
+                    <i class="fa-regular fa-calendar-days"></i>
+                </div>
+                <h3 style="font-size: 18px; font-weight: 700; color: var(--gt-zinc-800); margin-bottom: 8px;">No trips available for calendar planning</h3>
+                <p style="font-size: 14px; color: var(--gt-zinc-500); margin-bottom: 20px;">Create your first multi-city trip to view its visual calendar and vertical timeline.</p>
+                <a href="@Url.Action("Create", "User")" class="gt-btn-auth-primary" style="display: inline-flex; width: auto; padding: 10px 24px;">
+                    <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Plan a New Trip
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- Trip Selector & Live Financial Metric Bar -->
+            <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 22px 28px; box-shadow: var(--gt-shadow-card); margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 18px;">
+                    <!-- Trip Dropdown -->
+                    <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 280px;">
+                        <label style="font-size: 13.5px; font-weight: 700; color: var(--gt-zinc-600); white-space: nowrap;">
+                            Select Itinerary:
+                        </label>
+                        <select class="gt-auth-input" style="height: 42px; font-weight: 700; color: var(--gt-zinc-950);" onchange="location.href='@Url.Action("Calendar", "User")?tripId=' + this.value + '&view=' + currentViewMode;">
+                            @foreach (var t in Model.AllUserTrips)
+                            {
+                                <option value="@t.TripId" selected="@(t.TripId == Model.SelectedTripId)">
+                                    @t.Title (@t.StartDate.ToString("MMM dd") - @t.EndDate.ToString("MMM dd, yyyy"))
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- View Switcher Tabs -->
+                    <div style="display: flex; gap: 6px; background: var(--gt-zinc-100); padding: 4px 6px; border-radius: var(--gt-radius-full);">
+                        <button type="button" class="gt-nav-link @(Model.ActiveViewMode == "timeline" ? "active" : "")" id="btnModeTimeline" onclick="switchCalendarView('timeline')">
+                            <i class="fa-solid fa-route" style="margin-right: 5px;"></i> Vertical Timeline
+                        </button>
+                        <button type="button" class="gt-nav-link @(Model.ActiveViewMode == "expanded" ? "active" : "")" id="btnModeExpanded" onclick="switchCalendarView('expanded')">
+                            <i class="fa-solid fa-list-check" style="margin-right: 5px;"></i> Expandable Day Schedule
+                        </button>
+                        <button type="button" class="gt-nav-link @(Model.ActiveViewMode == "calendar" ? "active" : "")" id="btnModeCalendar" onclick="switchCalendarView('calendar')">
+                            <i class="fa-regular fa-calendar-days" style="margin-right: 5px;"></i> Month Grid
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Metrics Row -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; border-top: 1px solid var(--gt-border-subtle); padding-top: 16px;">
+                    <div>
+                        <div style="font-size: 11.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Duration</div>
+                        <div style="font-size: 18px; font-weight: 800; color: var(--gt-zinc-950);">
+                            @Model.TotalDays Days (@Model.SelectedTrip.StartDate.ToString("MMM dd") - @Model.SelectedTrip.EndDate.ToString("MMM dd"))
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Estimated Budget</div>
+                        <div style="font-size: 18px; font-weight: 800; color: var(--gt-brand-primary);">
+                            $@Model.TotalCalculatedCost.ToString("N0") <span style="font-size: 12px; font-weight: 500; color: var(--gt-zinc-400);">/ $@Model.SelectedTrip.TotalBudget.ToString("N0")</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Activities Flow</div>
+                        <div style="font-size: 18px; font-weight: 800; color: var(--gt-brand-emerald);">
+                            @Model.TotalCompletedActivities / @Model.TotalActivitiesCount Completed (@progressPercent%)
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
+                        <a href="@Url.Action("BuildItinerary", "User", new { id = Model.SelectedTripId })" class="gt-tag-btn" style="padding: 7px 14px; font-size: 12.5px; font-weight: 700;">
+                            <i class="fa-solid fa-pen-ruler" style="margin-right: 4px;"></i> Edit Itinerary
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==============================================================
+                 VIEW 1: VERTICAL TIMELINE WITH EXPANDABLE DAYS & DRAG-TO-REORDER
+                 ============================================================== -->
+            <div id="timelineContainer" style="display: @(Model.ActiveViewMode == "timeline" ? "block" : "none"); margin-bottom: 32px;">
+                <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 32px 36px; box-shadow: var(--gt-shadow-card);">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 10px;">
+                        <h3 style="font-size: 20px; font-weight: 800; color: var(--gt-zinc-950); display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-timeline" style="color: var(--gt-brand-primary);"></i>
+                            Interactive Vertical Timeline
+                        </h3>
+                        <div style="font-size: 12.5px; color: var(--gt-zinc-500); background: var(--gt-zinc-50); border: 1px solid var(--gt-zinc-200); padding: 4px 12px; border-radius: var(--gt-radius-full);">
+                            <i class="fa-solid fa-arrows-up-down" style="margin-right: 4px; color: var(--gt-brand-primary);"></i>
+                            Drag activities to reorder • Click activity to quick-edit
+                        </div>
+                    </div>
+
+                    <div style="position: relative; padding-left: 24px;">
+                        <!-- Timeline Spine -->
+                        <div style="position: absolute; left: 41px; top: 15px; bottom: 25px; width: 3px; background: linear-gradient(to bottom, #6366F1, #06B6D4, #10B981); z-index: 1;"></div>
+
+                        @foreach (var day in Model.Days)
+                        {
+                            <div style="display: flex; gap: 24px; margin-bottom: 32px; position: relative; z-index: 2;">
+                                <!-- Timeline Node Circle -->
+                                <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--gt-brand-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; box-shadow: 0 0 0 5px #FFFFFF, var(--gt-shadow-sm); flex-shrink: 0;">
+                                    @day.DayNumber
+                                </div>
+
+                                <!-- Day Card Block -->
+                                <div style="flex: 1; background: var(--gt-zinc-50); border: 1.5px solid var(--gt-zinc-200); border-radius: var(--gt-radius-xl); overflow: hidden; box-shadow: var(--gt-shadow-xs);">
+                                    
+                                    <!-- Day Header (Collapsible Clickable) -->
+                                    <div onclick="toggleDayAccordion('dayAccordion_@day.DayNumber')" style="padding: 16px 20px; background: #FFFFFF; border-bottom: 1px solid var(--gt-zinc-200); display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none;">
+                                        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                            <span style="font-size: 14px; font-weight: 800; color: var(--gt-brand-primary);">
+                                                Day @day.DayNumber
+                                            </span>
+                                            <span style="font-size: 13px; font-weight: 700; color: var(--gt-zinc-900);">
+                                                @day.DateFormatted
+                                            </span>
+                                            <span class="gt-tag-btn" style="padding: 2px 10px; font-size: 12px; font-weight: 700; background: rgba(99,102,241,0.08); color: var(--gt-brand-primary); border-color: rgba(99,102,241,0.2);">
+                                                📍 @day.CityName, @day.Country
+                                            </span>
+                                        </div>
+
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <span style="font-size: 12.5px; font-weight: 700; color: var(--gt-brand-emerald);">
+                                                Est. $@day.DailyBudgetTotal.ToString("N0")
+                                            </span>
+                                            <i class="fa-solid fa-chevron-down accordion-icon" id="icon_dayAccordion_@day.DayNumber" style="color: var(--gt-zinc-400); font-size: 12px; transition: transform 0.2s ease;"></i>
+                                        </div>
+                                    </div>
+
+                                    <!-- Day Content (Expandable Body) -->
+                                    <div id="dayAccordion_@day.DayNumber" style="padding: 18px 20px;">
+                                        
+                                        <!-- Lodging & Transit Metadata Row -->
+                                        <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 12.5px; margin-bottom: 16px; background: #FFFFFF; border: 1px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 10px 14px;">
+                                            <span>
+                                                🏨 Lodging: <strong>@day.AccommodationDetails</strong> ($@day.AccommodationCostPerDay.ToString("N0")/night)
+                                            </span>
+                                            @if (day.IsTransitDay)
+                                            {
+                                                <span style="color: #06B6D4; font-weight: 700;">
+                                                    ✈️ Transit Connection: @day.TransportMode ($@day.TransportCost.ToString("N0"))
+                                                </span>
+                                            }
+                                        </div>
+
+                                        <!-- Scheduled Activities Section (Drag to Reorder) -->
+                                        <div style="margin-bottom: 12px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                                <div style="font-size: 11.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">
+                                                    Activities Schedule (@day.Activities.Count):
+                                                </div>
+                                                <button type="button" class="gt-tag-btn" onclick="openQuickAddModal(@day.StopId, '@day.CityName', '@day.Date.ToString("yyyy-MM-dd")')" style="padding: 3px 10px; font-size: 11.5px;">
+                                                    <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Add Activity
+                                                </button>
+                                            </div>
+
+                                            @if (day.Activities.Count == 0)
+                                            {
+                                                <div style="background: #FFFFFF; border: 1px dashed var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 12px; text-align: center; font-size: 12.5px; color: var(--gt-zinc-400);">
+                                                    No specific activities scheduled for this day yet.
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="gt-activity-drag-list" data-stop-id="@day.StopId" style="display: flex; flex-direction: column; gap: 8px;">
+                                                    @for (int aIdx = 0; aIdx < day.Activities.Count; aIdx++)
+                                                    {
+                                                        var act = day.Activities[aIdx];
+                                                        <div class="gt-drag-activity" draggable="true" data-activity-id="@act.TripActivityId" data-order-index="@act.OrderIndex" style="background: #FFFFFF; border: 1px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: var(--gt-shadow-xs); transition: all 0.2s ease; cursor: grab;">
+                                                            
+                                                            <!-- Drag Handle & Title -->
+                                                            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                                                                <span class="gt-drag-handle" style="color: var(--gt-zinc-400); font-size: 14px; cursor: grab;" title="Drag to reorder">
+                                                                    <i class="fa-solid fa-grip-vertical"></i>
+                                                                </span>
+
+                                                                <input type="checkbox" @(act.IsCompleted ? "checked" : "") onchange="toggleActivityCompletion(@act.TripActivityId, this)" style="cursor: pointer; width: 16px; height: 16px; accent-color: var(--gt-brand-emerald);" title="Mark Completed" />
+
+                                                                <div>
+                                                                    <span class="activity-title" style="font-size: 13.5px; font-weight: 700; color: var(--gt-zinc-900); @(act.IsCompleted ? "text-decoration: line-through; opacity: 0.6;" : "")">
+                                                                        @act.CustomTitle
+                                                                    </span>
+                                                                    <div style="display: flex; gap: 8px; font-size: 11px; color: var(--gt-zinc-400); margin-top: 2px;">
+                                                                        <span>🎟️ @act.CategoryName</span>
+                                                                        <span>⏱️ @act.DurationHours hrs</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Cost & Quick Actions -->
+                                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                                <span class="activity-cost" style="font-size: 13px; font-weight: 800; color: var(--gt-brand-emerald);">
+                                                                    $@act.Cost.ToString("N0")
+                                                                </span>
+
+                                                                <!-- Quick Edit Button -->
+                                                                <button type="button" class="gt-tag-btn" onclick="openQuickEditModal(@act.TripActivityId, '@act.CustomTitle.Replace("'", "\\'") ', '@act.CategoryName', @act.Cost, @act.DurationHours, '@(act.Notes?.Replace("'", "\\'") ?? "")', @(act.IsCompleted ? "true" : "false"))" style="padding: 4px 8px; font-size: 11.5px;" title="Quick Edit">
+                                                                    <i class="fa-solid fa-pen"></i>
+                                                                </button>
+
+                                                                <!-- Delete Activity -->
+                                                                <button type="button" class="gt-tag-btn" onclick="deleteActivityAjax(@act.TripActivityId, this)" style="padding: 4px 8px; font-size: 11.5px; color: #DC2626; border-color: rgba(220,38,38,0.2);" title="Remove">
+                                                                    <i class="fa-regular fa-trash-can"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==============================================================
+                 VIEW 2: EXPANDABLE DAY-BY-DAY SCHEDULE VIEW
+                 ============================================================== -->
+            <div id="expandedContainer" style="display: @(Model.ActiveViewMode == "expanded" ? "block" : "none"); margin-bottom: 32px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+                    @foreach (var day in Model.Days)
+                    {
+                        <div style="background: #FFFFFF; border: 1.5px solid var(--gt-border); border-radius: var(--gt-radius-xl); overflow: hidden; box-shadow: var(--gt-shadow-card); display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <!-- Day Header Banner -->
+                                <div style="height: 120px; position: relative; background: var(--gt-zinc-900);">
+                                    <img src="@day.CityImageUrl" alt="@day.CityName" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.85;" />
+                                    <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);"></div>
+                                    <div style="position: absolute; top: 12px; left: 14px; background: var(--gt-brand-primary); color: white; padding: 3px 8px; border-radius: var(--gt-radius-sm); font-size: 11px; font-weight: 800;">
+                                        Day @day.DayNumber
+                                    </div>
+                                    <div style="position: absolute; bottom: 10px; left: 14px; right: 14px; color: white;">
+                                        <div style="font-size: 16px; font-weight: 800;">@day.CityName, @day.Country</div>
+                                        <div style="font-size: 11.5px; opacity: 0.85;">@day.DateFormatted</div>
+                                    </div>
+                                </div>
+
+                                <!-- Body -->
+                                <div style="padding: 16px;">
+                                    <div style="font-size: 12px; color: var(--gt-zinc-500); margin-bottom: 12px;">
+                                        🏨 @day.AccommodationDetails
+                                    </div>
+
+                                    <div style="font-size: 11px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; margin-bottom: 6px;">
+                                        Day Activities (@day.Activities.Count):
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;">
+                                        @foreach (var act in day.Activities)
+                                        {
+                                            <div style="background: var(--gt-zinc-50); border: 1px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 6px 10px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
+                                                <span style="font-weight: 600; color: var(--gt-zinc-900);">@act.CustomTitle</span>
+                                                <span style="font-weight: 700; color: var(--gt-brand-emerald);">$@act.Cost.ToString("N0")</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="border-top: 1px solid var(--gt-border-subtle); padding: 12px 16px; background: var(--gt-zinc-50); display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 12px; color: var(--gt-zinc-500);">Daily Total:</span>
+                                <span style="font-size: 15px; font-weight: 800; color: var(--gt-brand-primary);">$@day.DailyBudgetTotal.ToString("N0")</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- ==============================================================
+                 VIEW 3: MONTH GRID CALENDAR
+                 ============================================================== -->
+            <div id="calendarContainer" style="display: @(Model.ActiveViewMode == "calendar" ? "block" : "none"); margin-bottom: 32px;">
+                <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 32px; box-shadow: var(--gt-shadow-card);">
+                    
+                    <h3 style="font-size: 20px; font-weight: 800; color: var(--gt-zinc-950); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-regular fa-calendar-days" style="color: var(--gt-brand-primary);"></i>
+                        Itinerary Month Grid View
+                    </h3>
+
+                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px;">
+                        <!-- Day Headers -->
+                        @foreach (var dName in new string[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" })
+                        {
+                            <div style="text-align: center; font-size: 12px; font-weight: 800; color: var(--gt-zinc-400); text-transform: uppercase; padding: 6px;">
+                                @dName
+                            </div>
+                        }
+
+                        @foreach (var day in Model.Days)
+                        {
+                            <div style="background: var(--gt-zinc-50); border: 1.5px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 10px; min-height: 110px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                        <span style="font-size: 11px; font-weight: 800; color: var(--gt-brand-primary);">Day @day.DayNumber</span>
+                                        <span style="font-size: 12px; font-weight: 700; color: var(--gt-zinc-800);">@day.Date.Day</span>
+                                    </div>
+                                    <div style="font-size: 11.5px; font-weight: 700; color: var(--gt-zinc-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        @day.CityName
+                                    </div>
+                                    <div style="font-size: 10px; color: var(--gt-zinc-400);">
+                                        @day.Activities.Count activities
+                                    </div>
+                                </div>
+
+                                <div style="font-size: 11px; font-weight: 700; color: var(--gt-brand-emerald); text-align: right;">
+                                    $@day.DailyBudgetTotal.ToString("N0")
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+<!-- ==========================================================================
+     QUICK EDIT ACTIVITY MODAL
+     ========================================================================== -->
+<div id="quickEditModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--gt-radius-xl); max-width: 440px; width: 100%; padding: 28px; box-shadow: var(--gt-shadow-modal);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--gt-border-subtle); padding-bottom: 12px;">
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-zinc-950);">
+                Quick Edit Activity
+            </h3>
+            <button type="button" onclick="closeQuickEditModal()" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--gt-zinc-400);">&times;</button>
+        </div>
+
+        <form id="quickEditForm" onsubmit="saveQuickEdit(event)">
+            <input type="hidden" id="editActivityId" />
+
+            <div class="gt-form-group" style="margin-bottom: 12px;">
+                <label class="gt-form-label">Activity Title *</label>
+                <input type="text" id="editTitle" class="gt-auth-input" required />
+            </div>
+
+            <div class="gt-form-group" style="margin-bottom: 12px;">
+                <label class="gt-form-label">Category</label>
+                <select id="editCategory" class="gt-auth-input">
+                    <option value="Sightseeing">Sightseeing</option>
+                    <option value="Food & Dining">Food & Dining</option>
+                    <option value="Culture & History">Culture & History</option>
+                    <option value="Adventure & Nature">Adventure & Nature</option>
+                    <option value="Entertainment">Entertainment</option>
+                </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                <div class="gt-form-group">
+                    <label class="gt-form-label">Cost ($)</label>
+                    <input type="number" id="editCost" class="gt-auth-input" step="5" />
+                </div>
+                <div class="gt-form-group">
+                    <label class="gt-form-label">Duration (hrs)</label>
+                    <input type="number" id="editDuration" class="gt-auth-input" step="0.5" />
+                </div>
+            </div>
+
+            <div class="gt-form-group" style="margin-bottom: 16px;">
+                <label class="gt-form-label">Notes & Details</label>
+                <textarea id="editNotes" class="gt-auth-textarea" rows="2" placeholder="Timings, reservations, or notes..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="gt-tag-btn" onclick="closeQuickEditModal()">Cancel</button>
+                <button type="submit" class="gt-btn-auth-primary" style="width: auto; padding: 8px 22px;">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     QUICK ADD ACTIVITY MODAL
+     ========================================================================== -->
+<div id="quickAddModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--gt-radius-xl); max-width: 440px; width: 100%; padding: 28px; box-shadow: var(--gt-shadow-modal);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--gt-border-subtle); padding-bottom: 12px;">
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-zinc-950);" id="addModalTitle">
+                Add Activity to Day
+            </h3>
+            <button type="button" onclick="closeQuickAddModal()" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--gt-zinc-400);">&times;</button>
+        </div>
+
+        @using (Html.BeginForm("AddActivityToSection", "User", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="tripId" value="@Model.SelectedTripId" />
+            <input type="hidden" name="TripStopId" id="addModalStopId" />
+
+            <div class="gt-form-group" style="margin-bottom: 12px;">
+                <label class="gt-form-label">Activity Title *</label>
+                <input type="text" name="Title" class="gt-auth-input" placeholder="e.g. Sunset Boat Cruise" required />
+            </div>
+
+            <div class="gt-form-group" style="margin-bottom: 12px;">
+                <label class="gt-form-label">Category</label>
+                <select name="CategoryName" class="gt-auth-input">
+                    <option value="Sightseeing">Sightseeing</option>
+                    <option value="Food & Dining">Food & Dining</option>
+                    <option value="Culture & History">Culture & History</option>
+                    <option value="Adventure & Nature">Adventure & Nature</option>
+                    <option value="Entertainment">Entertainment</option>
+                </select>
+            </div>
+
+            <div class="gt-form-group" style="margin-bottom: 12px;">
+                <label class="gt-form-label">Estimated Cost ($)</label>
+                <input type="number" name="Cost" class="gt-auth-input" value="50" />
+            </div>
+
+            <div class="gt-form-group" style="margin-bottom: 16px;">
+                <label class="gt-form-label">Notes</label>
+                <textarea name="Notes" class="gt-auth-textarea" rows="2" placeholder="Schedule or meet-up point..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="gt-tag-btn" onclick="closeQuickAddModal()">Cancel</button>
+                <button type="submit" class="gt-btn-auth-primary" style="width: auto; padding: 8px 22px;">Add Activity</button>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentViewMode = '@Model.ActiveViewMode';
+
+        function switchCalendarView(mode) {
+            currentViewMode = mode;
+            document.querySelectorAll('#btnModeTimeline, #btnModeExpanded, #btnModeCalendar').forEach(b => b.classList.remove('active'));
+
+            document.getElementById('timelineContainer').style.display = 'none';
+            document.getElementById('expandedContainer').style.display = 'none';
+            document.getElementById('calendarContainer').style.display = 'none';
+
+            if (mode === 'expanded') {
+                document.getElementById('btnModeExpanded').classList.add('active');
+                document.getElementById('expandedContainer').style.display = 'block';
+            } else if (mode === 'calendar') {
+                document.getElementById('btnModeCalendar').classList.add('active');
+                document.getElementById('calendarContainer').style.display = 'block';
+            } else {
+                document.getElementById('btnModeTimeline').classList.add('active');
+                document.getElementById('timelineContainer').style.display = 'block';
+            }
+        }
+
+        function toggleDayAccordion(accordionId) {
+            const body = document.getElementById(accordionId);
+            const icon = document.getElementById('icon_' + accordionId);
+            if (body.style.display === 'none') {
+                body.style.display = 'block';
+                if (icon) icon.style.transform = 'rotate(0deg)';
+            } else {
+                body.style.display = 'none';
+                if (icon) icon.style.transform = 'rotate(-90deg)';
+            }
+        }
+
+        // =====================================================================
+        // DRAG AND DROP ACTIVITY REORDERING
+        // =====================================================================
+        let draggedItem = null;
+
+        document.querySelectorAll('.gt-drag-activity').forEach(item => {
+            item.addEventListener('dragstart', function (e) {
+                draggedItem = this;
+                this.style.opacity = '0.4';
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            item.addEventListener('dragend', function () {
+                this.style.opacity = '1';
+                draggedItem = null;
+            });
+
+            item.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                this.style.borderColor = 'var(--gt-brand-primary)';
+            });
+
+            item.addEventListener('dragleave', function () {
+                this.style.borderColor = 'var(--gt-zinc-200)';
+            });
+
+            item.addEventListener('drop', function (e) {
+                e.preventDefault();
+                this.style.borderColor = 'var(--gt-zinc-200)';
+                if (draggedItem && draggedItem !== this) {
+                    const list = this.parentElement;
+                    const items = Array.from(list.children);
+                    const fromIdx = items.indexOf(draggedItem);
+                    const toIdx = items.indexOf(this);
+
+                    if (fromIdx < toIdx) {
+                        list.insertBefore(draggedItem, this.nextSibling);
+                    } else {
+                        list.insertBefore(draggedItem, this);
+                    }
+
+                    // Save new order via AJAX
+                    const actId = draggedItem.getAttribute('data-activity-id');
+                    $.post('@Url.Action("UpdateActivityOrder", "User")', { activityId: actId, newOrderIndex: toIdx + 1 }, function (res) {
+                        if (res.success) {
+                            showToast('✨ Activity order updated!');
+                        }
+                    });
+                }
+            });
+        });
+
+        // =====================================================================
+        // QUICK EDIT MODAL & AJAX
+        // =====================================================================
+        function openQuickEditModal(id, title, category, cost, duration, notes, isCompleted) {
+            document.getElementById('editActivityId').value = id;
+            document.getElementById('editTitle').value = title;
+            document.getElementById('editCategory').value = category;
+            document.getElementById('editCost').value = cost;
+            document.getElementById('editDuration').value = duration;
+            document.getElementById('editNotes').value = notes;
+            document.getElementById('quickEditModal').style.display = 'flex';
+        }
+
+        function closeQuickEditModal() {
+            document.getElementById('quickEditModal').style.display = 'none';
+        }
+
+        function saveQuickEdit(e) {
+            e.preventDefault();
+            const id = document.getElementById('editActivityId').value;
+            const title = document.getElementById('editTitle').value;
+            const category = document.getElementById('editCategory').value;
+            const cost = document.getElementById('editCost').value;
+            const duration = document.getElementById('editDuration').value;
+            const notes = document.getElementById('editNotes').value;
+
+            $.post('@Url.Action("QuickEditActivity", "User")', {
+                TripActivityId: id,
+                Title: title,
+                CategoryName: category,
+                Cost: cost,
+                DurationHours: duration,
+                Notes: notes
+            }, function (res) {
+                if (res.success) {
+                    const card = document.querySelector(`.gt-drag-activity[data-activity-id="${id}"]`);
+                    if (card) {
+                        const titleEl = card.querySelector('.activity-title');
+                        const costEl = card.querySelector('.activity-cost');
+                        if (titleEl) titleEl.innerText = res.title;
+                        if (costEl) costEl.innerText = '$' + Number(res.cost).toLocaleString();
+                    }
+                    showToast('✅ Activity details updated!');
+                    closeQuickEditModal();
+                }
+            });
+        }
+
+        function toggleActivityCompletion(id, checkbox) {
+            $.post('@Url.Action("ToggleActivityStatus", "User")', { activityId: id }, function (res) {
+                if (res.success) {
+                    const card = document.querySelector(`.gt-drag-activity[data-activity-id="${id}"]`);
+                    if (card) {
+                        const titleEl = card.querySelector('.activity-title');
+                        if (titleEl) {
+                            if (res.isCompleted) {
+                                titleEl.style.textDecoration = 'line-through';
+                                titleEl.style.opacity = '0.6';
+                            } else {
+                                titleEl.style.textDecoration = 'none';
+                                titleEl.style.opacity = '1';
+                            }
+                        }
+                    }
+                    showToast(res.isCompleted ? '☑️ Activity marked completed!' : '🔄 Activity unmarked');
+                }
+            });
+        }
+
+        function deleteActivityAjax(id, btn) {
+            if (!confirm('Remove this activity from your day timeline?')) return;
+            $.post('@Url.Action("DeleteActivityAjax", "User")', { activityId: id }, function (res) {
+                if (res.success) {
+                    const card = btn.closest('.gt-drag-activity');
+                    if (card) card.remove();
+                    showToast('🗑️ Activity removed');
+                }
+            });
+        }
+
+        function openQuickAddModal(stopId, cityName, date) {
+            document.getElementById('addModalStopId').value = stopId;
+            document.getElementById('addModalTitle').innerText = 'Add Activity for ' + cityName;
+            document.getElementById('quickAddModal').style.display = 'flex';
+        }
+
+        function closeQuickAddModal() {
+            document.getElementById('quickAddModal').style.display = 'none';
+        }
+    </script>
+}

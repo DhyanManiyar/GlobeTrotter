@@ -774,6 +774,185 @@ namespace GlobeTrotter.Controllers
             }, JsonRequestBehavior.AllowGet);
         }
 
+        // =====================================================================
+        // 8. TRIP CALENDAR & VERTICAL TIMELINE VIEW: GET /User/Calendar
+        // =====================================================================
+        public async Task<ActionResult> Calendar(int? tripId, string view = "timeline")
+        {
+            var userId = await GetResolvedUserIdAsync();
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var allUserTrips = await db.Trips
+                .Include(t => t.TripStops.Select(s => s.DestinationCity))
+                .Include(t => t.TripStops.Select(s => s.TripActivities))
+                .Where(t => t.UserId == userId)
+                .OrderByDescending(t => t.StartDate)
+                .ToListAsync();
+
+            if (allUserTrips.Count == 0)
+            {
+                return View(new TripCalendarViewModel
+                {
+                    AllUserTrips = new List<Trip>(),
+                    Days = new List<CalendarDayViewModel>(),
+                    ActiveViewMode = view ?? "timeline"
+                });
+            }
+
+            // Determine selected trip
+            Trip selectedTrip = null;
+            if (tripId.HasValue)
+            {
+                selectedTrip = allUserTrips.FirstOrDefault(t => t.TripId == tripId.Value);
+            }
+            if (selectedTrip == null)
+            {
+                var today = DateTime.Today;
+                selectedTrip = allUserTrips.FirstOrDefault(t => t.StartDate >= today) ?? allUserTrips.FirstOrDefault();
+            }
+
+            // Build day-by-day plan from StartDate to EndDate
+            int totalDays = Math.Max(1, (selectedTrip.EndDate - selectedTrip.StartDate).Days + 1);
+            var daysList = new List<CalendarDayViewModel>();
+            var orderedStops = selectedTrip.TripStops.OrderBy(s => s.StopOrder).ToList();
+
+            decimal grandCalculatedCost = 0m;
+            int totalActivitiesCount = 0;
+            int totalCompletedActivities = 0;
+
+            for (int i = 0; i < totalDays; i++)
+            {
+                var currentDayDate = selectedTrip.StartDate.AddDays(i);
+
+                // Find active stop for this day
+                var activeStop = orderedStops.FirstOrDefault(s => currentDayDate >= s.ArrivalDate && currentDayDate <= s.DepartureDate);
+                if (activeStop == null)
+                {
+                    // Fallback to nearest stop based on order
+                    activeStop = orderedStops.FirstOrDefault();
+                }
+
+                bool isFirstDay = activeStop != null && currentDayDate.Date == activeStop.ArrivalDate.Date;
+                int stopDaysCount = activeStop != null ? Math.Max(1, (activeStop.DepartureDate - activeStop.ArrivalDate).Days + 1) : 1;
+                decimal dailyStayCost = activeStop != null ? (activeStop.AccommodationCost / stopDaysCount) : 0m;
+                decimal dayTransportCost = isFirstDay && activeStop != null ? activeStop.TransportCost : 0m;
+
+                // Activities for this stop
+                var stopActivities = activeStop != null ? activeStop.TripActivities.OrderBy(a => a.OrderIndex).ToList() : new List<TripActivity>();
+
+                decimal dayActivitiesCost = stopActivities.Sum(a => a.Cost);
+                decimal dailyBudgetTotal = dailyStayCost + dayTransportCost + dayActivitiesCost;
+
+                grandCalculatedCost += dailyBudgetTotal;
+                totalActivitiesCount += stopActivities.Count;
+                totalCompletedActivities += stopActivities.Count(a => a.IsCompleted);
+
+                daysList.Add(new CalendarDayViewModel
+                {
+                    DayNumber = i + 1,
+                    Date = currentDayDate,
+                    StopId = activeStop?.TripStopId ?? 0,
+                    StopOrder = activeStop?.StopOrder ?? 1,
+                    CityName = activeStop?.DestinationCity?.Name ?? "Transit Stop",
+                    Country = activeStop?.DestinationCity?.Country ?? "",
+                    CityImageUrl = activeStop?.DestinationCity?.ImageUrl ?? "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=600&q=80",
+                    AccommodationDetails = activeStop?.AccommodationDetails ?? "Standard Lodging",
+                    AccommodationCostPerDay = dailyStayCost,
+                    TransportMode = activeStop?.TransportMode ?? "Flight",
+                    TransportCost = dayTransportCost,
+                    Notes = activeStop?.Notes ?? "Explore city highlights and local culinary spots.",
+                    IsFirstDayOfStop = isFirstDay,
+                    IsTransitDay = isFirstDay && (activeStop?.StopOrder > 1),
+                    DailyBudgetTotal = dailyBudgetTotal,
+                    Activities = stopActivities
+                });
+            }
+
+            var viewModel = new TripCalendarViewModel
+            {
+                SelectedTripId = selectedTrip.TripId,
+                SelectedTrip = selectedTrip,
+                AllUserTrips = allUserTrips,
+                Days = daysList,
+                TotalDays = totalDays,
+                TotalCalculatedCost = grandCalculatedCost,
+                TotalActivitiesCount = totalActivitiesCount,
+                TotalCompletedActivities = totalCompletedActivities,
+                ActiveViewMode = view ?? "timeline"
+            };
+
+            return View(viewModel);
+        }
+
+        public async Task<ActionResult> Timeline(int? tripId)
+        {
+            return await Calendar(tripId, "timeline");
+        }
+
+        // =====================================================================
+        // 9. AJAX ACTIVITY QUICK EDIT, REORDER & TOGGLE
+        // =====================================================================
+        [HttpPost]
+        public async Task<JsonResult> UpdateActivityOrder(int activityId, int newOrderIndex)
+        {
+            var activity = await db.TripActivities.FindAsync(activityId);
+            if (activity == null) return Json(new { success = false, message = "Activity not found" });
+
+            activity.OrderIndex = newOrderIndex;
+            await db.SaveChangesAsync();
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> QuickEditActivity(QuickEditActivityViewModel model)
+        {
+            var activity = await db.TripActivities.FindAsync(model.TripActivityId);
+            if (activity == null) return Json(new { success = false, message = "Activity not found" });
+
+            if (!string.IsNullOrWhiteSpace(model.Title)) activity.CustomTitle = model.Title;
+            if (!string.IsNullOrWhiteSpace(model.CategoryName)) activity.CategoryName = model.CategoryName;
+            activity.Cost = model.Cost;
+            activity.DurationHours = model.DurationHours;
+            if (!string.IsNullOrWhiteSpace(model.Notes)) activity.Notes = model.Notes;
+            if (!string.IsNullOrWhiteSpace(model.TimeOfDay)) activity.TimeOfDay = model.TimeOfDay;
+            activity.IsCompleted = model.IsCompleted;
+
+            await db.SaveChangesAsync();
+            return Json(new { 
+                success = true, 
+                title = activity.CustomTitle, 
+                cost = activity.Cost,
+                category = activity.CategoryName,
+                duration = activity.DurationHours,
+                isCompleted = activity.IsCompleted
+            });
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> ToggleActivityStatus(int activityId)
+        {
+            var activity = await db.TripActivities.FindAsync(activityId);
+            if (activity == null) return Json(new { success = false, message = "Activity not found" });
+
+            activity.IsCompleted = !activity.IsCompleted;
+            await db.SaveChangesAsync();
+            return Json(new { success = true, isCompleted = activity.IsCompleted });
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> DeleteActivityAjax(int activityId)
+        {
+            var activity = await db.TripActivities.FindAsync(activityId);
+            if (activity == null) return Json(new { success = false, message = "Activity not found" });
+
+            db.TripActivities.Remove(activity);
+            await db.SaveChangesAsync();
+            return Json(new { success = true });
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing) db.Dispose();
@@ -781,3 +960,4 @@ namespace GlobeTrotter.Controllers
         }
     }
 }
+

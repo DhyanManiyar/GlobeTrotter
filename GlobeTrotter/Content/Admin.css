@@ -1,0 +1,502 @@
+/* ==========================================================================
+   GLOBETROTTER ENTERPRISE ADMIN DESIGN SYSTEM (Linear / Stripe / Vercel Aesthetic)
+   ========================================================================== */
+
+:root {
+    --gt-admin-sidebar-bg: #0F172A;
+    --gt-admin-sidebar-hover: rgba(255, 255, 255, 0.06);
+    --gt-admin-sidebar-active: #1E293B;
+    --gt-admin-sidebar-text: #94A3B8;
+    --gt-admin-sidebar-text-active: #FFFFFF;
+    --gt-admin-accent: #3B82F6;
+    --gt-admin-accent-glow: rgba(59, 130, 246, 0.15);
+    --gt-admin-bg: #F8FAFC;
+    --gt-admin-card-bg: #FFFFFF;
+    --gt-admin-border: #E2E8F0;
+    --gt-admin-border-subtle: #F1F5F9;
+    --gt-admin-text-main: #0F172A;
+    --gt-admin-text-muted: #64748B;
+    --gt-admin-text-subtle: #94A3B8;
+    --gt-admin-emerald: #10B981;
+    --gt-admin-rose: #EF4444;
+    --gt-admin-amber: #F59E0B;
+}
+
+body.admin-body {
+    background-color: var(--gt-admin-bg);
+    color: var(--gt-admin-text-main);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* ==========================================================================
+   1. ADMIN APP LAYOUT WRAPPER
+   ========================================================================== */
+.gt-admin-wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* ==========================================================================
+   2. FIXED DARK SIDEBAR (Width: 260px, #0F172A)
+   ========================================================================== */
+.gt-admin-sidebar {
+    width: 260px;
+    background-color: var(--gt-admin-sidebar-bg);
+    color: var(--gt-admin-sidebar-text);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+}
+
+.gt-admin-sidebar-brand {
+    padding: 22px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.gt-admin-brand-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.gt-admin-brand-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: -0.02em;
+}
+
+.gt-admin-brand-badge {
+    font-size: 10px;
+    font-weight: 700;
+    background: rgba(59, 130, 246, 0.2);
+    color: #60A5FA;
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.gt-admin-sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 12px;
+}
+
+.gt-admin-sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+}
+.gt-admin-sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.gt-admin-nav-category {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748B;
+    padding: 12px 10px 6px;
+}
+
+.gt-admin-nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border-radius: 8px;
+    color: var(--gt-admin-sidebar-text);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    transition: all 0.15s ease;
+    margin-bottom: 2px;
+    cursor: pointer;
+}
+
+.gt-admin-nav-item:hover {
+    background: var(--gt-admin-sidebar-hover);
+    color: var(--gt-admin-sidebar-text-active);
+}
+
+.gt-admin-nav-item.active {
+    background: var(--gt-admin-sidebar-active);
+    color: #FFFFFF;
+    border-left: 3px solid var(--gt-admin-accent);
+    padding-left: 9px;
+}
+
+.gt-admin-nav-item-icon {
+    width: 18px;
+    font-size: 14px;
+    margin-right: 10px;
+    text-align: center;
+    color: #64748B;
+}
+
+.gt-admin-nav-item.active .gt-admin-nav-item-icon {
+    color: var(--gt-admin-accent);
+}
+
+.gt-admin-sidebar-footer {
+    padding: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.gt-admin-profile-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #FFFFFF;
+}
+
+.gt-admin-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ==========================================================================
+   3. STICKY HEADER BAR (Height: 72px)
+   ========================================================================== */
+.gt-admin-main {
+    flex: 1;
+    margin-left: 260px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.gt-admin-header {
+    height: 72px;
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--gt-admin-border);
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.gt-admin-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.gt-admin-header-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--gt-admin-text-main);
+    letter-spacing: -0.02em;
+}
+
+.gt-admin-header-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.gt-admin-search-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gt-admin-bg);
+    border: 1px solid var(--gt-admin-border);
+    border-radius: 9999px;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--gt-admin-text-muted);
+    cursor: pointer;
+    width: 280px;
+    transition: all 0.15s ease;
+}
+
+.gt-admin-search-btn:hover {
+    border-color: #CBD5E1;
+    background: #FFFFFF;
+}
+
+.gt-admin-kbd {
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gt-admin-text-muted);
+    margin-left: auto;
+}
+
+.gt-admin-content-body {
+    padding: 32px;
+    flex: 1;
+}
+
+/* ==========================================================================
+   4. METRICS ROW & CARDS (Linear/Stripe Style)
+   ========================================================================== */
+.gt-admin-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.gt-admin-metric-card {
+    background: #FFFFFF;
+    border: 1px solid var(--gt-admin-border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gt-admin-metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.06);
+}
+
+.gt-admin-metric-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.gt-admin-metric-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gt-admin-text-muted);
+}
+
+.gt-admin-metric-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--gt-admin-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--gt-admin-text-main);
+}
+
+.gt-admin-metric-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--gt-admin-text-main);
+    letter-spacing: -0.03em;
+    margin-bottom: 6px;
+}
+
+.gt-admin-metric-trend {
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.gt-admin-metric-trend.positive {
+    color: var(--gt-admin-emerald);
+}
+
+.gt-admin-metric-trend.negative {
+    color: var(--gt-admin-rose);
+}
+
+/* ==========================================================================
+   5. DATA TABLES & ACTION BARS
+   ========================================================================== */
+.gt-admin-table-container {
+    background: #FFFFFF;
+    border: 1px solid var(--gt-admin-border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.gt-admin-table-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--gt-admin-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.gt-admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+}
+
+.gt-admin-table th {
+    background: #F8FAFC;
+    padding: 12px 20px;
+    text-align: left;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gt-admin-text-muted);
+    border-bottom: 1px solid var(--gt-admin-border);
+}
+
+.gt-admin-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--gt-admin-border-subtle);
+    color: var(--gt-admin-text-main);
+    vertical-align: middle;
+}
+
+.gt-admin-table tr:hover td {
+    background: #F8FAFC;
+}
+
+.gt-admin-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 9999px;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.gt-admin-badge.active {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.gt-admin-badge.suspended {
+    background: rgba(239, 68, 68, 0.1);
+    color: #DC2626;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.gt-admin-badge.pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #D97706;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.gt-admin-badge.admin {
+    background: rgba(99, 102, 241, 0.1);
+    color: #4F46E5;
+    border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+/* ==========================================================================
+   6. QUICK ACTIONS GRID & CARDS
+   ========================================================================== */
+.gt-admin-quick-action-btn {
+    background: #FFFFFF;
+    border: 1.5px solid var(--gt-admin-border);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--gt-admin-text-main);
+    font-weight: 700;
+    font-size: 13.5px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.gt-admin-quick-action-btn:hover {
+    border-color: var(--gt-admin-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12);
+}
+
+/* ==========================================================================
+   7. MODAL STYLES (Cmd+K Global Search & Add/Edit forms)
+   ========================================================================== */
+.gt-admin-modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.gt-admin-modal-card {
+    background: #FFFFFF;
+    border-radius: 14px;
+    max-width: 620px;
+    width: 100%;
+    box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.3);
+    overflow: hidden;
+    animation: modalIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.96) translateY(-10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ==========================================================================
+   8. RESPONSIVE MEDIA QUERIES
+   ========================================================================== */
+@media (max-width: 1199px) {
+    .gt-admin-metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .gt-admin-sidebar {
+        transform: translateX(-100%);
+    }
+    .gt-admin-sidebar.open {
+        transform: translateX(0);
+    }
+    .gt-admin-main {
+        margin-left: 0;
+    }
+    .gt-admin-metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    .gt-admin-content-body {
+        padding: 20px 16px;
+    }
+    .gt-admin-header {
+        padding: 0 16px;
+    }
+}

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - GlobeTrotter Admin Console</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Core & Admin CSS -->
+    @Styles.Render("~/Content/css")
+    <link rel="stylesheet" href="~/Content/Admin.css" />
+
+    <!-- Chart.js CDN for Enterprise Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body class="admin-body">
+
+    <div class="gt-admin-wrapper">
+        <!-- ==============================================================
+             1. GLOBAL LEFT SIDEBAR (Width 260px, Dark #0F172A)
+             ============================================================== -->
+        <aside class="gt-admin-sidebar" id="adminSidebar">
+            <!-- Branding -->
+            <div class="gt-admin-sidebar-brand">
+                <a href="@Url.Action("Index", "Admin")" class="gt-admin-brand-link">
+                    <span style="font-size: 20px;">🌍</span>
+                    <div>
+                        <div class="gt-admin-brand-title">GlobeTrotter</div>
+                        <div style="font-size: 11px; color: #64748B; font-weight: 600;">Admin Console</div>
+                    </div>
+                </a>
+                <span class="gt-admin-brand-badge">SaaS</span>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="gt-admin-sidebar-nav">
+                <div class="gt-admin-nav-category">Core Management</div>
+                
+                <a href="@Url.Action("Index", "Admin")" class="gt-admin-nav-item @(ViewBag.ActiveMenu == "Dashboard" ? "active" : "")">
+                    <div style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-chart-pie gt-admin-nav-item-icon"></i>
+                        <span>Dashboard</span>
+                    </div>
+                </a>
+
+                <a href="@Url.Action("Users", "Admin")" class="gt-admin-nav-item @(ViewBag.ActiveMenu == "Users" ? "active" : "")">
+                    <div style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-users gt-admin-nav-item-icon"></i>
+                        <span>User Management</span>
+                    </div>
+                </a>
+
+                <a href="@Url.Action("Content", "Admin")" class="gt-admin-nav-item @(ViewBag.ActiveMenu == "Content" ? "active" : "")">
+                    <div style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-map-location-dot gt-admin-nav-item-icon"></i>
+                        <span>Content &amp; Cities</span>
+                    </div>
+                </a>
+
+                <div class="gt-admin-nav-category">Intelligence &amp; Safety</div>
+
+                <a href="@Url.Action("Analytics", "Admin")" class="gt-admin-nav-item @(ViewBag.ActiveMenu == "Analytics" ? "active" : "")">
+                    <div style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-arrow-trend-up gt-admin-nav-item-icon"></i>
+                        <span>Analytics &amp; Funnels</span>
+                    </div>
+                </a>
+
+                <a href="@Url.Action("Moderation", "Admin")" class="gt-admin-nav-item @(ViewBag.ActiveMenu == "Moderation" ? "active" : "")">
+                    <div style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-shield-halved gt-admin-nav-item-icon"></i>
+                        <span>Moderation Queue</span>
+                    </div>
+                </a>
+
+                <div class="gt-admin-nav-category">Platform &amp; Ecosystem</div>
+
+                <a href="@Url.Action("Settings", "Admin")" class="gt-admin-nav-item @(ViewBag.ActiveMenu == "Settings" ? "active" : "")">
+                    <div style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-sliders gt-admin-nav-item-icon"></i>
+                        <span>Platform Settings</span>
+                    </div>
+                </a>
+
+                <a href="@Url.Action("Index", "Community")" class="gt-admin-nav-item">
+                    <div style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-globe gt-admin-nav-item-icon"></i>
+                        <span>Public Community</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px; opacity: 0.5;"></i>
+                </a>
+
+                <a href="@Url.Action("Index", "User")" class="gt-admin-nav-item">
+                    <div style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-person-walking-luggage gt-admin-nav-item-icon"></i>
+                        <span>Traveler Portal</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px; opacity: 0.5;"></i>
+                </a>
+            </nav>
+
+            <!-- Admin Profile Footer -->
+            <div class="gt-admin-sidebar-footer">
+                <div class="gt-admin-profile-pill">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Admin" class="gt-admin-avatar" />
+                    <div>
+                        <div style="font-size: 13px; font-weight: 700;">System Admin</div>
+                        <div style="font-size: 11px; color: #64748B;">admin@globetrotter.io</div>
+                    </div>
+                </div>
+                @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "adminLogoutForm", style = "margin:0;" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <button type="submit" title="Logout" style="background: none; border: none; color: #94A3B8; cursor: pointer; font-size: 14px;" onmouseover="this.style.color='#EF4444';" onmouseout="this.style.color='#94A3B8';">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                }
+            </div>
+        </aside>
+
+        <!-- ==============================================================
+             2. MAIN CONTENT AREA & STICKY HEADER
+             ============================================================== -->
+        <main class="gt-admin-main">
+            <!-- Header Bar -->
+            <header class="gt-admin-header">
+                <div class="gt-admin-header-left">
+                    <button type="button" class="gt-icon-btn" id="sidebarToggleBtn" style="display: none;" onclick="toggleAdminSidebar()">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div>
+                        <div class="gt-admin-header-title">@ViewBag.Title</div>
+                        @if (ViewBag.Subtitle != null)
+                        {
+                            <div style="font-size: 12.5px; color: var(--gt-admin-text-muted);">@ViewBag.Subtitle</div>
+                        }
+                    </div>
+                </div>
+
+                <div class="gt-admin-header-right">
+                    <!-- Global Search Button (Cmd+K) -->
+                    <button type="button" class="gt-admin-search-btn" onclick="openCmdKModal()">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>Search platform...</span>
+                        <kbd class="gt-admin-kbd">⌘K</kbd>
+                    </button>
+
+                    <!-- Notifications -->
+                    <button type="button" class="gt-icon-btn" title="Notifications" onclick="showToast('No unread system alerts.')">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="gt-badge-dot"></span>
+                    </button>
+
+                    <!-- User Portal Shortcut -->
+                    <a href="@Url.Action("Index", "User")" class="gt-tag-btn" style="padding: 7px 14px; font-weight: 700; background: var(--gt-admin-bg);" title="Back to User Dashboard">
+                        <i class="fa-solid fa-house" style="margin-right: 4px;"></i> Traveler View
+                    </a>
+                </div>
+            </header>
+
+            <!-- Body View Content -->
+            <div class="gt-admin-content-body">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <!-- ==============================================================
+         3. GLOBAL SEARCH (Cmd+K / Ctrl+K) MODAL
+         ============================================================== -->
+    <div class="gt-admin-modal-backdrop" id="cmdkModal" onclick="if(event.target === this) closeCmdKModal();">
+        <div class="gt-admin-modal-card">
+            <div style="padding: 16px 20px; border-bottom: 1px solid var(--gt-admin-border); display: flex; align-items: center; gap: 12px;">
+                <i class="fa-solid fa-magnifying-glass" style="color: var(--gt-admin-text-muted);"></i>
+                <input type="text" id="cmdkSearchInput" placeholder="Quick search users, cities, trips, settings..." style="border: none; outline: none; font-size: 15px; font-weight: 600; width: 100%; font-family: inherit;" />
+                <kbd class="gt-admin-kbd">ESC</kbd>
+            </div>
+            <div style="padding: 16px 20px; max-height: 320px; overflow-y: auto;">
+                <div style="font-size: 11px; font-weight: 700; color: var(--gt-admin-text-muted); text-transform: uppercase; margin-bottom: 8px;">Navigation Shortcuts</div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <a href="@Url.Action("Index", "Admin")" class="gt-admin-quick-action-btn" style="padding: 10px 14px;">
+                        <span>📊 Dashboard Overview</span>
+                    </a>
+                    <a href="@Url.Action("Users", "Admin")" class="gt-admin-quick-action-btn" style="padding: 10px 14px;">
+                        <span>👥 User Management Directory</span>
+                    </a>
+                    <a href="@Url.Action("Content", "Admin")" class="gt-admin-quick-action-btn" style="padding: 10px 14px;">
+                        <span>🗺️ Cities &amp; Activity Inventory</span>
+                    </a>
+                    <a href="@Url.Action("Analytics", "Admin")" class="gt-admin-quick-action-btn" style="padding: 10px 14px;">
+                        <span>📈 Platform Performance &amp; Funnels</span>
+                    </a>
+                    <a href="@Url.Action("Settings", "Admin")" class="gt-admin-quick-action-btn" style="padding: 10px 14px;">
+                        <span>⚙️ Platform Settings &amp; API Keys</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="gtToast" style="position: fixed; bottom: 24px; right: 24px; background: #0F172A; color: white; padding: 12px 20px; border-radius: 8px; font-size: 13.5px; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: none; z-index: 9999; align-items: center; gap: 8px;">
+        <span id="gtToastMessage"></span>
+    </div>
+
+    <!-- Scripts -->
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+
+    <script>
+        // Global Keyboard Shortcut (Cmd+K / Ctrl+K)
+        document.addEventListener('keydown', function (e) {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                openCmdKModal();
+            }
+            if (e.key === 'Escape') {
+                closeCmdKModal();
+            }
+        });
+
+        function openCmdKModal() {
+            document.getElementById('cmdkModal').style.display = 'flex';
+            setTimeout(() => document.getElementById('cmdkSearchInput').focus(), 50);
+        }
+
+        function closeCmdKModal() {
+            document.getElementById('cmdkModal').style.display = 'none';
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('gtToast');
+            const msgEl = document.getElementById('gtToastMessage');
+            if (toast && msgEl) {
+                msgEl.innerText = message;
+                toast.style.display = 'flex';
+                setTimeout(() => toast.style.display = 'none', 3000);
+            }
+        }
+
+        function toggleAdminSidebar() {
+            const sidebar = document.getElementById('adminSidebar');
+            if (sidebar) sidebar.classList.toggle('open');
+        }
+    </script>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>
