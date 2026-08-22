@@ -1,33 +1,809 @@
-﻿@{
-    ViewBag.Title = "Home Page";
+@{
+    ViewBag.Title = "Plan & Experience Multi-City Travel";
 }
 
-<main>
-    <section class="row" aria-labelledby="aspnetTitle">
-        <h1 id="title">ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-        <p><a href="https://asp.net" class="btn btn-primary btn-md">Learn more &raquo;</a></p>
-    </section>
+<!-- ==========================================================================
+     1. FLOATING CAPSULE NAVIGATION (21st.dev Style)
+     ========================================================================== -->
+<header class="gt-navbar" id="mainNavbar">
+    <div class="gt-nav-capsule">
+        <!-- Brand Logo -->
+        <a href="@Url.Action("Index", "Home")" class="gt-brand" aria-label="GlobeTrotter Home">
+            <div class="gt-brand-logo-wrap">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="32" cy="32" r="14" fill="url(#brandGrad)" />
+                    <ellipse cx="32" cy="32" rx="22" ry="10" transform="rotate(-30 32 32)" stroke="#38BDF8" stroke-width="3" stroke-dasharray="4 2" />
+                    <circle cx="48" cy="22" r="3.5" fill="#38BDF8" />
+                    <defs>
+                        <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#6366F1" />
+                            <stop offset="100%" stop-color="#06B6D4" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <span class="gt-brand-name">GlobeTrotter</span>
+            <span class="gt-brand-badge">SaaS</span>
+        </a>
 
-    <div class="row">
-        <section class="col-md-4" aria-labelledby="gettingStartedTitle">
-            <h2 id="gettingStartedTitle">Getting started</h2>
-            <p>
-                ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-                enables a clean separation of concerns and gives you full control over markup
-                for enjoyable, agile development.
-            </p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="librariesTitle">
-            <h2 id="librariesTitle">Get more libraries</h2>
-            <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="hostingTitle">
-            <h2 id="hostingTitle">Web Hosting</h2>
-            <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-        </section>
+        <!-- Nav Links -->
+        <nav>
+            <ul class="gt-nav-menu">
+                <li><a href="@Url.Action("Index", "Home")" class="gt-nav-link active">Explore</a></li>
+                <li><a href="#my-trips-section" class="gt-nav-link">My Trips</a></li>
+                <li><a href="#activities-section" class="gt-nav-link">Activities</a></li>
+                <li><a href="#community-section" class="gt-nav-link">Community</a></li>
+                <li><a href="@Url.Action("About", "Home")" class="gt-nav-link">About</a></li>
+            </ul>
+        </nav>
+
+        <!-- Right Nav Actions -->
+        <div class="gt-nav-actions">
+            <!-- Notification Icon -->
+            <button type="button" class="gt-icon-btn" aria-label="Notifications" onclick="showToast('2 new itinerary recommendations available')">
+                <i class="fa-regular fa-bell"></i>
+                <span class="gt-badge-dot"></span>
+            </button>
+
+            <!-- User Pill -->
+            <div class="gt-user-pill" onclick="showToast('Alex Rivera (demo-user-001) • Free Tier')">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Alex" class="gt-user-avatar" />
+                <span>Alex</span>
+                <i class="fa-solid fa-chevron-down" style="font-size: 10px; color: var(--gt-zinc-400);"></i>
+            </div>
+        </div>
     </div>
-</main>
+</header>
+
+<!-- ==========================================================================
+     2. HERO / SEARCH SECTION WITH AMBIENT GLOW
+     ========================================================================== -->
+<section class="gt-hero-section">
+    <div class="gt-hero-ambient-glow"></div>
+    <div class="gt-hero-content">
+        <!-- Live Status Badge -->
+        <div class="gt-live-badge">
+            <span class="gt-pulse-dot"></span>
+            <span>Intelligent Travel Engine v2.4</span>
+            <span style="color: var(--gt-zinc-300);">•</span>
+            <span style="color: var(--gt-brand-primary); font-weight: 700;">Over 12,000+ routes planned</span>
+        </div>
+
+        <h1 class="gt-hero-title">
+            Where will you go <span class="gt-title-gradient">next?</span>
+        </h1>
+        <p class="gt-hero-desc">
+            The all-in-one multi-city itinerary builder. Optimize travel stops, track daily budgets in real-time, and fork community adventures.
+        </p>
+
+        <!-- Command Style Search Bar -->
+        <div class="gt-search-container" role="search">
+            <i class="fa-solid fa-magnifying-glass gt-search-icon"></i>
+            <input type="text" 
+                   id="mainSearchInput" 
+                   class="gt-search-input" 
+                   placeholder="Search cities, activities, or tags (e.g. Paris, Sushi, Budget)..." 
+                   aria-label="Search destinations or activities"
+                   onkeyup="handleSearchInput(this.value)" />
+            <button type="button" class="gt-search-btn" onclick="executeSearch()">
+                <span>Explore</span>
+                <i class="fa-solid fa-arrow-right" style="font-size: 12px;"></i>
+            </button>
+        </div>
+
+        <!-- Quick Filter Tags -->
+        <div class="gt-quick-tags">
+            <span class="gt-quick-tag-label">Trending:</span>
+            <button type="button" class="gt-tag-btn" onclick="filterByTag('Europe')">Europe</button>
+            <button type="button" class="gt-tag-btn" onclick="filterByTag('Japan')">Japan</button>
+            <button type="button" class="gt-tag-btn" onclick="filterByTag('Budget')">Budget Friendly</button>
+            <button type="button" class="gt-tag-btn" onclick="filterByTag('Luxury')">Luxury</button>
+            <button type="button" class="gt-tag-btn" onclick="filterByTag('Bali')">Bali</button>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     3. REGIONAL SELECTION & FILTERS
+     ========================================================================== -->
+<section class="gt-section" id="explore-section">
+    <div class="gt-container">
+        <!-- Region Segmented Pills -->
+        <div class="gt-region-bar" role="tablist" aria-label="Region filters">
+            <button type="button" class="gt-region-btn active" onclick="selectRegion('All', this)">
+                <i class="fa-solid fa-earth-americas" style="color: #60A5FA;"></i>
+                <span>All Regions</span>
+            </button>
+            <button type="button" class="gt-region-btn" onclick="selectRegion('Europe', this)">
+                <i class="fa-solid fa-earth-europe" style="color: #818CF8;"></i>
+                <span>Europe</span>
+            </button>
+            <button type="button" class="gt-region-btn" onclick="selectRegion('Asia', this)">
+                <i class="fa-solid fa-earth-asia" style="color: #F87171;"></i>
+                <span>Asia</span>
+            </button>
+            <button type="button" class="gt-region-btn" onclick="selectRegion('Americas', this)">
+                <i class="fa-solid fa-earth-americas" style="color: #34D399;"></i>
+                <span>Americas</span>
+            </button>
+            <button type="button" class="gt-region-btn" onclick="selectRegion('Africa', this)">
+                <i class="fa-solid fa-earth-africa" style="color: #FBBF24;"></i>
+                <span>Africa</span>
+            </button>
+            <button type="button" class="gt-region-btn" onclick="selectRegion('Oceania', this)">
+                <i class="fa-solid fa-earth-oceania" style="color: #A78BFA;"></i>
+                <span>Oceania</span>
+            </button>
+        </div>
+
+        <!-- Filter & Sort Toolbar -->
+        <div class="gt-control-bar">
+            <div class="gt-control-group">
+                <span style="font-size: 13px; font-weight: 600; color: var(--gt-zinc-500);">Group:</span>
+                <select class="gt-select-custom" id="groupBySelect" onchange="applyFilters()">
+                    <option value="all">All Destinations</option>
+                    <option value="cost">By Cost Index</option>
+                    <option value="region">By Region</option>
+                </select>
+                <button type="button" class="gt-tag-btn" style="padding: 6px 12px;" onclick="showToast('Active filters: Budget + Top Rated')">
+                    <i class="fa-solid fa-sliders" style="margin-right: 4px;"></i> Filters
+                </button>
+            </div>
+
+            <div class="gt-control-group">
+                <span style="font-size: 13px; font-weight: 600; color: var(--gt-zinc-500);">Sort:</span>
+                <select class="gt-select-custom" id="sortBySelect" onchange="applySort(this.value)">
+                    <option value="popularity">Popularity</option>
+                    <option value="cost-low">Cost: Low to High</option>
+                    <option value="cost-high">Cost: High to Low</option>
+                    <option value="rating">Rating: Highest</option>
+                </select>
+                <span style="font-size: 13px; font-weight: 700; color: var(--gt-brand-primary);" id="resultsCounter">
+                    6 destinations
+                </span>
+            </div>
+        </div>
+
+        <!-- ==================================================================
+             4. BENTO DESTINATION GRID (3x2)
+             ================================================================== -->
+        <div class="gt-dest-grid" id="destinationsGrid">
+            <!-- Card 1: Paris -->
+            <article class="gt-card" data-region="Europe" data-cost="220" data-rating="4.95" data-popularity="98" data-name="Paris France">
+                <div class="gt-card-media">
+                    <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80" alt="Paris" class="gt-card-img" loading="lazy" />
+                    <div class="gt-card-overlay"></div>
+                    <span class="gt-card-badge gt-badge-trending"><i class="fa-solid fa-fire"></i> Trending</span>
+                    <div class="gt-card-header-info">
+                        <h3 class="gt-city-name">Paris</h3>
+                        <p class="gt-country-name"><i class="fa-solid fa-location-dot"></i> France, Europe</p>
+                    </div>
+                </div>
+                <div class="gt-card-body">
+                    <div class="gt-meta-row">
+                        <div class="gt-rating-box">
+                            <i class="fa-solid fa-star"></i>
+                            <span>4.95</span>
+                            <span class="gt-reviews">(2.3k)</span>
+                        </div>
+                        <span class="gt-tier-tag">Luxury</span>
+                    </div>
+                    <div class="gt-action-row">
+                        <div class="gt-cost-tag">
+                            <span class="gt-cost-label">Est. Daily</span>
+                            <span class="gt-cost-val">$220/day</span>
+                        </div>
+                        <button type="button" class="gt-btn-add" onclick="addToTrip('Paris', 1)">
+                            <i class="fa-solid fa-plus"></i> Add Stop
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 2: Tokyo -->
+            <article class="gt-card" data-region="Asia" data-cost="160" data-rating="4.98" data-popularity="99" data-name="Tokyo Japan">
+                <div class="gt-card-media">
+                    <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=800&q=80" alt="Tokyo" class="gt-card-img" loading="lazy" />
+                    <div class="gt-card-overlay"></div>
+                    <span class="gt-card-badge gt-badge-top"><i class="fa-solid fa-star"></i> Top Rated</span>
+                    <div class="gt-card-header-info">
+                        <h3 class="gt-city-name">Tokyo</h3>
+                        <p class="gt-country-name"><i class="fa-solid fa-location-dot"></i> Japan, Asia</p>
+                    </div>
+                </div>
+                <div class="gt-card-body">
+                    <div class="gt-meta-row">
+                        <div class="gt-rating-box">
+                            <i class="fa-solid fa-star"></i>
+                            <span>4.98</span>
+                            <span class="gt-reviews">(3.1k)</span>
+                        </div>
+                        <span class="gt-tier-tag">Moderate</span>
+                    </div>
+                    <div class="gt-action-row">
+                        <div class="gt-cost-tag">
+                            <span class="gt-cost-label">Est. Daily</span>
+                            <span class="gt-cost-val">$160/day</span>
+                        </div>
+                        <button type="button" class="gt-btn-add" onclick="addToTrip('Tokyo', 2)">
+                            <i class="fa-solid fa-plus"></i> Add Stop
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 3: Rome -->
+            <article class="gt-card" data-region="Europe" data-cost="150" data-rating="4.90" data-popularity="95" data-name="Rome Italy">
+                <div class="gt-card-media">
+                    <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80" alt="Rome" class="gt-card-img" loading="lazy" />
+                    <div class="gt-card-overlay"></div>
+                    <span class="gt-card-badge gt-badge-trending"><i class="fa-solid fa-fire"></i> Popular</span>
+                    <div class="gt-card-header-info">
+                        <h3 class="gt-city-name">Rome</h3>
+                        <p class="gt-country-name"><i class="fa-solid fa-location-dot"></i> Italy, Europe</p>
+                    </div>
+                </div>
+                <div class="gt-card-body">
+                    <div class="gt-meta-row">
+                        <div class="gt-rating-box">
+                            <i class="fa-solid fa-star"></i>
+                            <span>4.90</span>
+                            <span class="gt-reviews">(1.9k)</span>
+                        </div>
+                        <span class="gt-tier-tag">Moderate</span>
+                    </div>
+                    <div class="gt-action-row">
+                        <div class="gt-cost-tag">
+                            <span class="gt-cost-label">Est. Daily</span>
+                            <span class="gt-cost-val">$150/day</span>
+                        </div>
+                        <button type="button" class="gt-btn-add" onclick="addToTrip('Rome', 3)">
+                            <i class="fa-solid fa-plus"></i> Add Stop
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 4: New York City -->
+            <article class="gt-card" data-region="Americas" data-cost="280" data-rating="4.92" data-popularity="96" data-name="New York City United States">
+                <div class="gt-card-media">
+                    <img src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=800&q=80" alt="New York" class="gt-card-img" loading="lazy" />
+                    <div class="gt-card-overlay"></div>
+                    <span class="gt-card-badge gt-badge-featured"><i class="fa-solid fa-wand-magic-sparkles"></i> Featured</span>
+                    <div class="gt-card-header-info">
+                        <h3 class="gt-city-name">New York City</h3>
+                        <p class="gt-country-name"><i class="fa-solid fa-location-dot"></i> USA, Americas</p>
+                    </div>
+                </div>
+                <div class="gt-card-body">
+                    <div class="gt-meta-row">
+                        <div class="gt-rating-box">
+                            <i class="fa-solid fa-star"></i>
+                            <span>4.92</span>
+                            <span class="gt-reviews">(2.8k)</span>
+                        </div>
+                        <span class="gt-tier-tag">Luxury</span>
+                    </div>
+                    <div class="gt-action-row">
+                        <div class="gt-cost-tag">
+                            <span class="gt-cost-label">Est. Daily</span>
+                            <span class="gt-cost-val">$280/day</span>
+                        </div>
+                        <button type="button" class="gt-btn-add" onclick="addToTrip('New York City', 4)">
+                            <i class="fa-solid fa-plus"></i> Add Stop
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 5: Bali -->
+            <article class="gt-card" data-region="Asia" data-cost="65" data-rating="4.88" data-popularity="97" data-name="Bali Indonesia">
+                <div class="gt-card-media">
+                    <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80" alt="Bali" class="gt-card-img" loading="lazy" />
+                    <div class="gt-card-overlay"></div>
+                    <span class="gt-card-badge gt-badge-top" style="background: rgba(6, 182, 212, 0.85);"><i class="fa-solid fa-tag"></i> Top Value</span>
+                    <div class="gt-card-header-info">
+                        <h3 class="gt-city-name">Bali</h3>
+                        <p class="gt-country-name"><i class="fa-solid fa-location-dot"></i> Indonesia, Asia</p>
+                    </div>
+                </div>
+                <div class="gt-card-body">
+                    <div class="gt-meta-row">
+                        <div class="gt-rating-box">
+                            <i class="fa-solid fa-star"></i>
+                            <span>4.88</span>
+                            <span class="gt-reviews">(1.7k)</span>
+                        </div>
+                        <span class="gt-tier-tag" style="color: var(--gt-brand-emerald); font-weight: 800;">Budget</span>
+                    </div>
+                    <div class="gt-action-row">
+                        <div class="gt-cost-tag">
+                            <span class="gt-cost-label">Est. Daily</span>
+                            <span class="gt-cost-val">$65/day</span>
+                        </div>
+                        <button type="button" class="gt-btn-add" onclick="addToTrip('Bali', 5)">
+                            <i class="fa-solid fa-plus"></i> Add Stop
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 6: Barcelona -->
+            <article class="gt-card" data-region="Europe" data-cost="145" data-rating="4.89" data-popularity="94" data-name="Barcelona Spain">
+                <div class="gt-card-media">
+                    <img src="https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=800&q=80" alt="Barcelona" class="gt-card-img" loading="lazy" />
+                    <div class="gt-card-overlay"></div>
+                    <span class="gt-card-badge gt-badge-trending"><i class="fa-solid fa-fire"></i> Trending</span>
+                    <div class="gt-card-header-info">
+                        <h3 class="gt-city-name">Barcelona</h3>
+                        <p class="gt-country-name"><i class="fa-solid fa-location-dot"></i> Spain, Europe</p>
+                    </div>
+                </div>
+                <div class="gt-card-body">
+                    <div class="gt-meta-row">
+                        <div class="gt-rating-box">
+                            <i class="fa-solid fa-star"></i>
+                            <span>4.89</span>
+                            <span class="gt-reviews">(2.1k)</span>
+                        </div>
+                        <span class="gt-tier-tag">Moderate</span>
+                    </div>
+                    <div class="gt-action-row">
+                        <div class="gt-cost-tag">
+                            <span class="gt-cost-label">Est. Daily</span>
+                            <span class="gt-cost-val">$145/day</span>
+                        </div>
+                        <button type="button" class="gt-btn-add" onclick="addToTrip('Barcelona', 8)">
+                            <i class="fa-solid fa-plus"></i> Add Stop
+                        </button>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     5. RECENT ADVENTURES (MINIMALIST DASHBOARD)
+     ========================================================================== -->
+<section class="gt-adventures-section" id="my-trips-section">
+    <div class="gt-container">
+        <div class="gt-section-header">
+            <div>
+                <h2 class="gt-section-title">Your Recent Itineraries</h2>
+                <p class="gt-section-desc">Manage stops, budget caps, and daily activity timelines</p>
+            </div>
+            <button type="button" class="gt-btn-add" style="padding: 8px 18px;" onclick="openCreateTripModal()">
+                <i class="fa-solid fa-plus"></i> New Itinerary
+            </button>
+        </div>
+
+        <div class="gt-trips-grid">
+            <!-- Trip 1 -->
+            <a href="javascript:void(0)" class="gt-trip-card" onclick="showToast('Loading 7-Day European Romance Itinerary...')">
+                <div class="gt-trip-thumb">
+                    <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=400&q=80" alt="Paris" />
+                    <span class="gt-trip-badge">Upcoming</span>
+                </div>
+                <div class="gt-trip-info">
+                    <div>
+                        <h3 class="gt-trip-title">7-Day European Romance</h3>
+                        <p class="gt-trip-dates"><i class="fa-regular fa-calendar"></i> Sep 10 - 17, 2026</p>
+                        <p class="gt-trip-cities"><i class="fa-solid fa-route"></i> 2 Cities (Paris, Rome)</p>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--gt-zinc-500); margin-bottom: 2px;">
+                            <span>Itinerary</span>
+                            <span>75%</span>
+                        </div>
+                        <div class="gt-progress-track">
+                            <div class="gt-progress-fill" style="width: 75%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Trip 2 -->
+            <a href="javascript:void(0)" class="gt-trip-card" onclick="showToast('Loading 10-Day Japan Odyssey...')">
+                <div class="gt-trip-thumb">
+                    <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=400&q=80" alt="Tokyo" />
+                    <span class="gt-trip-badge" style="background: var(--gt-brand-primary);">Planning</span>
+                </div>
+                <div class="gt-trip-info">
+                    <div>
+                        <h3 class="gt-trip-title">10-Day Japan Odyssey</h3>
+                        <p class="gt-trip-dates"><i class="fa-regular fa-calendar"></i> Oct 05 - 15, 2026</p>
+                        <p class="gt-trip-cities"><i class="fa-solid fa-route"></i> 2 Cities (Tokyo, Kyoto)</p>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--gt-zinc-500); margin-bottom: 2px;">
+                            <span>Itinerary</span>
+                            <span>45%</span>
+                        </div>
+                        <div class="gt-progress-track">
+                            <div class="gt-progress-fill" style="width: 45%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Trip 3 -->
+            <a href="javascript:void(0)" class="gt-trip-card" onclick="showToast('Loading Bali Wellness Retreat...')">
+                <div class="gt-trip-thumb">
+                    <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=400&q=80" alt="Bali" />
+                    <span class="gt-trip-badge" style="background: var(--gt-brand-emerald);">Draft</span>
+                </div>
+                <div class="gt-trip-info">
+                    <div>
+                        <h3 class="gt-trip-title">Bali Wellness & Hike</h3>
+                        <p class="gt-trip-dates"><i class="fa-regular fa-calendar"></i> Nov 12 - 18, 2026</p>
+                        <p class="gt-trip-cities"><i class="fa-solid fa-route"></i> 1 City (Ubud)</p>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--gt-zinc-500); margin-bottom: 2px;">
+                            <span>Itinerary</span>
+                            <span>20%</span>
+                        </div>
+                        <div class="gt-progress-track">
+                            <div class="gt-progress-fill" style="width: 20%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     6. CURATED ACTIVITIES CAROUSEL
+     ========================================================================== -->
+<section class="gt-section" id="activities-section">
+    <div class="gt-container">
+        <div class="gt-section-header">
+            <div>
+                <h2 class="gt-section-title">Curated Experiences</h2>
+                <p class="gt-section-desc">Handpicked activities across world capitals with guaranteed pricing</p>
+            </div>
+        </div>
+
+        <div class="gt-act-scroll">
+            <!-- Activity 1 -->
+            <div class="gt-act-card">
+                <div class="gt-act-media">
+                    <img src="https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=500&q=80" alt="Eiffel Tower" loading="lazy" />
+                    <span class="gt-act-cat-tag">Sightseeing</span>
+                </div>
+                <div class="gt-act-content">
+                    <h4 class="gt-act-heading">Eiffel Tower Summit & Champagne</h4>
+                    <p style="font-size: 11.5px; color: var(--gt-zinc-400);">Paris, France</p>
+                    <div class="gt-act-btm">
+                        <span class="gt-act-price">$45.00</span>
+                        <span class="gt-act-time"><i class="fa-regular fa-clock"></i> 2.5h</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity 2 -->
+            <div class="gt-act-card">
+                <div class="gt-act-media">
+                    <img src="https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=500&q=80" alt="Batur" loading="lazy" />
+                    <span class="gt-act-cat-tag">Adventure</span>
+                </div>
+                <div class="gt-act-content">
+                    <h4 class="gt-act-heading">Mount Batur Sunrise Volcano Trek</h4>
+                    <p style="font-size: 11.5px; color: var(--gt-zinc-400);">Bali, Indonesia</p>
+                    <div class="gt-act-btm">
+                        <span class="gt-act-price">$45.00</span>
+                        <span class="gt-act-time"><i class="fa-regular fa-clock"></i> 6.0h</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity 3 -->
+            <div class="gt-act-card">
+                <div class="gt-act-media">
+                    <img src="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=500&q=80" alt="Sushi" loading="lazy" />
+                    <span class="gt-act-cat-tag">Food</span>
+                </div>
+                <div class="gt-act-content">
+                    <h4 class="gt-act-heading">Tsukiji Market Sushi Masterclass</h4>
+                    <p style="font-size: 11.5px; color: var(--gt-zinc-400);">Tokyo, Japan</p>
+                    <div class="gt-act-btm">
+                        <span class="gt-act-price">$85.00</span>
+                        <span class="gt-act-time"><i class="fa-regular fa-clock"></i> 3.0h</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity 4 -->
+            <div class="gt-act-card">
+                <div class="gt-act-media">
+                    <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=500&q=80" alt="Rome" loading="lazy" />
+                    <span class="gt-act-cat-tag">Culture</span>
+                </div>
+                <div class="gt-act-content">
+                    <h4 class="gt-act-heading">Colosseum & Roman Forum Tour</h4>
+                    <p style="font-size: 11.5px; color: var(--gt-zinc-400);">Rome, Italy</p>
+                    <div class="gt-act-btm">
+                        <span class="gt-act-price">$55.00</span>
+                        <span class="gt-act-time"><i class="fa-regular fa-clock"></i> 3.0h</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity 5 -->
+            <div class="gt-act-card">
+                <div class="gt-act-media">
+                    <img src="https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=500&q=80" alt="Kyoto" loading="lazy" />
+                    <span class="gt-act-cat-tag">Wellness</span>
+                </div>
+                <div class="gt-act-content">
+                    <h4 class="gt-act-heading">Arashiyama Bamboo & Tea Ceremony</h4>
+                    <p style="font-size: 11.5px; color: var(--gt-zinc-400);">Kyoto, Japan</p>
+                    <div class="gt-act-btm">
+                        <span class="gt-act-price">$40.00</span>
+                        <span class="gt-act-time"><i class="fa-regular fa-clock"></i> 3.0h</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     7. COMMUNITY & SOCIAL PROOF (OBSIDIAN THEME)
+     ========================================================================== -->
+<section class="gt-community-section" id="community-section">
+    <div class="gt-container">
+        <div class="gt-comm-header">
+            <h2 class="gt-comm-title">Built for modern travelers</h2>
+            <p class="gt-comm-desc">Explore verified multi-city itineraries created and field-tested by the global community.</p>
+        </div>
+
+        <div class="gt-testimonials">
+            <!-- 1 -->
+            <div class="gt-testimonial">
+                <p class="gt-quote">
+                    "GlobeTrotter saved our 2-week trip across Europe! Being able to calculate stay and transport costs while ordering stops in real-time kept us $400 under budget."
+                </p>
+                <div class="gt-user-meta">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Alex" />
+                    <div>
+                        <div class="gt-user-title">Alex Rivera</div>
+                        <div class="gt-user-sub">4 Trips Planned • Verified Traveler</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2 -->
+            <div class="gt-testimonial">
+                <p class="gt-quote">
+                    "The fork & copy trip feature is incredible. I cloned Marcus's 10-Day Japan itinerary, tweaked the workshops, and had our dream vacation booked in minutes."
+                </p>
+                <div class="gt-user-meta">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80" alt="Marcus" />
+                    <div>
+                        <div class="gt-user-title">Marcus Vance</div>
+                        <div class="gt-user-sub">Digital Nomad • Tokyo & Kyoto</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 -->
+            <div class="gt-testimonial">
+                <p class="gt-quote">
+                    "The day-by-day vertical timeline and automatic over-budget warnings gave our travel group complete financial visibility before booking flights."
+                </p>
+                <div class="gt-user-meta">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80" alt="Elena" />
+                    <div>
+                        <div class="gt-user-title">Elena Rostova</div>
+                        <div class="gt-user-sub">Solo Backpacker • 28 Countries</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <button type="button" class="gt-btn-join" onclick="showToast('Joined GlobeTrotter Community Beta!')">
+                <i class="fa-solid fa-sparkles"></i> Join Community Network
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     8. MINIMALIST FOOTER
+     ========================================================================== -->
+<footer class="gt-footer">
+    <div class="gt-container">
+        <div class="gt-footer-grid">
+            <div class="gt-footer-brand">
+                <a href="@Url.Action("Index", "Home")" class="gt-brand" style="color: white;">
+                    <div class="gt-brand-logo-wrap" style="background: white;">
+                        <span style="font-size: 14px; font-weight:800; color:#09090B;">GT</span>
+                    </div>
+                    <span class="gt-brand-name" style="color: white;">GlobeTrotter</span>
+                </a>
+                <p>
+                    Plan Smarter. Travel Better. The intelligent multi-city itinerary builder and budget planner.
+                </p>
+                <div class="gt-socials-row">
+                    <a href="javascript:void(0)" class="gt-social-btn" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="javascript:void(0)" class="gt-social-btn" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+                    <a href="javascript:void(0)" class="gt-social-btn" aria-label="Discord"><i class="fa-brands fa-discord"></i></a>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="gt-footer-h">Platform</h4>
+                <ul class="gt-footer-ul">
+                    <li><a href="#explore-section">Explorer</a></li>
+                    <li><a href="#my-trips-section">Itinerary Builder</a></li>
+                    <li><a href="javascript:void(0)">Cost Engine</a></li>
+                    <li><a href="#community-section">Community</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="gt-footer-h">Resources</h4>
+                <ul class="gt-footer-ul">
+                    <li><a href="javascript:void(0)">Documentation</a></li>
+                    <li><a href="@Url.Action("Contact", "Home")">Support</a></li>
+                    <li><a href="javascript:void(0)">API Specs</a></li>
+                    <li><a href="javascript:void(0)">Changelog</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="gt-footer-h">Updates</h4>
+                <p style="font-size: 13px; color: var(--gt-zinc-400);">Subscribe for weekly curated travel guides and airfare alerts.</p>
+                <form class="gt-sub-input-wrap" onsubmit="handleNewsletter(event)">
+                    <input type="email" class="gt-sub-input" placeholder="email@domain.com" required />
+                    <button type="submit" class="gt-sub-btn">Join</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="gt-footer-btm">
+            <p>&copy; @DateTime.Now.Year GlobeTrotter SaaS. All rights reserved.</p>
+            <div style="display: flex; gap: 16px;">
+                <a href="javascript:void(0)" style="color: var(--gt-zinc-500);">Privacy</a>
+                <a href="javascript:void(0)" style="color: var(--gt-zinc-500);">Terms</a>
+                <a href="javascript:void(0)" style="color: var(--gt-zinc-500);">Security</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- ==========================================================================
+     9. SLEEK FLOATING ACTION BUTTON
+     ========================================================================== -->
+<button type="button" class="gt-fab-btn" onclick="openCreateTripModal()" aria-label="Start new itinerary">
+    <i class="fa-solid fa-plus gt-fab-icon"></i>
+    <span>Plan Trip</span>
+</button>
+
+<!-- ==========================================================================
+     10. TOAST NOTIFICATION CONTAINER
+     ========================================================================== -->
+<div id="gtToast" class="gt-toast" role="status" aria-live="polite">
+    <i class="fa-solid fa-circle-check gt-toast-icon"></i>
+    <span id="gtToastMessage">Action completed!</span>
+</div>
+
+<!-- ==========================================================================
+     11. INTERACTIVE CLIENT-SIDE ENGINE
+     ========================================================================== -->
+@section scripts {
+<script>
+    // 1. Toast Engine
+    let toastTimeout;
+    function showToast(message) {
+        const toast = document.getElementById('gtToast');
+        const msgEl = document.getElementById('gtToastMessage');
+        msgEl.innerText = message;
+        toast.classList.add('show');
+        
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3200);
+    }
+
+    // 2. Region Filter System
+    function selectRegion(regionName, buttonEl) {
+        document.querySelectorAll('.gt-region-btn').forEach(btn => btn.classList.remove('active'));
+        buttonEl.classList.add('active');
+
+        const cards = document.querySelectorAll('.gt-card');
+        let count = 0;
+
+        cards.forEach(card => {
+            const cardRegion = card.getAttribute('data-region');
+            if (regionName === 'All' || cardRegion === regionName) {
+                card.style.display = 'flex';
+                count++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        document.getElementById('resultsCounter').innerText = `${count} destinations`;
+        showToast(`Filtered by ${regionName} (${count} found)`);
+    }
+
+    // 3. Live Search Input Filter
+    function handleSearchInput(query) {
+        const cleanQuery = query.toLowerCase().trim();
+        const cards = document.querySelectorAll('.gt-card');
+        let count = 0;
+
+        cards.forEach(card => {
+            const name = (card.getAttribute('data-name') || '').toLowerCase();
+            const region = (card.getAttribute('data-region') || '').toLowerCase();
+            if (name.includes(cleanQuery) || region.includes(cleanQuery)) {
+                card.style.display = 'flex';
+                count++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        document.getElementById('resultsCounter').innerText = `${count} destinations`;
+    }
+
+    function executeSearch() {
+        const input = document.getElementById('mainSearchInput').value;
+        if (input.trim().length > 0) {
+            handleSearchInput(input);
+            showToast(`Searched for "${input}"`);
+        } else {
+            showToast('Type a destination, tag, or activity to search.');
+        }
+    }
+
+    function filterByTag(tag) {
+        document.getElementById('mainSearchInput').value = tag;
+        handleSearchInput(tag);
+        showToast(`Filtered by #${tag}`);
+    }
+
+    // 4. Sort System
+    function applySort(criteria) {
+        const grid = document.getElementById('destinationsGrid');
+        const cards = Array.from(grid.querySelectorAll('.gt-card'));
+
+        cards.sort((a, b) => {
+            if (criteria === 'popularity') {
+                return parseFloat(b.getAttribute('data-popularity')) - parseFloat(a.getAttribute('data-popularity'));
+            } else if (criteria === 'cost-low') {
+                return parseFloat(a.getAttribute('data-cost')) - parseFloat(b.getAttribute('data-cost'));
+            } else if (criteria === 'cost-high') {
+                return parseFloat(b.getAttribute('data-cost')) - parseFloat(a.getAttribute('data-cost'));
+            } else if (criteria === 'rating') {
+                return parseFloat(b.getAttribute('data-rating')) - parseFloat(a.getAttribute('data-rating'));
+            }
+            return 0;
+        });
+
+        cards.forEach(card => grid.appendChild(card));
+        showToast(`Sorted by ${criteria}`);
+    }
+
+    // 5. Actions
+    function addToTrip(cityName, cityId) {
+        showToast(`Added "${cityName}" to your 7-Day European Romance stops!`);
+    }
+
+    function openCreateTripModal() {
+        showToast('Opening Trip Wizard...');
+    }
+
+    function handleNewsletter(e) {
+        e.preventDefault();
+        showToast('Subscribed to GlobeTrotter updates!');
+        e.target.reset();
+    }
+</script>
+}

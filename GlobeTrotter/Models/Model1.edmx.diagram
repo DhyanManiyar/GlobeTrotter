@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="3fdaf881975b430fa2c92434114ba83e" Name="Diagram1" ZoomLevel="54">
+        <EntityTypeShape EntityType="GlobeTrotterDBModel.Activity" Width="1.5" PointX="10.5" PointY="19.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="GlobeTrotterDBModel.ActivityCategory" Width="1.5" PointX="8.25" PointY="20.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="GlobeTrotterDBModel.AspNetRole" Width="1.5" PointX="0.75" PointY="10.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="GlobeTrotterDBModel.AspNetUserClaim" Width="1.5" PointX="5.25" PointY="5.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="GlobeTrotterDBModel.AspNetUserLogin" Width="1.5" PointX="5.25" PointY="8.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="GlobeTrotterDBModel.AspNetUser" Width="1.5" PointX="3" PointY="8.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="GlobeTrotterDBModel.DestinationCity" Width="1.5" PointX="6" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="GlobeTrotterDBModel.SavedDestination" Width="1.5" PointX="8.25" PointY="9.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="GlobeTrotterDBModel.TripActivity" Width="1.5" PointX="12.75" PointY="14.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="GlobeTrotterDBModel.TripExpens" Width="1.5" PointX="7.5" PointY="14.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="GlobeTrotterDBModel.Trip" Width="1.5" PointX="5.25" PointY="14.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="GlobeTrotterDBModel.TripStop" Width="1.5" PointX="10.5" PointY="14.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="GlobeTrotterDBModel.vw_CityPopularityRankings" Width="1.5" PointX="0.75" PointY="1.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="GlobeTrotterDBModel.vw_TripBudgetSummary" Width="1.5" PointX="8.75" PointY="1.875" IsExpanded="true" />
+        <AssociationConnector Association="GlobeTrotterDBModel.FK_Activities_ActivityCategories" ManuallyRouted="false" />
+        <AssociationConnector Association="GlobeTrotterDBModel.FK_Activities_DestinationCities" ManuallyRouted="false" />
+        <AssociationConnector Association="GlobeTrotterDBModel.FK_TripActivities_Activities" ManuallyRouted="false" />
+        <AssociationConnector Association="GlobeTrotterDBModel.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" ManuallyRouted="false" />
+        <AssociationConnector Association="GlobeTrotterDBModel.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" ManuallyRouted="false" />
+        <AssociationConnector Association="GlobeTrotterDBModel.FK_SavedDestinations_AspNetUsers" ManuallyRouted="false" />
+        <AssociationConnector Association="GlobeTrotterDBModel.FK_Trips_AspNetUsers" ManuallyRouted="false" />
+        <AssociationConnector Association="GlobeTrotterDBModel.FK_SavedDestinations_DestinationCities" ManuallyRouted="false" />
+        <AssociationConnector Association="GlobeTrotterDBModel.FK_TripStops_DestinationCities" ManuallyRouted="false" />
+        <AssociationConnector Association="GlobeTrotterDBModel.FK_TripActivities_TripStops" ManuallyRouted="false" />
+        <AssociationConnector Association="GlobeTrotterDBModel.FK_TripExpenses_Trips" ManuallyRouted="false" />
+        <AssociationConnector Association="GlobeTrotterDBModel.FK_TripExpenses_TripStops" ManuallyRouted="false" />
+        <AssociationConnector Association="GlobeTrotterDBModel.FK_Trips_ForkedFrom" ManuallyRouted="false" />
+        <AssociationConnector Association="GlobeTrotterDBModel.FK_TripStops_Trips" ManuallyRouted="false" />
+        <AssociationConnector Association="GlobeTrotterDBModel.AspNetUserRoles" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

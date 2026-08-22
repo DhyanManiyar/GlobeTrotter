@@ -1,0 +1,1420 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="GlobeTrotterDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Activities">
+          <Key>
+            <PropertyRef Name="ActivityId" />
+          </Key>
+          <Property Name="ActivityId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CityId" Type="int" Nullable="false" />
+          <Property Name="CategoryId" Type="int" Nullable="false" />
+          <Property Name="Title" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="Description" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="ImageUrl" Type="nvarchar" MaxLength="500" />
+          <Property Name="EstimatedCost" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="DurationHours" Type="decimal" Precision="4" Scale="2" Nullable="false" />
+          <Property Name="Rating" Type="decimal" Precision="3" Scale="2" Nullable="false" />
+          <Property Name="IsTopPick" Type="bit" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime2" Precision="7" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ActivityCategories">
+          <Key>
+            <PropertyRef Name="CategoryId" />
+          </Key>
+          <Property Name="CategoryId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CategoryName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="IconClass" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="250" />
+        </EntityType>
+        <EntityType Name="AspNetRoles">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="256" Nullable="false" />
+        </EntityType>
+        <EntityType Name="AspNetUserClaims">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserId" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="ClaimType" Type="nvarchar(max)" />
+          <Property Name="ClaimValue" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="AspNetUserLogins">
+          <Key>
+            <PropertyRef Name="LoginProvider" />
+            <PropertyRef Name="ProviderKey" />
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="LoginProvider" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="ProviderKey" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="UserId" Type="nvarchar" MaxLength="128" Nullable="false" />
+        </EntityType>
+        <EntityType Name="AspNetUserRoles">
+          <Key>
+            <PropertyRef Name="UserId" />
+            <PropertyRef Name="RoleId" />
+          </Key>
+          <Property Name="UserId" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="RoleId" Type="nvarchar" MaxLength="128" Nullable="false" />
+        </EntityType>
+        <EntityType Name="AspNetUsers">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="Email" Type="nvarchar" MaxLength="256" />
+          <Property Name="EmailConfirmed" Type="bit" Nullable="false" />
+          <Property Name="PasswordHash" Type="nvarchar(max)" />
+          <Property Name="SecurityStamp" Type="nvarchar(max)" />
+          <Property Name="PhoneNumber" Type="nvarchar(max)" />
+          <Property Name="PhoneNumberConfirmed" Type="bit" Nullable="false" />
+          <Property Name="TwoFactorEnabled" Type="bit" Nullable="false" />
+          <Property Name="LockoutEndDateUtc" Type="datetime" />
+          <Property Name="LockoutEnabled" Type="bit" Nullable="false" />
+          <Property Name="AccessFailedCount" Type="int" Nullable="false" />
+          <Property Name="UserName" Type="nvarchar" MaxLength="256" Nullable="false" />
+          <Property Name="FullName" Type="nvarchar" MaxLength="150" />
+          <Property Name="AvatarUrl" Type="nvarchar" MaxLength="500" />
+          <Property Name="Bio" Type="nvarchar" MaxLength="500" />
+          <Property Name="PreferredCurrency" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="LanguagePreference" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime2" Precision="7" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DestinationCities">
+          <Key>
+            <PropertyRef Name="CityId" />
+          </Key>
+          <Property Name="CityId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Country" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Region" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Description" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="ImageUrl" Type="nvarchar" MaxLength="500" Nullable="false" />
+          <Property Name="CostIndex" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="PopularityScore" Type="decimal" Precision="3" Scale="2" Nullable="false" />
+          <Property Name="AvgDailyCost" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="CurrencyCode" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="Latitude" Type="decimal" Precision="9" Scale="6" />
+          <Property Name="Longitude" Type="decimal" Precision="9" Scale="6" />
+          <Property Name="IsFeatured" Type="bit" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime2" Precision="7" Nullable="false" />
+        </EntityType>
+        <EntityType Name="SavedDestinations">
+          <Key>
+            <PropertyRef Name="SavedId" />
+          </Key>
+          <Property Name="SavedId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserId" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="CityId" Type="int" Nullable="false" />
+          <Property Name="SavedAt" Type="datetime2" Precision="7" Nullable="false" />
+        </EntityType>
+        <EntityType Name="TripActivities">
+          <Key>
+            <PropertyRef Name="TripActivityId" />
+          </Key>
+          <Property Name="TripActivityId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="TripStopId" Type="int" Nullable="false" />
+          <Property Name="ActivityId" Type="int" />
+          <Property Name="CustomTitle" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="CategoryName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="ScheduledDate" Type="date" Nullable="false" />
+          <Property Name="TimeOfDay" Type="nvarchar" MaxLength="30" Nullable="false" />
+          <Property Name="StartTime" Type="time" Precision="0" />
+          <Property Name="EndTime" Type="time" Precision="0" />
+          <Property Name="Cost" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="DurationHours" Type="decimal" Precision="4" Scale="2" Nullable="false" />
+          <Property Name="OrderIndex" Type="int" Nullable="false" />
+          <Property Name="Notes" Type="nvarchar" MaxLength="500" />
+          <Property Name="IsCompleted" Type="bit" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime2" Precision="7" Nullable="false" />
+        </EntityType>
+        <EntityType Name="TripExpenses">
+          <Key>
+            <PropertyRef Name="ExpenseId" />
+          </Key>
+          <Property Name="ExpenseId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="TripId" Type="int" Nullable="false" />
+          <Property Name="TripStopId" Type="int" />
+          <Property Name="ExpenseCategory" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Title" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="Amount" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="ExpenseDate" Type="date" Nullable="false" />
+          <Property Name="Notes" Type="nvarchar" MaxLength="250" />
+          <Property Name="CreatedAt" Type="datetime2" Precision="7" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Trips">
+          <Key>
+            <PropertyRef Name="TripId" />
+          </Key>
+          <Property Name="TripId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserId" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="Title" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="StartDate" Type="date" Nullable="false" />
+          <Property Name="EndDate" Type="date" Nullable="false" />
+          <Property Name="CoverImageUrl" Type="nvarchar" MaxLength="500" />
+          <Property Name="TotalBudget" Type="decimal" Precision="12" Scale="2" Nullable="false" />
+          <Property Name="Currency" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="IsPublic" Type="bit" Nullable="false" />
+          <Property Name="ShareSlug" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="ForkedFromTripId" Type="int" />
+          <Property Name="CreatedAt" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="UpdatedAt" Type="datetime2" Precision="7" Nullable="false" />
+        </EntityType>
+        <EntityType Name="TripStops">
+          <Key>
+            <PropertyRef Name="TripStopId" />
+          </Key>
+          <Property Name="TripStopId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="TripId" Type="int" Nullable="false" />
+          <Property Name="CityId" Type="int" Nullable="false" />
+          <Property Name="StopOrder" Type="int" Nullable="false" />
+          <Property Name="ArrivalDate" Type="date" Nullable="false" />
+          <Property Name="DepartureDate" Type="date" Nullable="false" />
+          <Property Name="AccommodationCost" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="AccommodationDetails" Type="nvarchar" MaxLength="250" />
+          <Property Name="TransportCost" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="TransportMode" Type="nvarchar" MaxLength="50" />
+          <Property Name="Notes" Type="nvarchar(max)" />
+          <Property Name="CreatedAt" Type="datetime2" Precision="7" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'GlobeTrotterDB.dbo.vw_CityPopularityRankings' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="vw_CityPopularityRankings">
+          <Key>
+            <PropertyRef Name="CityId" />
+            <PropertyRef Name="CityName" />
+            <PropertyRef Name="Country" />
+            <PropertyRef Name="Region" />
+            <PropertyRef Name="CostIndex" />
+            <PropertyRef Name="AvgDailyCost" />
+            <PropertyRef Name="ImageUrl" />
+            <PropertyRef Name="PopularityScore" />
+          </Key>
+          <Property Name="CityId" Type="int" Nullable="false" />
+          <Property Name="CityName" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Country" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Region" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="CostIndex" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="AvgDailyCost" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="ImageUrl" Type="nvarchar" MaxLength="500" Nullable="false" />
+          <Property Name="PopularityScore" Type="decimal" Precision="3" Scale="2" Nullable="false" />
+          <Property Name="TimesPlannedInTrips" Type="int" />
+          <Property Name="WishlistCount" Type="int" />
+          <Property Name="AvailableActivitiesCount" Type="int" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'GlobeTrotterDB.dbo.vw_TripBudgetSummary' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="vw_TripBudgetSummary">
+          <Key>
+            <PropertyRef Name="TripId" />
+            <PropertyRef Name="UserId" />
+            <PropertyRef Name="TripTitle" />
+            <PropertyRef Name="TotalBudget" />
+            <PropertyRef Name="Currency" />
+            <PropertyRef Name="StartDate" />
+            <PropertyRef Name="EndDate" />
+            <PropertyRef Name="TotalStayCost" />
+            <PropertyRef Name="TotalTransportCost" />
+            <PropertyRef Name="TotalActivityCost" />
+            <PropertyRef Name="TotalOtherExpenses" />
+            <PropertyRef Name="IsOverBudget" />
+          </Key>
+          <Property Name="TripId" Type="int" Nullable="false" />
+          <Property Name="UserId" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="TripTitle" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="TotalBudget" Type="decimal" Precision="12" Scale="2" Nullable="false" />
+          <Property Name="Currency" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="StartDate" Type="date" Nullable="false" />
+          <Property Name="EndDate" Type="date" Nullable="false" />
+          <Property Name="TotalDays" Type="int" />
+          <Property Name="TotalStops" Type="int" />
+          <Property Name="TotalStayCost" Type="decimal" Precision="38" Scale="2" Nullable="false" />
+          <Property Name="TotalTransportCost" Type="decimal" Precision="38" Scale="2" Nullable="false" />
+          <Property Name="TotalActivityCost" Type="decimal" Precision="38" Scale="2" Nullable="false" />
+          <Property Name="TotalOtherExpenses" Type="decimal" Precision="38" Scale="2" Nullable="false" />
+          <Property Name="GrandTotalEstimatedCost" Type="decimal" Precision="38" Scale="2" />
+          <Property Name="BudgetRemaining" Type="decimal" Precision="38" Scale="2" />
+          <Property Name="IsOverBudget" Type="int" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_Activities_ActivityCategories">
+          <End Role="ActivityCategories" Type="Self.ActivityCategories" Multiplicity="1" />
+          <End Role="Activities" Type="Self.Activities" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ActivityCategories">
+              <PropertyRef Name="CategoryId" />
+            </Principal>
+            <Dependent Role="Activities">
+              <PropertyRef Name="CategoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Activities_DestinationCities">
+          <End Role="DestinationCities" Type="Self.DestinationCities" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Activities" Type="Self.Activities" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DestinationCities">
+              <PropertyRef Name="CityId" />
+            </Principal>
+            <Dependent Role="Activities">
+              <PropertyRef Name="CityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
+          <End Role="AspNetUsers" Type="Self.AspNetUsers" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="AspNetUserClaims" Type="Self.AspNetUserClaims" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="AspNetUsers">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="AspNetUserClaims">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId">
+          <End Role="AspNetUsers" Type="Self.AspNetUsers" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="AspNetUserLogins" Type="Self.AspNetUserLogins" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="AspNetUsers">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="AspNetUserLogins">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_AspNetUserRoles_dbo_AspNetRoles_RoleId">
+          <End Role="AspNetRoles" Type="Self.AspNetRoles" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="AspNetUserRoles" Type="Self.AspNetUserRoles" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="AspNetRoles">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="AspNetUserRoles">
+              <PropertyRef Name="RoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_AspNetUserRoles_dbo_AspNetUsers_UserId">
+          <End Role="AspNetUsers" Type="Self.AspNetUsers" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="AspNetUserRoles" Type="Self.AspNetUserRoles" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="AspNetUsers">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="AspNetUserRoles">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SavedDestinations_AspNetUsers">
+          <End Role="AspNetUsers" Type="Self.AspNetUsers" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="SavedDestinations" Type="Self.SavedDestinations" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="AspNetUsers">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="SavedDestinations">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SavedDestinations_DestinationCities">
+          <End Role="DestinationCities" Type="Self.DestinationCities" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="SavedDestinations" Type="Self.SavedDestinations" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DestinationCities">
+              <PropertyRef Name="CityId" />
+            </Principal>
+            <Dependent Role="SavedDestinations">
+              <PropertyRef Name="CityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TripActivities_Activities">
+          <End Role="Activities" Type="Self.Activities" Multiplicity="0..1" />
+          <End Role="TripActivities" Type="Self.TripActivities" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Activities">
+              <PropertyRef Name="ActivityId" />
+            </Principal>
+            <Dependent Role="TripActivities">
+              <PropertyRef Name="ActivityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TripActivities_TripStops">
+          <End Role="TripStops" Type="Self.TripStops" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="TripActivities" Type="Self.TripActivities" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TripStops">
+              <PropertyRef Name="TripStopId" />
+            </Principal>
+            <Dependent Role="TripActivities">
+              <PropertyRef Name="TripStopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TripExpenses_Trips">
+          <End Role="Trips" Type="Self.Trips" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="TripExpenses" Type="Self.TripExpenses" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Trips">
+              <PropertyRef Name="TripId" />
+            </Principal>
+            <Dependent Role="TripExpenses">
+              <PropertyRef Name="TripId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TripExpenses_TripStops">
+          <End Role="TripStops" Type="Self.TripStops" Multiplicity="0..1" />
+          <End Role="TripExpenses" Type="Self.TripExpenses" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TripStops">
+              <PropertyRef Name="TripStopId" />
+            </Principal>
+            <Dependent Role="TripExpenses">
+              <PropertyRef Name="TripStopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Trips_AspNetUsers">
+          <End Role="AspNetUsers" Type="Self.AspNetUsers" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Trips" Type="Self.Trips" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="AspNetUsers">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Trips">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Trips_ForkedFrom">
+          <End Role="Trips" Type="Self.Trips" Multiplicity="0..1" />
+          <End Role="Trips1" Type="Self.Trips" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Trips">
+              <PropertyRef Name="TripId" />
+            </Principal>
+            <Dependent Role="Trips1">
+              <PropertyRef Name="ForkedFromTripId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TripStops_DestinationCities">
+          <End Role="DestinationCities" Type="Self.DestinationCities" Multiplicity="1" />
+          <End Role="TripStops" Type="Self.TripStops" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DestinationCities">
+              <PropertyRef Name="CityId" />
+            </Principal>
+            <Dependent Role="TripStops">
+              <PropertyRef Name="CityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TripStops_Trips">
+          <End Role="Trips" Type="Self.Trips" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="TripStops" Type="Self.TripStops" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Trips">
+              <PropertyRef Name="TripId" />
+            </Principal>
+            <Dependent Role="TripStops">
+              <PropertyRef Name="TripId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="sp_CloneTrip" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="OriginalTripId" Type="int" Mode="In" />
+          <Parameter Name="NewUserId" Type="nvarchar" Mode="In" />
+          <Parameter Name="NewTripTitle" Type="nvarchar" Mode="In" />
+          <Parameter Name="NewTripId" Type="int" Mode="InOut" />
+        </Function>
+        <Function Name="sp_GetTripDailyTimeline" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="TripId" Type="int" Mode="In" />
+        </Function>
+        <EntityContainer Name="GlobeTrotterDBModelStoreContainer">
+          <EntitySet Name="Activities" EntityType="Self.Activities" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ActivityCategories" EntityType="Self.ActivityCategories" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="AspNetRoles" EntityType="Self.AspNetRoles" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="AspNetUserClaims" EntityType="Self.AspNetUserClaims" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="AspNetUserLogins" EntityType="Self.AspNetUserLogins" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="AspNetUserRoles" EntityType="Self.AspNetUserRoles" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="AspNetUsers" EntityType="Self.AspNetUsers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DestinationCities" EntityType="Self.DestinationCities" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SavedDestinations" EntityType="Self.SavedDestinations" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TripActivities" EntityType="Self.TripActivities" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TripExpenses" EntityType="Self.TripExpenses" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Trips" EntityType="Self.Trips" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TripStops" EntityType="Self.TripStops" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="vw_CityPopularityRankings" EntityType="Self.vw_CityPopularityRankings" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [vw_CityPopularityRankings].[CityId] AS [CityId], 
+    [vw_CityPopularityRankings].[CityName] AS [CityName], 
+    [vw_CityPopularityRankings].[Country] AS [Country], 
+    [vw_CityPopularityRankings].[Region] AS [Region], 
+    [vw_CityPopularityRankings].[CostIndex] AS [CostIndex], 
+    [vw_CityPopularityRankings].[AvgDailyCost] AS [AvgDailyCost], 
+    [vw_CityPopularityRankings].[ImageUrl] AS [ImageUrl], 
+    [vw_CityPopularityRankings].[PopularityScore] AS [PopularityScore], 
+    [vw_CityPopularityRankings].[TimesPlannedInTrips] AS [TimesPlannedInTrips], 
+    [vw_CityPopularityRankings].[WishlistCount] AS [WishlistCount], 
+    [vw_CityPopularityRankings].[AvailableActivitiesCount] AS [AvailableActivitiesCount]
+    FROM [dbo].[vw_CityPopularityRankings] AS [vw_CityPopularityRankings]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="vw_TripBudgetSummary" EntityType="Self.vw_TripBudgetSummary" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [vw_TripBudgetSummary].[TripId] AS [TripId], 
+    [vw_TripBudgetSummary].[UserId] AS [UserId], 
+    [vw_TripBudgetSummary].[TripTitle] AS [TripTitle], 
+    [vw_TripBudgetSummary].[TotalBudget] AS [TotalBudget], 
+    [vw_TripBudgetSummary].[Currency] AS [Currency], 
+    [vw_TripBudgetSummary].[StartDate] AS [StartDate], 
+    [vw_TripBudgetSummary].[EndDate] AS [EndDate], 
+    [vw_TripBudgetSummary].[TotalDays] AS [TotalDays], 
+    [vw_TripBudgetSummary].[TotalStops] AS [TotalStops], 
+    [vw_TripBudgetSummary].[TotalStayCost] AS [TotalStayCost], 
+    [vw_TripBudgetSummary].[TotalTransportCost] AS [TotalTransportCost], 
+    [vw_TripBudgetSummary].[TotalActivityCost] AS [TotalActivityCost], 
+    [vw_TripBudgetSummary].[TotalOtherExpenses] AS [TotalOtherExpenses], 
+    [vw_TripBudgetSummary].[GrandTotalEstimatedCost] AS [GrandTotalEstimatedCost], 
+    [vw_TripBudgetSummary].[BudgetRemaining] AS [BudgetRemaining], 
+    [vw_TripBudgetSummary].[IsOverBudget] AS [IsOverBudget]
+    FROM [dbo].[vw_TripBudgetSummary] AS [vw_TripBudgetSummary]</DefiningQuery>
+          </EntitySet>
+          <AssociationSet Name="FK_Activities_ActivityCategories" Association="Self.FK_Activities_ActivityCategories">
+            <End Role="ActivityCategories" EntitySet="ActivityCategories" />
+            <End Role="Activities" EntitySet="Activities" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Activities_DestinationCities" Association="Self.FK_Activities_DestinationCities">
+            <End Role="DestinationCities" EntitySet="DestinationCities" />
+            <End Role="Activities" EntitySet="Activities" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" Association="Self.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
+            <End Role="AspNetUsers" EntitySet="AspNetUsers" />
+            <End Role="AspNetUserClaims" EntitySet="AspNetUserClaims" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" Association="Self.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId">
+            <End Role="AspNetUsers" EntitySet="AspNetUsers" />
+            <End Role="AspNetUserLogins" EntitySet="AspNetUserLogins" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_AspNetUserRoles_dbo_AspNetRoles_RoleId" Association="Self.FK_dbo_AspNetUserRoles_dbo_AspNetRoles_RoleId">
+            <End Role="AspNetRoles" EntitySet="AspNetRoles" />
+            <End Role="AspNetUserRoles" EntitySet="AspNetUserRoles" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_AspNetUserRoles_dbo_AspNetUsers_UserId" Association="Self.FK_dbo_AspNetUserRoles_dbo_AspNetUsers_UserId">
+            <End Role="AspNetUsers" EntitySet="AspNetUsers" />
+            <End Role="AspNetUserRoles" EntitySet="AspNetUserRoles" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SavedDestinations_AspNetUsers" Association="Self.FK_SavedDestinations_AspNetUsers">
+            <End Role="AspNetUsers" EntitySet="AspNetUsers" />
+            <End Role="SavedDestinations" EntitySet="SavedDestinations" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SavedDestinations_DestinationCities" Association="Self.FK_SavedDestinations_DestinationCities">
+            <End Role="DestinationCities" EntitySet="DestinationCities" />
+            <End Role="SavedDestinations" EntitySet="SavedDestinations" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TripActivities_Activities" Association="Self.FK_TripActivities_Activities">
+            <End Role="Activities" EntitySet="Activities" />
+            <End Role="TripActivities" EntitySet="TripActivities" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TripActivities_TripStops" Association="Self.FK_TripActivities_TripStops">
+            <End Role="TripStops" EntitySet="TripStops" />
+            <End Role="TripActivities" EntitySet="TripActivities" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TripExpenses_Trips" Association="Self.FK_TripExpenses_Trips">
+            <End Role="Trips" EntitySet="Trips" />
+            <End Role="TripExpenses" EntitySet="TripExpenses" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TripExpenses_TripStops" Association="Self.FK_TripExpenses_TripStops">
+            <End Role="TripStops" EntitySet="TripStops" />
+            <End Role="TripExpenses" EntitySet="TripExpenses" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Trips_AspNetUsers" Association="Self.FK_Trips_AspNetUsers">
+            <End Role="AspNetUsers" EntitySet="AspNetUsers" />
+            <End Role="Trips" EntitySet="Trips" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Trips_ForkedFrom" Association="Self.FK_Trips_ForkedFrom">
+            <End Role="Trips" EntitySet="Trips" />
+            <End Role="Trips1" EntitySet="Trips" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TripStops_DestinationCities" Association="Self.FK_TripStops_DestinationCities">
+            <End Role="DestinationCities" EntitySet="DestinationCities" />
+            <End Role="TripStops" EntitySet="TripStops" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TripStops_Trips" Association="Self.FK_TripStops_Trips">
+            <End Role="Trips" EntitySet="Trips" />
+            <End Role="TripStops" EntitySet="TripStops" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="GlobeTrotterDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Activity">
+          <Key>
+            <PropertyRef Name="ActivityId" />
+          </Key>
+          <Property Name="ActivityId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CityId" Type="Int32" Nullable="false" />
+          <Property Name="CategoryId" Type="Int32" Nullable="false" />
+          <Property Name="Title" Type="String" MaxLength="150" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ImageUrl" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="EstimatedCost" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="DurationHours" Type="Decimal" Precision="4" Scale="2" Nullable="false" />
+          <Property Name="Rating" Type="Decimal" Precision="3" Scale="2" Nullable="false" />
+          <Property Name="IsTopPick" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="7" />
+          <NavigationProperty Name="ActivityCategory" Relationship="Self.FK_Activities_ActivityCategories" FromRole="Activities" ToRole="ActivityCategories" />
+          <NavigationProperty Name="DestinationCity" Relationship="Self.FK_Activities_DestinationCities" FromRole="Activities" ToRole="DestinationCities" />
+          <NavigationProperty Name="TripActivities" Relationship="Self.FK_TripActivities_Activities" FromRole="Activities" ToRole="TripActivities" />
+        </EntityType>
+        <EntityType Name="ActivityCategory">
+          <Key>
+            <PropertyRef Name="CategoryId" />
+          </Key>
+          <Property Name="CategoryId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CategoryName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="IconClass" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Activities" Relationship="Self.FK_Activities_ActivityCategories" FromRole="ActivityCategories" ToRole="Activities" />
+        </EntityType>
+        <EntityType Name="AspNetRole">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="256" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="AspNetUsers" Relationship="Self.AspNetUserRoles" FromRole="AspNetRoles" ToRole="AspNetUsers" />
+        </EntityType>
+        <EntityType Name="AspNetUserClaim">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ClaimType" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ClaimValue" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="AspNetUser" Relationship="Self.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" FromRole="AspNetUserClaims" ToRole="AspNetUsers" />
+        </EntityType>
+        <EntityType Name="AspNetUserLogin">
+          <Key>
+            <PropertyRef Name="LoginProvider" />
+            <PropertyRef Name="ProviderKey" />
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="LoginProvider" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ProviderKey" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="UserId" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="AspNetUser" Relationship="Self.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" FromRole="AspNetUserLogins" ToRole="AspNetUsers" />
+        </EntityType>
+        <EntityType Name="AspNetUser">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Email" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
+          <Property Name="EmailConfirmed" Type="Boolean" Nullable="false" />
+          <Property Name="PasswordHash" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="SecurityStamp" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="PhoneNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="PhoneNumberConfirmed" Type="Boolean" Nullable="false" />
+          <Property Name="TwoFactorEnabled" Type="Boolean" Nullable="false" />
+          <Property Name="LockoutEndDateUtc" Type="DateTime" Precision="3" />
+          <Property Name="LockoutEnabled" Type="Boolean" Nullable="false" />
+          <Property Name="AccessFailedCount" Type="Int32" Nullable="false" />
+          <Property Name="UserName" Type="String" MaxLength="256" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="FullName" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="AvatarUrl" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="Bio" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="PreferredCurrency" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="LanguagePreference" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="7" />
+          <NavigationProperty Name="AspNetUserClaims" Relationship="Self.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" FromRole="AspNetUsers" ToRole="AspNetUserClaims" />
+          <NavigationProperty Name="AspNetUserLogins" Relationship="Self.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" FromRole="AspNetUsers" ToRole="AspNetUserLogins" />
+          <NavigationProperty Name="SavedDestinations" Relationship="Self.FK_SavedDestinations_AspNetUsers" FromRole="AspNetUsers" ToRole="SavedDestinations" />
+          <NavigationProperty Name="Trips" Relationship="Self.FK_Trips_AspNetUsers" FromRole="AspNetUsers" ToRole="Trips" />
+          <NavigationProperty Name="AspNetRoles" Relationship="Self.AspNetUserRoles" FromRole="AspNetUsers" ToRole="AspNetRoles" />
+        </EntityType>
+        <EntityType Name="DestinationCity">
+          <Key>
+            <PropertyRef Name="CityId" />
+          </Key>
+          <Property Name="CityId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Country" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Region" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ImageUrl" Type="String" MaxLength="500" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="CostIndex" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="PopularityScore" Type="Decimal" Precision="3" Scale="2" Nullable="false" />
+          <Property Name="AvgDailyCost" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="CurrencyCode" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Latitude" Type="Decimal" Precision="9" Scale="6" />
+          <Property Name="Longitude" Type="Decimal" Precision="9" Scale="6" />
+          <Property Name="IsFeatured" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="7" />
+          <NavigationProperty Name="Activities" Relationship="Self.FK_Activities_DestinationCities" FromRole="DestinationCities" ToRole="Activities" />
+          <NavigationProperty Name="SavedDestinations" Relationship="Self.FK_SavedDestinations_DestinationCities" FromRole="DestinationCities" ToRole="SavedDestinations" />
+          <NavigationProperty Name="TripStops" Relationship="Self.FK_TripStops_DestinationCities" FromRole="DestinationCities" ToRole="TripStops" />
+        </EntityType>
+        <EntityType Name="SavedDestination">
+          <Key>
+            <PropertyRef Name="SavedId" />
+          </Key>
+          <Property Name="SavedId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="CityId" Type="Int32" Nullable="false" />
+          <Property Name="SavedAt" Type="DateTime" Nullable="false" Precision="7" />
+          <NavigationProperty Name="AspNetUser" Relationship="Self.FK_SavedDestinations_AspNetUsers" FromRole="SavedDestinations" ToRole="AspNetUsers" />
+          <NavigationProperty Name="DestinationCity" Relationship="Self.FK_SavedDestinations_DestinationCities" FromRole="SavedDestinations" ToRole="DestinationCities" />
+        </EntityType>
+        <EntityType Name="TripActivity">
+          <Key>
+            <PropertyRef Name="TripActivityId" />
+          </Key>
+          <Property Name="TripActivityId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="TripStopId" Type="Int32" Nullable="false" />
+          <Property Name="ActivityId" Type="Int32" />
+          <Property Name="CustomTitle" Type="String" MaxLength="150" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="CategoryName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ScheduledDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="TimeOfDay" Type="String" MaxLength="30" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="StartTime" Type="Time" Precision="0" />
+          <Property Name="EndTime" Type="Time" Precision="0" />
+          <Property Name="Cost" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="DurationHours" Type="Decimal" Precision="4" Scale="2" Nullable="false" />
+          <Property Name="OrderIndex" Type="Int32" Nullable="false" />
+          <Property Name="Notes" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="IsCompleted" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="7" />
+          <NavigationProperty Name="Activity" Relationship="Self.FK_TripActivities_Activities" FromRole="TripActivities" ToRole="Activities" />
+          <NavigationProperty Name="TripStop" Relationship="Self.FK_TripActivities_TripStops" FromRole="TripActivities" ToRole="TripStops" />
+        </EntityType>
+        <EntityType Name="TripExpens">
+          <Key>
+            <PropertyRef Name="ExpenseId" />
+          </Key>
+          <Property Name="ExpenseId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="TripId" Type="Int32" Nullable="false" />
+          <Property Name="TripStopId" Type="Int32" />
+          <Property Name="ExpenseCategory" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Title" Type="String" MaxLength="150" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Amount" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="ExpenseDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="Notes" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="7" />
+          <NavigationProperty Name="Trip" Relationship="Self.FK_TripExpenses_Trips" FromRole="TripExpenses" ToRole="Trips" />
+          <NavigationProperty Name="TripStop" Relationship="Self.FK_TripExpenses_TripStops" FromRole="TripExpenses" ToRole="TripStops" />
+        </EntityType>
+        <EntityType Name="Trip">
+          <Key>
+            <PropertyRef Name="TripId" />
+          </Key>
+          <Property Name="TripId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Title" Type="String" MaxLength="150" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="StartDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="EndDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="CoverImageUrl" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="TotalBudget" Type="Decimal" Precision="12" Scale="2" Nullable="false" />
+          <Property Name="Currency" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="IsPublic" Type="Boolean" Nullable="false" />
+          <Property Name="ShareSlug" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ForkedFromTripId" Type="Int32" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="UpdatedAt" Type="DateTime" Nullable="false" Precision="7" />
+          <NavigationProperty Name="AspNetUser" Relationship="Self.FK_Trips_AspNetUsers" FromRole="Trips" ToRole="AspNetUsers" />
+          <NavigationProperty Name="TripExpenses" Relationship="Self.FK_TripExpenses_Trips" FromRole="Trips" ToRole="TripExpenses" />
+          <NavigationProperty Name="Trips1" Relationship="Self.FK_Trips_ForkedFrom" FromRole="Trips" ToRole="Trips1" />
+          <NavigationProperty Name="Trip1" Relationship="Self.FK_Trips_ForkedFrom" FromRole="Trips1" ToRole="Trips" />
+          <NavigationProperty Name="TripStops" Relationship="Self.FK_TripStops_Trips" FromRole="Trips" ToRole="TripStops" />
+        </EntityType>
+        <EntityType Name="TripStop">
+          <Key>
+            <PropertyRef Name="TripStopId" />
+          </Key>
+          <Property Name="TripStopId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="TripId" Type="Int32" Nullable="false" />
+          <Property Name="CityId" Type="Int32" Nullable="false" />
+          <Property Name="StopOrder" Type="Int32" Nullable="false" />
+          <Property Name="ArrivalDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="DepartureDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="AccommodationCost" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="AccommodationDetails" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="TransportCost" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="TransportMode" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="7" />
+          <NavigationProperty Name="DestinationCity" Relationship="Self.FK_TripStops_DestinationCities" FromRole="TripStops" ToRole="DestinationCities" />
+          <NavigationProperty Name="TripActivities" Relationship="Self.FK_TripActivities_TripStops" FromRole="TripStops" ToRole="TripActivities" />
+          <NavigationProperty Name="TripExpenses" Relationship="Self.FK_TripExpenses_TripStops" FromRole="TripStops" ToRole="TripExpenses" />
+          <NavigationProperty Name="Trip" Relationship="Self.FK_TripStops_Trips" FromRole="TripStops" ToRole="Trips" />
+        </EntityType>
+        <EntityType Name="vw_CityPopularityRankings">
+          <Key>
+            <PropertyRef Name="CityId" />
+            <PropertyRef Name="CityName" />
+            <PropertyRef Name="Country" />
+            <PropertyRef Name="Region" />
+            <PropertyRef Name="CostIndex" />
+            <PropertyRef Name="AvgDailyCost" />
+            <PropertyRef Name="ImageUrl" />
+            <PropertyRef Name="PopularityScore" />
+          </Key>
+          <Property Name="CityId" Type="Int32" Nullable="false" />
+          <Property Name="CityName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Country" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Region" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="CostIndex" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="AvgDailyCost" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="ImageUrl" Type="String" MaxLength="500" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="PopularityScore" Type="Decimal" Precision="3" Scale="2" Nullable="false" />
+          <Property Name="TimesPlannedInTrips" Type="Int32" />
+          <Property Name="WishlistCount" Type="Int32" />
+          <Property Name="AvailableActivitiesCount" Type="Int32" />
+        </EntityType>
+        <EntityType Name="vw_TripBudgetSummary">
+          <Key>
+            <PropertyRef Name="TripId" />
+            <PropertyRef Name="UserId" />
+            <PropertyRef Name="TripTitle" />
+            <PropertyRef Name="TotalBudget" />
+            <PropertyRef Name="Currency" />
+            <PropertyRef Name="StartDate" />
+            <PropertyRef Name="EndDate" />
+            <PropertyRef Name="TotalStayCost" />
+            <PropertyRef Name="TotalTransportCost" />
+            <PropertyRef Name="TotalActivityCost" />
+            <PropertyRef Name="TotalOtherExpenses" />
+            <PropertyRef Name="IsOverBudget" />
+          </Key>
+          <Property Name="TripId" Type="Int32" Nullable="false" />
+          <Property Name="UserId" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="TripTitle" Type="String" MaxLength="150" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="TotalBudget" Type="Decimal" Precision="12" Scale="2" Nullable="false" />
+          <Property Name="Currency" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="StartDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="EndDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="TotalDays" Type="Int32" />
+          <Property Name="TotalStops" Type="Int32" />
+          <Property Name="TotalStayCost" Type="Decimal" Precision="38" Scale="2" Nullable="false" />
+          <Property Name="TotalTransportCost" Type="Decimal" Precision="38" Scale="2" Nullable="false" />
+          <Property Name="TotalActivityCost" Type="Decimal" Precision="38" Scale="2" Nullable="false" />
+          <Property Name="TotalOtherExpenses" Type="Decimal" Precision="38" Scale="2" Nullable="false" />
+          <Property Name="GrandTotalEstimatedCost" Type="Decimal" Precision="38" Scale="2" />
+          <Property Name="BudgetRemaining" Type="Decimal" Precision="38" Scale="2" />
+          <Property Name="IsOverBudget" Type="Int32" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_Activities_ActivityCategories">
+          <End Role="ActivityCategories" Type="Self.ActivityCategory" Multiplicity="1" />
+          <End Role="Activities" Type="Self.Activity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ActivityCategories">
+              <PropertyRef Name="CategoryId" />
+            </Principal>
+            <Dependent Role="Activities">
+              <PropertyRef Name="CategoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Activities_DestinationCities">
+          <End Role="DestinationCities" Type="Self.DestinationCity" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Activities" Type="Self.Activity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DestinationCities">
+              <PropertyRef Name="CityId" />
+            </Principal>
+            <Dependent Role="Activities">
+              <PropertyRef Name="CityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TripActivities_Activities">
+          <End Role="Activities" Type="Self.Activity" Multiplicity="0..1" />
+          <End Role="TripActivities" Type="Self.TripActivity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Activities">
+              <PropertyRef Name="ActivityId" />
+            </Principal>
+            <Dependent Role="TripActivities">
+              <PropertyRef Name="ActivityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
+          <End Role="AspNetUsers" Type="Self.AspNetUser" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="AspNetUserClaims" Type="Self.AspNetUserClaim" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="AspNetUsers">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="AspNetUserClaims">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId">
+          <End Role="AspNetUsers" Type="Self.AspNetUser" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="AspNetUserLogins" Type="Self.AspNetUserLogin" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="AspNetUsers">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="AspNetUserLogins">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SavedDestinations_AspNetUsers">
+          <End Role="AspNetUsers" Type="Self.AspNetUser" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="SavedDestinations" Type="Self.SavedDestination" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="AspNetUsers">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="SavedDestinations">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Trips_AspNetUsers">
+          <End Role="AspNetUsers" Type="Self.AspNetUser" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Trips" Type="Self.Trip" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="AspNetUsers">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Trips">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SavedDestinations_DestinationCities">
+          <End Role="DestinationCities" Type="Self.DestinationCity" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="SavedDestinations" Type="Self.SavedDestination" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DestinationCities">
+              <PropertyRef Name="CityId" />
+            </Principal>
+            <Dependent Role="SavedDestinations">
+              <PropertyRef Name="CityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TripStops_DestinationCities">
+          <End Role="DestinationCities" Type="Self.DestinationCity" Multiplicity="1" />
+          <End Role="TripStops" Type="Self.TripStop" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DestinationCities">
+              <PropertyRef Name="CityId" />
+            </Principal>
+            <Dependent Role="TripStops">
+              <PropertyRef Name="CityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TripActivities_TripStops">
+          <End Role="TripStops" Type="Self.TripStop" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="TripActivities" Type="Self.TripActivity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TripStops">
+              <PropertyRef Name="TripStopId" />
+            </Principal>
+            <Dependent Role="TripActivities">
+              <PropertyRef Name="TripStopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TripExpenses_Trips">
+          <End Role="Trips" Type="Self.Trip" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="TripExpenses" Type="Self.TripExpens" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Trips">
+              <PropertyRef Name="TripId" />
+            </Principal>
+            <Dependent Role="TripExpenses">
+              <PropertyRef Name="TripId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TripExpenses_TripStops">
+          <End Role="TripStops" Type="Self.TripStop" Multiplicity="0..1" />
+          <End Role="TripExpenses" Type="Self.TripExpens" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TripStops">
+              <PropertyRef Name="TripStopId" />
+            </Principal>
+            <Dependent Role="TripExpenses">
+              <PropertyRef Name="TripStopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Trips_ForkedFrom">
+          <End Role="Trips" Type="Self.Trip" Multiplicity="0..1" />
+          <End Role="Trips1" Type="Self.Trip" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Trips">
+              <PropertyRef Name="TripId" />
+            </Principal>
+            <Dependent Role="Trips1">
+              <PropertyRef Name="ForkedFromTripId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TripStops_Trips">
+          <End Role="Trips" Type="Self.Trip" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="TripStops" Type="Self.TripStop" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Trips">
+              <PropertyRef Name="TripId" />
+            </Principal>
+            <Dependent Role="TripStops">
+              <PropertyRef Name="TripId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="AspNetUserRoles">
+          <End Role="AspNetRoles" Type="Self.AspNetRole" Multiplicity="*" />
+          <End Role="AspNetUsers" Type="Self.AspNetUser" Multiplicity="*" />
+        </Association>
+        <EntityContainer Name="GlobeTrotterDBEntities1" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Activities" EntityType="Self.Activity" />
+          <EntitySet Name="ActivityCategories" EntityType="Self.ActivityCategory" />
+          <EntitySet Name="AspNetRoles" EntityType="Self.AspNetRole" />
+          <EntitySet Name="AspNetUserClaims" EntityType="Self.AspNetUserClaim" />
+          <EntitySet Name="AspNetUserLogins" EntityType="Self.AspNetUserLogin" />
+          <EntitySet Name="AspNetUsers" EntityType="Self.AspNetUser" />
+          <EntitySet Name="DestinationCities" EntityType="Self.DestinationCity" />
+          <EntitySet Name="SavedDestinations" EntityType="Self.SavedDestination" />
+          <EntitySet Name="TripActivities" EntityType="Self.TripActivity" />
+          <EntitySet Name="TripExpenses" EntityType="Self.TripExpens" />
+          <EntitySet Name="Trips" EntityType="Self.Trip" />
+          <EntitySet Name="TripStops" EntityType="Self.TripStop" />
+          <EntitySet Name="vw_CityPopularityRankings" EntityType="Self.vw_CityPopularityRankings" />
+          <EntitySet Name="vw_TripBudgetSummary" EntityType="Self.vw_TripBudgetSummary" />
+          <AssociationSet Name="FK_Activities_ActivityCategories" Association="Self.FK_Activities_ActivityCategories">
+            <End Role="ActivityCategories" EntitySet="ActivityCategories" />
+            <End Role="Activities" EntitySet="Activities" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Activities_DestinationCities" Association="Self.FK_Activities_DestinationCities">
+            <End Role="DestinationCities" EntitySet="DestinationCities" />
+            <End Role="Activities" EntitySet="Activities" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TripActivities_Activities" Association="Self.FK_TripActivities_Activities">
+            <End Role="Activities" EntitySet="Activities" />
+            <End Role="TripActivities" EntitySet="TripActivities" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" Association="Self.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
+            <End Role="AspNetUsers" EntitySet="AspNetUsers" />
+            <End Role="AspNetUserClaims" EntitySet="AspNetUserClaims" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" Association="Self.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId">
+            <End Role="AspNetUsers" EntitySet="AspNetUsers" />
+            <End Role="AspNetUserLogins" EntitySet="AspNetUserLogins" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SavedDestinations_AspNetUsers" Association="Self.FK_SavedDestinations_AspNetUsers">
+            <End Role="AspNetUsers" EntitySet="AspNetUsers" />
+            <End Role="SavedDestinations" EntitySet="SavedDestinations" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Trips_AspNetUsers" Association="Self.FK_Trips_AspNetUsers">
+            <End Role="AspNetUsers" EntitySet="AspNetUsers" />
+            <End Role="Trips" EntitySet="Trips" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SavedDestinations_DestinationCities" Association="Self.FK_SavedDestinations_DestinationCities">
+            <End Role="DestinationCities" EntitySet="DestinationCities" />
+            <End Role="SavedDestinations" EntitySet="SavedDestinations" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TripStops_DestinationCities" Association="Self.FK_TripStops_DestinationCities">
+            <End Role="DestinationCities" EntitySet="DestinationCities" />
+            <End Role="TripStops" EntitySet="TripStops" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TripActivities_TripStops" Association="Self.FK_TripActivities_TripStops">
+            <End Role="TripStops" EntitySet="TripStops" />
+            <End Role="TripActivities" EntitySet="TripActivities" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TripExpenses_Trips" Association="Self.FK_TripExpenses_Trips">
+            <End Role="Trips" EntitySet="Trips" />
+            <End Role="TripExpenses" EntitySet="TripExpenses" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TripExpenses_TripStops" Association="Self.FK_TripExpenses_TripStops">
+            <End Role="TripStops" EntitySet="TripStops" />
+            <End Role="TripExpenses" EntitySet="TripExpenses" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Trips_ForkedFrom" Association="Self.FK_Trips_ForkedFrom">
+            <End Role="Trips" EntitySet="Trips" />
+            <End Role="Trips1" EntitySet="Trips" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TripStops_Trips" Association="Self.FK_TripStops_Trips">
+            <End Role="Trips" EntitySet="Trips" />
+            <End Role="TripStops" EntitySet="TripStops" />
+          </AssociationSet>
+          <AssociationSet Name="AspNetUserRoles" Association="Self.AspNetUserRoles">
+            <End Role="AspNetRoles" EntitySet="AspNetRoles" />
+            <End Role="AspNetUsers" EntitySet="AspNetUsers" />
+          </AssociationSet>
+          <FunctionImport Name="sp_CloneTrip">
+            <Parameter Name="OriginalTripId" Mode="In" Type="Int32" />
+            <Parameter Name="NewUserId" Mode="In" Type="String" />
+            <Parameter Name="NewTripTitle" Mode="In" Type="String" />
+            <Parameter Name="NewTripId" Mode="InOut" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="sp_GetTripDailyTimeline" ReturnType="Collection(GlobeTrotterDBModel.sp_GetTripDailyTimeline_Result)">
+            <Parameter Name="TripId" Mode="In" Type="Int32" />
+          </FunctionImport>
+        </EntityContainer>
+        <ComplexType Name="sp_GetTripDailyTimeline_Result">
+          <Property Type="Int32" Name="TripStopId" Nullable="false" />
+          <Property Type="Int32" Name="StopOrder" Nullable="false" />
+          <Property Type="String" Name="CityName" Nullable="false" MaxLength="100" />
+          <Property Type="String" Name="Country" Nullable="false" MaxLength="100" />
+          <Property Type="String" Name="CityImageUrl" Nullable="false" MaxLength="500" />
+          <Property Type="Int32" Name="TripActivityId" Nullable="true" />
+          <Property Type="String" Name="ActivityTitle" Nullable="true" MaxLength="150" />
+          <Property Type="String" Name="CategoryName" Nullable="true" MaxLength="50" />
+          <Property Type="DateTime" Name="ScheduledDate" Nullable="true" />
+          <Property Type="String" Name="TimeOfDay" Nullable="true" MaxLength="30" />
+          <Property Type="Time" Name="StartTime" Nullable="true" />
+          <Property Type="Time" Name="EndTime" Nullable="true" />
+          <Property Type="Decimal" Name="ActivityCost" Nullable="true" Precision="10" Scale="2" />
+          <Property Type="Decimal" Name="DurationHours" Nullable="true" Precision="4" Scale="2" />
+          <Property Type="String" Name="ActivityNotes" Nullable="true" MaxLength="500" />
+          <Property Type="Boolean" Name="IsCompleted" Nullable="true" />
+        </ComplexType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="GlobeTrotterDBModelStoreContainer" CdmEntityContainer="GlobeTrotterDBEntities1">
+          <EntitySetMapping Name="Activities">
+            <EntityTypeMapping TypeName="GlobeTrotterDBModel.Activity">
+              <MappingFragment StoreEntitySet="Activities">
+                <ScalarProperty Name="ActivityId" ColumnName="ActivityId" />
+                <ScalarProperty Name="CityId" ColumnName="CityId" />
+                <ScalarProperty Name="CategoryId" ColumnName="CategoryId" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="ImageUrl" ColumnName="ImageUrl" />
+                <ScalarProperty Name="EstimatedCost" ColumnName="EstimatedCost" />
+                <ScalarProperty Name="DurationHours" ColumnName="DurationHours" />
+                <ScalarProperty Name="Rating" ColumnName="Rating" />
+                <ScalarProperty Name="IsTopPick" ColumnName="IsTopPick" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ActivityCategories">
+            <EntityTypeMapping TypeName="GlobeTrotterDBModel.ActivityCategory">
+              <MappingFragment StoreEntitySet="ActivityCategories">
+                <ScalarProperty Name="CategoryId" ColumnName="CategoryId" />
+                <ScalarProperty Name="CategoryName" ColumnName="CategoryName" />
+                <ScalarProperty Name="IconClass" ColumnName="IconClass" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="AspNetRoles">
+            <EntityTypeMapping TypeName="GlobeTrotterDBModel.AspNetRole">
+              <MappingFragment StoreEntitySet="AspNetRoles">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="AspNetUserClaims">
+            <EntityTypeMapping TypeName="GlobeTrotterDBModel.AspNetUserClaim">
+              <MappingFragment StoreEntitySet="AspNetUserClaims">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="ClaimType" ColumnName="ClaimType" />
+                <ScalarProperty Name="ClaimValue" ColumnName="ClaimValue" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="AspNetUserLogins">
+            <EntityTypeMapping TypeName="GlobeTrotterDBModel.AspNetUserLogin">
+              <MappingFragment StoreEntitySet="AspNetUserLogins">
+                <ScalarProperty Name="LoginProvider" ColumnName="LoginProvider" />
+                <ScalarProperty Name="ProviderKey" ColumnName="ProviderKey" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="AspNetUsers">
+            <EntityTypeMapping TypeName="GlobeTrotterDBModel.AspNetUser">
+              <MappingFragment StoreEntitySet="AspNetUsers">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="EmailConfirmed" ColumnName="EmailConfirmed" />
+                <ScalarProperty Name="PasswordHash" ColumnName="PasswordHash" />
+                <ScalarProperty Name="SecurityStamp" ColumnName="SecurityStamp" />
+                <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
+                <ScalarProperty Name="PhoneNumberConfirmed" ColumnName="PhoneNumberConfirmed" />
+                <ScalarProperty Name="TwoFactorEnabled" ColumnName="TwoFactorEnabled" />
+                <ScalarProperty Name="LockoutEndDateUtc" ColumnName="LockoutEndDateUtc" />
+                <ScalarProperty Name="LockoutEnabled" ColumnName="LockoutEnabled" />
+                <ScalarProperty Name="AccessFailedCount" ColumnName="AccessFailedCount" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="FullName" ColumnName="FullName" />
+                <ScalarProperty Name="AvatarUrl" ColumnName="AvatarUrl" />
+                <ScalarProperty Name="Bio" ColumnName="Bio" />
+                <ScalarProperty Name="PreferredCurrency" ColumnName="PreferredCurrency" />
+                <ScalarProperty Name="LanguagePreference" ColumnName="LanguagePreference" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DestinationCities">
+            <EntityTypeMapping TypeName="GlobeTrotterDBModel.DestinationCity">
+              <MappingFragment StoreEntitySet="DestinationCities">
+                <ScalarProperty Name="CityId" ColumnName="CityId" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Country" ColumnName="Country" />
+                <ScalarProperty Name="Region" ColumnName="Region" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="ImageUrl" ColumnName="ImageUrl" />
+                <ScalarProperty Name="CostIndex" ColumnName="CostIndex" />
+                <ScalarProperty Name="PopularityScore" ColumnName="PopularityScore" />
+                <ScalarProperty Name="AvgDailyCost" ColumnName="AvgDailyCost" />
+                <ScalarProperty Name="CurrencyCode" ColumnName="CurrencyCode" />
+                <ScalarProperty Name="Latitude" ColumnName="Latitude" />
+                <ScalarProperty Name="Longitude" ColumnName="Longitude" />
+                <ScalarProperty Name="IsFeatured" ColumnName="IsFeatured" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SavedDestinations">
+            <EntityTypeMapping TypeName="GlobeTrotterDBModel.SavedDestination">
+              <MappingFragment StoreEntitySet="SavedDestinations">
+                <ScalarProperty Name="SavedId" ColumnName="SavedId" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="CityId" ColumnName="CityId" />
+                <ScalarProperty Name="SavedAt" ColumnName="SavedAt" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TripActivities">
+            <EntityTypeMapping TypeName="GlobeTrotterDBModel.TripActivity">
+              <MappingFragment StoreEntitySet="TripActivities">
+                <ScalarProperty Name="TripActivityId" ColumnName="TripActivityId" />
+                <ScalarProperty Name="TripStopId" ColumnName="TripStopId" />
+                <ScalarProperty Name="ActivityId" ColumnName="ActivityId" />
+                <ScalarProperty Name="CustomTitle" ColumnName="CustomTitle" />
+                <ScalarProperty Name="CategoryName" ColumnName="CategoryName" />
+                <ScalarProperty Name="ScheduledDate" ColumnName="ScheduledDate" />
+                <ScalarProperty Name="TimeOfDay" ColumnName="TimeOfDay" />
+                <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+                <ScalarProperty Name="EndTime" ColumnName="EndTime" />
+                <ScalarProperty Name="Cost" ColumnName="Cost" />
+                <ScalarProperty Name="DurationHours" ColumnName="DurationHours" />
+                <ScalarProperty Name="OrderIndex" ColumnName="OrderIndex" />
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+                <ScalarProperty Name="IsCompleted" ColumnName="IsCompleted" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TripExpenses">
+            <EntityTypeMapping TypeName="GlobeTrotterDBModel.TripExpens">
+              <MappingFragment StoreEntitySet="TripExpenses">
+                <ScalarProperty Name="ExpenseId" ColumnName="ExpenseId" />
+                <ScalarProperty Name="TripId" ColumnName="TripId" />
+                <ScalarProperty Name="TripStopId" ColumnName="TripStopId" />
+                <ScalarProperty Name="ExpenseCategory" ColumnName="ExpenseCategory" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="Amount" ColumnName="Amount" />
+                <ScalarProperty Name="ExpenseDate" ColumnName="ExpenseDate" />
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Trips">
+            <EntityTypeMapping TypeName="GlobeTrotterDBModel.Trip">
+              <MappingFragment StoreEntitySet="Trips">
+                <ScalarProperty Name="TripId" ColumnName="TripId" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+                <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+                <ScalarProperty Name="CoverImageUrl" ColumnName="CoverImageUrl" />
+                <ScalarProperty Name="TotalBudget" ColumnName="TotalBudget" />
+                <ScalarProperty Name="Currency" ColumnName="Currency" />
+                <ScalarProperty Name="IsPublic" ColumnName="IsPublic" />
+                <ScalarProperty Name="ShareSlug" ColumnName="ShareSlug" />
+                <ScalarProperty Name="ForkedFromTripId" ColumnName="ForkedFromTripId" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TripStops">
+            <EntityTypeMapping TypeName="GlobeTrotterDBModel.TripStop">
+              <MappingFragment StoreEntitySet="TripStops">
+                <ScalarProperty Name="TripStopId" ColumnName="TripStopId" />
+                <ScalarProperty Name="TripId" ColumnName="TripId" />
+                <ScalarProperty Name="CityId" ColumnName="CityId" />
+                <ScalarProperty Name="StopOrder" ColumnName="StopOrder" />
+                <ScalarProperty Name="ArrivalDate" ColumnName="ArrivalDate" />
+                <ScalarProperty Name="DepartureDate" ColumnName="DepartureDate" />
+                <ScalarProperty Name="AccommodationCost" ColumnName="AccommodationCost" />
+                <ScalarProperty Name="AccommodationDetails" ColumnName="AccommodationDetails" />
+                <ScalarProperty Name="TransportCost" ColumnName="TransportCost" />
+                <ScalarProperty Name="TransportMode" ColumnName="TransportMode" />
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="vw_CityPopularityRankings">
+            <EntityTypeMapping TypeName="GlobeTrotterDBModel.vw_CityPopularityRankings">
+              <MappingFragment StoreEntitySet="vw_CityPopularityRankings">
+                <ScalarProperty Name="CityId" ColumnName="CityId" />
+                <ScalarProperty Name="CityName" ColumnName="CityName" />
+                <ScalarProperty Name="Country" ColumnName="Country" />
+                <ScalarProperty Name="Region" ColumnName="Region" />
+                <ScalarProperty Name="CostIndex" ColumnName="CostIndex" />
+                <ScalarProperty Name="AvgDailyCost" ColumnName="AvgDailyCost" />
+                <ScalarProperty Name="ImageUrl" ColumnName="ImageUrl" />
+                <ScalarProperty Name="PopularityScore" ColumnName="PopularityScore" />
+                <ScalarProperty Name="TimesPlannedInTrips" ColumnName="TimesPlannedInTrips" />
+                <ScalarProperty Name="WishlistCount" ColumnName="WishlistCount" />
+                <ScalarProperty Name="AvailableActivitiesCount" ColumnName="AvailableActivitiesCount" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="vw_TripBudgetSummary">
+            <EntityTypeMapping TypeName="GlobeTrotterDBModel.vw_TripBudgetSummary">
+              <MappingFragment StoreEntitySet="vw_TripBudgetSummary">
+                <ScalarProperty Name="TripId" ColumnName="TripId" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="TripTitle" ColumnName="TripTitle" />
+                <ScalarProperty Name="TotalBudget" ColumnName="TotalBudget" />
+                <ScalarProperty Name="Currency" ColumnName="Currency" />
+                <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+                <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+                <ScalarProperty Name="TotalDays" ColumnName="TotalDays" />
+                <ScalarProperty Name="TotalStops" ColumnName="TotalStops" />
+                <ScalarProperty Name="TotalStayCost" ColumnName="TotalStayCost" />
+                <ScalarProperty Name="TotalTransportCost" ColumnName="TotalTransportCost" />
+                <ScalarProperty Name="TotalActivityCost" ColumnName="TotalActivityCost" />
+                <ScalarProperty Name="TotalOtherExpenses" ColumnName="TotalOtherExpenses" />
+                <ScalarProperty Name="GrandTotalEstimatedCost" ColumnName="GrandTotalEstimatedCost" />
+                <ScalarProperty Name="BudgetRemaining" ColumnName="BudgetRemaining" />
+                <ScalarProperty Name="IsOverBudget" ColumnName="IsOverBudget" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <AssociationSetMapping Name="AspNetUserRoles" TypeName="GlobeTrotterDBModel.AspNetUserRoles" StoreEntitySet="AspNetUserRoles">
+            <EndProperty Name="AspNetRoles">
+              <ScalarProperty Name="Id" ColumnName="RoleId" />
+            </EndProperty>
+            <EndProperty Name="AspNetUsers">
+              <ScalarProperty Name="Id" ColumnName="UserId" />
+            </EndProperty>
+          </AssociationSetMapping>
+          <FunctionImportMapping FunctionImportName="sp_CloneTrip" FunctionName="GlobeTrotterDBModel.Store.sp_CloneTrip" />
+          <FunctionImportMapping FunctionImportName="sp_GetTripDailyTimeline" FunctionName="GlobeTrotterDBModel.Store.sp_GetTripDailyTimeline">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="GlobeTrotterDBModel.sp_GetTripDailyTimeline_Result">
+                <ScalarProperty Name="TripStopId" ColumnName="TripStopId" />
+                <ScalarProperty Name="StopOrder" ColumnName="StopOrder" />
+                <ScalarProperty Name="CityName" ColumnName="CityName" />
+                <ScalarProperty Name="Country" ColumnName="Country" />
+                <ScalarProperty Name="CityImageUrl" ColumnName="CityImageUrl" />
+                <ScalarProperty Name="TripActivityId" ColumnName="TripActivityId" />
+                <ScalarProperty Name="ActivityTitle" ColumnName="ActivityTitle" />
+                <ScalarProperty Name="CategoryName" ColumnName="CategoryName" />
+                <ScalarProperty Name="ScheduledDate" ColumnName="ScheduledDate" />
+                <ScalarProperty Name="TimeOfDay" ColumnName="TimeOfDay" />
+                <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+                <ScalarProperty Name="EndTime" ColumnName="EndTime" />
+                <ScalarProperty Name="ActivityCost" ColumnName="ActivityCost" />
+                <ScalarProperty Name="DurationHours" ColumnName="DurationHours" />
+                <ScalarProperty Name="ActivityNotes" ColumnName="ActivityNotes" />
+                <ScalarProperty Name="IsCompleted" ColumnName="IsCompleted" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
