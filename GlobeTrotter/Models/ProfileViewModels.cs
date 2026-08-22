@@ -74,9 +74,12 @@ namespace GlobeTrotter.Models
     public class ExploreSearchViewModel
     {
         public string SearchQuery { get; set; }
+        public string SelectedRegion { get; set; } = "All";
+        public string SelectedCountry { get; set; } = "All";
         public string SelectedCategory { get; set; } = "All";
         public int? SelectedCityId { get; set; }
         public string PriceRange { get; set; } = "All";
+        public string DurationRange { get; set; } = "All"; // "All", "short" (<2h), "medium" (2-4h), "long" (4h+)
         public string SortBy { get; set; } = "popular";
         public string ActiveTab { get; set; } = "all"; // "all", "cities", "activities"
 
@@ -84,7 +87,10 @@ namespace GlobeTrotter.Models
         public List<ActivityExploreItem> Activities { get; set; } = new List<ActivityExploreItem>();
         public List<ActivityCategory> Categories { get; set; } = new List<ActivityCategory>();
         public List<DestinationCity> AllFilterCities { get; set; } = new List<DestinationCity>();
+        public List<string> Regions { get; set; } = new List<string>();
+        public List<string> Countries { get; set; } = new List<string>();
         public List<Trip> UserTrips { get; set; } = new List<Trip>();
+        public List<int> AddedActivityIds { get; set; } = new List<int>();
     }
 
     public class ActivityExploreItem
@@ -93,6 +99,7 @@ namespace GlobeTrotter.Models
         public int CityId { get; set; }
         public string CityName { get; set; }
         public string Country { get; set; }
+        public string Region { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string CategoryName { get; set; }
@@ -101,5 +108,7 @@ namespace GlobeTrotter.Models
         public decimal Rating { get; set; }
         public bool IsTopPick { get; set; }
         public string ImageUrl { get; set; }
+        public bool IsAddedToUserTrip { get; set; }
+        public int? UserTripActivityId { get; set; }
     }
 }

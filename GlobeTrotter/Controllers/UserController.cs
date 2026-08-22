@@ -965,6 +965,41 @@ namespace GlobeTrotter.Controllers
             return Json(new { success = true });
         }
 
+        // ── Reorder sections (drag & drop) ──────────────────────────────────────────
+        [HttpPost]
+        public async Task<JsonResult> ReorderSections(int tripId, int[] orderedStopIds)
+        {
+            try
+            {
+                if (orderedStopIds == null || orderedStopIds.Length == 0)
+                    return Json(new { success = false, message = "No order data received." });
+
+                var userId = await GetResolvedUserIdAsync();
+
+                // Validate that all stops belong to the specified trip AND current user
+                var tripStops = await db.TripStops
+                    .Where(s => s.TripId == tripId && s.Trip.UserId == userId)
+                    .ToListAsync();
+
+                if (tripStops.Count == 0)
+                    return Json(new { success = false, message = "Trip not found or access denied." });
+
+                for (int i = 0; i < orderedStopIds.Length; i++)
+                {
+                    var stop = tripStops.FirstOrDefault(s => s.TripStopId == orderedStopIds[i]);
+                    if (stop != null)
+                        stop.StopOrder = i + 1;
+                }
+
+                await db.SaveChangesAsync();
+                return Json(new { success = true, message = "Section order saved!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing) db.Dispose();

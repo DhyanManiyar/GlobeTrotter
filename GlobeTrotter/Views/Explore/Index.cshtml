@@ -1,6 +1,6 @@
 @model GlobeTrotter.Models.ExploreSearchViewModel
 @{
-    ViewBag.Title = "Explore & Search Destinations & Activities";
+    ViewBag.Title = "Explore Destinations & Activities | GlobeTrotter";
     string currentTab = Model.ActiveTab ?? "all";
 }
 
@@ -10,61 +10,99 @@
         <!-- ==================================================================
              1. SEARCH HERO & FILTER ENGINE
              ================================================================== -->
-        <div style="text-align: center; max-width: 760px; margin: 0 auto 36px;">
-            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); padding: 4px 14px; border-radius: var(--gt-radius-full); color: var(--gt-brand-primary); font-size: 12px; font-weight: 700; margin-bottom: 12px;">
+        <div style="text-align: center; max-width: 800px; margin: 0 auto 32px;">
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); padding: 5px 16px; border-radius: var(--gt-radius-full); color: var(--gt-brand-primary); font-size: 12.5px; font-weight: 700; margin-bottom: 12px;">
                 <i class="fa-solid fa-sparkles"></i> Global Destination & Activity Discovery Engine
             </div>
-            <h1 style="font-size: 36px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 10px;">
-                Find Your Next Experience
+            <h1 style="font-size: 38px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 10px;">
+                Find Cities & Experiences
             </h1>
-            <p style="font-size: 15px; color: var(--gt-zinc-500);">
-                Search through world-class cities, curated culinary tours, iconic landmarks, and hidden local adventures.
+            <p style="font-size: 15.5px; color: var(--gt-zinc-500); line-height: 1.5;">
+                Explore world-class destination cities, curated cultural tours, culinary masterclasses, and thrilling outdoor excursions.
             </p>
         </div>
 
-        <!-- Search Controls Bar -->
-        <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 20px 24px; box-shadow: var(--gt-shadow-card); margin-bottom: 32px;">
-            @using (Html.BeginForm("Index", "Explore", FormMethod.Get, new { id = "exploreSearchForm" }))
-            {
-                <div style="display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr auto; gap: 12px; align-items: center;">
-                    <!-- Keyword Search -->
-                    <div class="gt-input-box">
-                        <i class="fa-solid fa-magnifying-glass input-icon"></i>
-                        <input type="text" name="q" value="@Model.SearchQuery" class="gt-auth-input" placeholder="Search city, activity, e.g. 'Paris', 'Museum'..." />
+        <!-- ==================================================================
+             2. ADVANCED SEARCH & MULTI-DIMENSIONAL FILTER CONTROLS
+             ================================================================== -->
+        <div style="background: #FFFFFF; border: 1.5px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 24px 28px; box-shadow: var(--gt-shadow-card); margin-bottom: 32px;">
+            <form id="exploreSearchForm" action="@Url.Action("Index", "Explore")" method="get">
+                <input type="hidden" name="tab" id="activeTabInput" value="@currentTab" />
+
+                <!-- Primary Search Bar -->
+                <div style="display: flex; gap: 12px; margin-bottom: 18px;">
+                    <div class="gt-input-box" style="flex: 1;">
+                        <i class="fa-solid fa-magnifying-glass input-icon" style="color: var(--gt-brand-primary);"></i>
+                        <input type="text" name="q" id="searchKeywordInput" value="@Model.SearchQuery" class="gt-auth-input" placeholder="Search any city, country, landmark, tour, e.g. 'Paris', 'Sushi Masterclass', 'Kyoto'..." style="font-size: 14.5px; padding-left: 42px;" />
+                        @if (!string.IsNullOrWhiteSpace(Model.SearchQuery))
+                        {
+                            <button type="button" onclick="clearSearch()" style="position: absolute; right: 14px; background: none; border: none; color: var(--gt-zinc-400); cursor: pointer; font-size: 14px;" title="Clear Search">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        }
                     </div>
 
-                    <!-- Destination City Dropdown -->
-                    <div class="gt-input-box">
-                        <i class="fa-solid fa-city input-icon"></i>
-                        <select name="cityId" class="gt-auth-input" onchange="document.getElementById('exploreSearchForm').submit()">
-                            <option value="">All Destinations</option>
+                    <button type="submit" class="gt-btn-auth-primary" style="width: auto; padding: 0 28px; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>Search</span>
+                    </button>
+                </div>
+
+                <!-- Secondary Filter Bar: Region, Country, Category (Type), Price (Cost), Duration, Sort -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; align-items: center; border-top: 1px solid var(--gt-border-subtle); padding-top: 16px;">
+                    
+                    <!-- 1. Region Filter -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; margin-bottom: 4px;">Region</label>
+                        <select name="region" class="gt-auth-input" style="padding: 7px 12px; font-size: 12.5px;" onchange="submitSearch()">
+                            <option value="All">All Regions</option>
+                            @foreach (var reg in Model.Regions)
+                            {
+                                <option value="@reg" selected="@(Model.SelectedRegion.Equals(reg, StringComparison.OrdinalIgnoreCase))">@reg</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- 2. Country Filter -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; margin-bottom: 4px;">Country</label>
+                        <select name="country" class="gt-auth-input" style="padding: 7px 12px; font-size: 12.5px;" onchange="submitSearch()">
+                            <option value="All">All Countries</option>
+                            @foreach (var ctry in Model.Countries)
+                            {
+                                <option value="@ctry" selected="@(Model.SelectedCountry.Equals(ctry, StringComparison.OrdinalIgnoreCase))">@ctry</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- 3. City Specific Filter -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; margin-bottom: 4px;">City</label>
+                        <select name="cityId" class="gt-auth-input" style="padding: 7px 12px; font-size: 12.5px;" onchange="submitSearch()">
+                            <option value="">All Cities</option>
                             @foreach (var city in Model.AllFilterCities)
                             {
-                                <option value="@city.CityId" selected="@(Model.SelectedCityId == city.CityId)">
-                                    @city.Name, @city.Country
-                                </option>
+                                <option value="@city.CityId" selected="@(Model.SelectedCityId == city.CityId)">@city.Name</option>
                             }
                         </select>
                     </div>
 
-                    <!-- Category Dropdown -->
-                    <div class="gt-input-box">
-                        <i class="fa-solid fa-layer-group input-icon"></i>
-                        <select name="cat" class="gt-auth-input" onchange="document.getElementById('exploreSearchForm').submit()">
-                            <option value="All">All Categories</option>
-                            @foreach (var category in Model.Categories)
+                    <!-- 4. Activity Type / Category -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; margin-bottom: 4px;">Activity Type</label>
+                        <select name="cat" class="gt-auth-input" style="padding: 7px 12px; font-size: 12.5px;" onchange="submitSearch()">
+                            <option value="All">All Types</option>
+                            @foreach (var cat in Model.Categories)
                             {
-                                <option value="@category.CategoryName" selected="@(Model.SelectedCategory == category.CategoryName)">
-                                    @category.CategoryName
-                                </option>
+                                <option value="@cat.CategoryName" selected="@(Model.SelectedCategory.Equals(cat.CategoryName, StringComparison.OrdinalIgnoreCase))">@cat.CategoryName</option>
                             }
                         </select>
                     </div>
 
-                    <!-- Price Filter -->
-                    <div class="gt-input-box">
-                        <i class="fa-solid fa-tag input-icon"></i>
-                        <select name="price" class="gt-auth-input" onchange="document.getElementById('exploreSearchForm').submit()">
+                    <!-- 5. Cost / Price Filter -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; margin-bottom: 4px;">Cost</label>
+                        <select name="price" class="gt-auth-input" style="padding: 7px 12px; font-size: 12.5px;" onchange="submitSearch()">
                             <option value="All" selected="@(Model.PriceRange == "All")">Any Price</option>
                             <option value="free" selected="@(Model.PriceRange == "free")">Free ($0)</option>
                             <option value="budget" selected="@(Model.PriceRange == "budget")">Budget ($1-$50)</option>
@@ -73,157 +111,163 @@
                         </select>
                     </div>
 
-                    <!-- Search Button -->
-                    <button type="submit" class="gt-btn-auth-primary" style="width: auto; padding: 10px 24px;">
-                        <span>Search</span>
-                    </button>
+                    <!-- 6. Duration Filter -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; margin-bottom: 4px;">Duration</label>
+                        <select name="duration" class="gt-auth-input" style="padding: 7px 12px; font-size: 12.5px;" onchange="submitSearch()">
+                            <option value="All" selected="@(Model.DurationRange == "All")">Any Duration</option>
+                            <option value="short" selected="@(Model.DurationRange == "short")">Quick (&lt; 2 hrs)</option>
+                            <option value="medium" selected="@(Model.DurationRange == "medium")">Half Day (2-4 hrs)</option>
+                            <option value="long" selected="@(Model.DurationRange == "long")">Full Day (4+ hrs)</option>
+                        </select>
+                    </div>
+
+                    <!-- 7. Sort By -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; margin-bottom: 4px;">Sort By</label>
+                        <select name="sort" class="gt-auth-input" style="padding: 7px 12px; font-size: 12.5px;" onchange="submitSearch()">
+                            <option value="popular" selected="@(Model.SortBy == "popular")">Most Popular ★</option>
+                            <option value="rating" selected="@(Model.SortBy == "rating")">Highest Rated</option>
+                            <option value="cost-low" selected="@(Model.SortBy == "cost-low")">Price: Low to High</option>
+                            <option value="cost-high" selected="@(Model.SortBy == "cost-high")">Price: High to Low</option>
+                            <option value="duration-low" selected="@(Model.SortBy == "duration-low")">Duration: Shortest</option>
+                            <option value="duration-high" selected="@(Model.SortBy == "duration-high")">Duration: Longest</option>
+                        </select>
+                    </div>
+
                 </div>
-            }
+
+                <!-- Active Filter Tags / Reset Button -->
+                @if (!string.IsNullOrWhiteSpace(Model.SearchQuery) || Model.SelectedRegion != "All" || Model.SelectedCountry != "All" || Model.SelectedCategory != "All" || Model.SelectedCityId.HasValue || Model.PriceRange != "All" || Model.DurationRange != "All")
+                {
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--gt-zinc-200); font-size: 12px;">
+                        <span style="color: var(--gt-zinc-400); font-weight: 600;">Active Filters:</span>
+                        @if (!string.IsNullOrWhiteSpace(Model.SearchQuery)) { <span class="gt-tag-btn" style="padding: 3px 10px; font-size: 11.5px;">Query: "@Model.SearchQuery"</span> }
+                        @if (Model.SelectedRegion != "All") { <span class="gt-tag-btn" style="padding: 3px 10px; font-size: 11.5px;">Region: @Model.SelectedRegion</span> }
+                        @if (Model.SelectedCountry != "All") { <span class="gt-tag-btn" style="padding: 3px 10px; font-size: 11.5px;">Country: @Model.SelectedCountry</span> }
+                        @if (Model.SelectedCategory != "All") { <span class="gt-tag-btn" style="padding: 3px 10px; font-size: 11.5px;">Type: @Model.SelectedCategory</span> }
+                        @if (Model.PriceRange != "All") { <span class="gt-tag-btn" style="padding: 3px 10px; font-size: 11.5px;">Price: @Model.PriceRange</span> }
+                        @if (Model.DurationRange != "All") { <span class="gt-tag-btn" style="padding: 3px 10px; font-size: 11.5px;">Duration: @Model.DurationRange</span> }
+                        <a href="@Url.Action("Index", "Explore")" style="color: #DC2626; font-weight: 700; text-decoration: none; margin-left: auto;">
+                            <i class="fa-solid fa-rotate-left"></i> Reset All Filters
+                        </a>
+                    </div>
+                }
+            </form>
         </div>
 
         <!-- ==================================================================
-             2. TAB FILTERS (ALL / CITIES / ACTIVITIES)
+             3. TAB SWITCHER (ALL RESULTS / DESTINATION CITIES / ACTIVITIES)
              ================================================================== -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
             <div style="display: flex; gap: 6px; background: #FFFFFF; border: 1px solid var(--gt-border); padding: 4px 6px; border-radius: var(--gt-radius-full); box-shadow: var(--gt-shadow-xs);">
-                <button type="button" class="gt-nav-link @(currentTab == "all" ? "active" : "")" onclick="setExploreTab('all')">
-                    All Results (@(Model.Cities.Count + Model.Activities.Count))
+                <button type="button" class="gt-nav-link @(currentTab == "all" ? "active" : "")" id="tabBtnAll" onclick="setExploreTab('all')">
+                    <i class="fa-solid fa-border-all" style="margin-right: 5px;"></i> All Results (@(Model.Cities.Count + Model.Activities.Count))
                 </button>
-                <button type="button" class="gt-nav-link @(currentTab == "cities" ? "active" : "")" onclick="setExploreTab('cities')">
-                    Destinations (@Model.Cities.Count)
+                <button type="button" class="gt-nav-link @(currentTab == "cities" ? "active" : "")" id="tabBtnCities" onclick="setExploreTab('cities')">
+                    <i class="fa-solid fa-city" style="margin-right: 5px;"></i> Destination Cities (@Model.Cities.Count)
                 </button>
-                <button type="button" class="gt-nav-link @(currentTab == "activities" ? "active" : "")" onclick="setExploreTab('activities')">
-                    Activities & Sights (@Model.Activities.Count)
+                <button type="button" class="gt-nav-link @(currentTab == "activities" ? "active" : "")" id="tabBtnActivities" onclick="setExploreTab('activities')">
+                    <i class="fa-solid fa-ticket" style="margin-right: 5px;"></i> Activities &amp; Sights (@Model.Activities.Count)
                 </button>
             </div>
 
             <div style="font-size: 13px; color: var(--gt-zinc-500);">
-                Showing <strong>@Model.Cities.Count</strong> cities & <strong>@Model.Activities.Count</strong> activities
+                Found <strong>@Model.Cities.Count</strong> destinations and <strong>@Model.Activities.Count</strong> activities
             </div>
         </div>
 
         <!-- ==================================================================
-             3. CITIES / DESTINATIONS GRID
+             4. DESTINATION CITIES GRID
              ================================================================== -->
         <div id="citiesContainer" style="display: @(currentTab == "activities" ? "none" : "block"); margin-bottom: 48px;">
-            <div class="gt-section-header" style="margin-bottom: 16px;">
+            <div class="gt-section-header" style="margin-bottom: 18px;">
                 <div>
-                    <h3 class="gt-section-title" style="font-size: 20px;">Destination Cities</h3>
+                    <h3 class="gt-section-title" style="font-size: 20px;">
+                        <i class="fa-solid fa-location-dot" style="color: var(--gt-brand-primary); margin-right: 6px;"></i> Destination Cities
+                    </h3>
                     <p class="gt-section-desc">Global hubs with curated lodging and local transport options</p>
                 </div>
             </div>
 
             @if (Model.Cities.Count == 0)
             {
-                <p style="font-size: 14px; color: var(--gt-zinc-500); font-style: italic;">No destination cities matching search criteria.</p>
+                <div style="background: #FFFFFF; border: 1px dashed var(--gt-zinc-300); border-radius: var(--gt-radius-xl); padding: 48px 20px; text-align: center;">
+                    <i class="fa-solid fa-city" style="font-size: 32px; color: var(--gt-zinc-300); margin-bottom: 12px;"></i>
+                    <p style="font-size: 15px; font-weight: 600; color: var(--gt-zinc-700); margin-bottom: 4px;">No destination cities found matching your filter</p>
+                    <p style="font-size: 13px; color: var(--gt-zinc-400);">Try broadening your region or keyword search.</p>
+                </div>
             }
             else
             {
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 24px;">
                     @foreach (var city in Model.Cities)
                     {
-                        <div class="gt-card">
-                            <div class="gt-card-media" style="height: 190px;">
-                                <img src="@city.ImageUrl" alt="@city.Name" class="gt-card-img" />
-                                <div class="gt-card-overlay"></div>
-                                <span class="gt-card-badge gt-badge-top">@city.Region</span>
-                                
-                                <div class="gt-card-header-info">
-                                    <h3 class="gt-city-name">@city.Name</h3>
-                                    <p class="gt-country-name">@city.Country</p>
-                                </div>
-                            </div>
-
-                            <div style="padding: 16px 18px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
-                                <p style="font-size: 13px; color: var(--gt-zinc-600); line-height: 1.4; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                                    @city.Description
-                                </p>
-
-                                <div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 12.5px;">
-                                        <span style="font-weight: 700; color: var(--gt-zinc-950);">
-                                            $@city.AvgDailyCost.ToString("N0") <span style="font-size: 11px; font-weight: 400; color: var(--gt-zinc-400);">/day avg</span>
-                                        </span>
-                                        <span class="gt-tier-tag">@city.CostIndex Tier</span>
-                                    </div>
-
-                                    <div style="display: flex; gap: 8px;">
-                                        <a href="@Url.Action("Index", "Explore", new { cityId = city.CityId, tab = "activities" })" class="gt-tag-btn" style="flex: 1; justify-content: center; padding: 6px 10px; font-size: 12px;">
-                                            <i class="fa-solid fa-list-check" style="margin-right: 4px;"></i> Activities
-                                        </a>
-                                        <a href="@Url.Action("Create", "Trips")" class="gt-btn-add" style="flex: 1; justify-content: center; padding: 6px 10px; font-size: 12px;">
-                                            <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Plan Trip
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
-        </div>
-
-        <!-- ==================================================================
-             4. ACTIVITIES GRID
-             ================================================================== -->
-        <div id="activitiesContainer" style="display: @(currentTab == "cities" ? "none" : "block"); margin-bottom: 48px;">
-            <div class="gt-section-header" style="margin-bottom: 16px;">
-                <div>
-                    <h3 class="gt-section-title" style="font-size: 20px;">Curated Activities & Experiences</h3>
-                    <p class="gt-section-desc">Hand-picked tours, museum tickets, food walks, and excursions</p>
-                </div>
-            </div>
-
-            @if (Model.Activities.Count == 0)
-            {
-                <p style="font-size: 14px; color: var(--gt-zinc-500); font-style: italic;">No activities matching search criteria.</p>
-            }
-            else
-            {
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;">
-                    @foreach (var act in Model.Activities)
-                    {
-                        <div class="gt-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                        <div class="gt-card" style="display: flex; flex-direction: column; justify-content: space-between; border-radius: var(--gt-radius-xl); overflow: hidden; background: #FFFFFF; border: 1.5px solid var(--gt-border); box-shadow: var(--gt-shadow-card); transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='var(--gt-shadow-xl)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--gt-shadow-card)'">
                             <div>
-                                <div class="gt-card-media" style="height: 160px;">
-                                    <img src="@act.ImageUrl" alt="@act.Title" class="gt-card-img" />
-                                    <div class="gt-card-overlay"></div>
-                                    <span class="gt-act-cat-tag" style="position: absolute; top: 10px; left: 10px;">@act.CategoryName</span>
+                                <!-- City Hero Image & Badges -->
+                                <div class="gt-card-media" style="height: 190px; position: relative; overflow: hidden;">
+                                    <img src="@city.ImageUrl" alt="@city.Name" class="gt-card-img" style="width: 100%; height: 100%; object-fit: cover;" />
+                                    <div class="gt-card-overlay" style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);"></div>
                                     
-                                    @if (act.IsTopPick)
-                                    {
-                                        <span class="gt-card-badge gt-badge-trending" style="top: 10px; right: 10px;">
-                                            <i class="fa-solid fa-star"></i> Top Pick
-                                        </span>
-                                    }
+                                    <!-- Region Badge -->
+                                    <span class="gt-card-badge gt-badge-top" style="position: absolute; top: 12px; left: 12px; font-size: 11px;">
+                                        <i class="fa-solid fa-earth-americas" style="margin-right: 3px;"></i> @city.Region
+                                    </span>
+
+                                    <!-- Popularity Score Badge -->
+                                    <span style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); color: #F59E0B; font-size: 11.5px; font-weight: 800; padding: 3px 8px; border-radius: var(--gt-radius-full); display: flex; align-items: center; gap: 4px;">
+                                        <i class="fa-solid fa-star"></i> @city.PopularityScore.ToString("F1")
+                                    </span>
+
+                                    <!-- City & Country Text on Image -->
+                                    <div style="position: absolute; bottom: 12px; left: 16px; right: 16px; color: white;">
+                                        <h3 style="font-size: 20px; font-weight: 800; line-height: 1.2; margin-bottom: 2px; color: white;">@city.Name</h3>
+                                        <p style="font-size: 12.5px; color: rgba(255,255,255,0.85); font-weight: 500;">
+                                            <i class="fa-solid fa-flag" style="font-size: 11px; margin-right: 4px;"></i> @city.Country
+                                        </p>
+                                    </div>
                                 </div>
 
-                                <div style="padding: 16px 18px;">
-                                    <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gt-brand-primary); font-weight: 700; margin-bottom: 4px;">
-                                        <i class="fa-solid fa-location-dot"></i> @act.CityName, @act.Country
-                                    </div>
-                                    <h4 style="font-size: 15px; font-weight: 700; color: var(--gt-zinc-950); line-height: 1.3; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                                        @act.Title
-                                    </h4>
-                                    <p style="font-size: 12.5px; color: var(--gt-zinc-500); line-height: 1.4; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                                        @act.Description
+                                <!-- City Card Body -->
+                                <div style="padding: 18px 20px 14px;">
+                                    <p style="font-size: 13px; color: var(--gt-zinc-600); line-height: 1.45; margin-bottom: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        @city.Description
                                     </p>
+
+                                    <!-- Meta Info Badges: Cost, Tier, Activities Count -->
+                                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--gt-zinc-50); border: 1px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); margin-bottom: 14px;">
+                                        <div>
+                                            <span style="font-size: 10px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; display: block;">Daily Avg</span>
+                                            <span style="font-size: 14px; font-weight: 800; color: var(--gt-zinc-950);">$@city.AvgDailyCost.ToString("N0") <span style="font-size: 11px; font-weight: 500; color: var(--gt-zinc-400);">/day</span></span>
+                                        </div>
+                                        <div>
+                                            <span style="font-size: 10px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; display: block;">Cost Tier</span>
+                                            <span class="gt-tier-tag" style="font-size: 11px; padding: 2px 7px;">@city.CostIndex</span>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <span style="font-size: 10px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; display: block;">Activities</span>
+                                            <span style="font-size: 12.5px; font-weight: 700; color: var(--gt-brand-primary);">@city.Activities.Count Available</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div style="padding: 12px 18px 16px; border-top: 1px solid var(--gt-border-subtle); display: flex; align-items: center; justify-content: space-between; background: var(--gt-zinc-50); border-bottom-left-radius: var(--gt-radius-xl); border-bottom-right-radius: var(--gt-radius-xl);">
-                                <div>
-                                    <div style="font-size: 16px; font-weight: 800; color: var(--gt-brand-emerald);">
-                                        @(act.EstimatedCost == 0 ? "Free" : "$" + act.EstimatedCost.ToString("N0"))
-                                    </div>
-                                    <div style="font-size: 11px; color: var(--gt-zinc-400);">
-                                        <i class="fa-regular fa-clock"></i> @act.DurationHours hrs
-                                    </div>
-                                </div>
+                            <!-- City Card Action Buttons -->
+                            <div style="padding: 12px 20px 18px; border-top: 1px solid var(--gt-border-subtle); display: flex; gap: 8px; align-items: center;">
+                                <!-- 1. Quick View -->
+                                <button type="button" class="gt-tag-btn" onclick="openQuickView('city', @city.CityId)" style="padding: 7px 11px; font-size: 12px;" title="Quick View City Details & Photos">
+                                    <i class="fa-solid fa-eye" style="margin-right: 3px;"></i> View
+                                </button>
 
-                                <button type="button" class="gt-btn-add" style="padding: 6px 14px; font-size: 12.5px;" onclick="openAddToTripModal(@act.ActivityId, '@act.Title.Replace("'", "\\'")')">
-                                    <i class="fa-solid fa-plus"></i>
-                                    <span>Add to Trip</span>
+                                <!-- 2. Filter City Activities -->
+                                <a href="@Url.Action("Index", "Explore", new { cityId = city.CityId, tab = "activities" })" class="gt-tag-btn" style="padding: 7px 11px; font-size: 12px; color: var(--gt-brand-primary);" title="Browse activities in this city">
+                                    <i class="fa-solid fa-list-check" style="margin-right: 3px;"></i> Activities
+                                </a>
+
+                                <!-- 3. Add to Trip (Primary Action) -->
+                                <button type="button" class="gt-btn-auth-primary" style="flex: 1; padding: 7px 12px; font-size: 12px; font-weight: 700; justify-content: center; text-decoration: none;" onclick="openAddCityModal(@city.CityId, '@city.Name.Replace("'", "\\'")', '@city.Country.Replace("'", "\\'")')">
+                                    <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Add to Trip
                                 </button>
                             </div>
                         </div>
@@ -231,28 +275,249 @@
                 </div>
             }
         </div>
+
+        <!-- ==================================================================
+             5. CURATED ACTIVITIES GRID
+             ================================================================== -->
+        <div id="activitiesContainer" style="display: @(currentTab == "cities" ? "none" : "block"); margin-bottom: 48px;">
+            <div class="gt-section-header" style="margin-bottom: 18px;">
+                <div>
+                    <h3 class="gt-section-title" style="font-size: 20px;">
+                        <i class="fa-solid fa-ticket" style="color: var(--gt-brand-primary); margin-right: 6px;"></i> Curated Activities &amp; Sights
+                    </h3>
+                    <p class="gt-section-desc">Hand-picked tours, museum tickets, food walks, and excursions with duration and cost filters</p>
+                </div>
+            </div>
+
+            @if (Model.Activities.Count == 0)
+            {
+                <div style="background: #FFFFFF; border: 1px dashed var(--gt-zinc-300); border-radius: var(--gt-radius-xl); padding: 48px 20px; text-align: center;">
+                    <i class="fa-solid fa-ticket" style="font-size: 32px; color: var(--gt-zinc-300); margin-bottom: 12px;"></i>
+                    <p style="font-size: 15px; font-weight: 600; color: var(--gt-zinc-700); margin-bottom: 4px;">No activities found matching your filter criteria</p>
+                    <p style="font-size: 13px; color: var(--gt-zinc-400);">Try changing activity type, cost or duration filter above.</p>
+                </div>
+            }
+            else
+            {
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 24px;">
+                    @foreach (var act in Model.Activities)
+                    {
+                        <div class="gt-card" id="activityCard-@act.ActivityId" style="display: flex; flex-direction: column; justify-content: space-between; border-radius: var(--gt-radius-xl); overflow: hidden; background: #FFFFFF; border: 1.5px solid var(--gt-border); box-shadow: var(--gt-shadow-card); transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='var(--gt-shadow-xl)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--gt-shadow-card)'">
+                            <div>
+                                <!-- Activity Image & Badges -->
+                                <div class="gt-card-media" style="height: 170px; position: relative; overflow: hidden;">
+                                    <img src="@act.ImageUrl" alt="@act.Title" class="gt-card-img" style="width: 100%; height: 100%; object-fit: cover;" />
+                                    <div class="gt-card-overlay" style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);"></div>
+                                    
+                                    <!-- Category Tag -->
+                                    <span class="gt-act-cat-tag" style="position: absolute; top: 12px; left: 12px; font-size: 11px; padding: 4px 10px; font-weight: 700; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); color: #FFFFFF; border-radius: var(--gt-radius-full);">
+                                        @act.CategoryName
+                                    </span>
+                                    
+                                    @if (act.IsTopPick)
+                                    {
+                                        <span class="gt-card-badge gt-badge-trending" style="position: absolute; top: 12px; right: 12px; font-size: 11px; padding: 3px 9px;">
+                                            <i class="fa-solid fa-star"></i> Top Pick
+                                        </span>
+                                    }
+
+                                    <!-- Rating badge bottom right -->
+                                    <span style="position: absolute; bottom: 10px; right: 12px; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); color: #F59E0B; font-size: 11.5px; font-weight: 800; padding: 2px 7px; border-radius: var(--gt-radius-full); display: flex; align-items: center; gap: 4px;">
+                                        <i class="fa-solid fa-star"></i> @act.Rating.ToString("F2")
+                                    </span>
+
+                                    <!-- Duration bottom left -->
+                                    <span style="position: absolute; bottom: 10px; left: 12px; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); color: #FFFFFF; font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: var(--gt-radius-full); display: flex; align-items: center; gap: 4px;">
+                                        <i class="fa-regular fa-clock"></i> @act.DurationHours hrs
+                                    </span>
+                                </div>
+
+                                <!-- Activity Content Body -->
+                                <div style="padding: 16px 18px 12px;">
+                                    <div style="display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--gt-brand-primary); font-weight: 700; margin-bottom: 5px;">
+                                        <i class="fa-solid fa-location-dot"></i> @act.CityName, @act.Country
+                                    </div>
+                                    <h4 style="font-size: 15.5px; font-weight: 800; color: var(--gt-zinc-950); line-height: 1.35; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        @act.Title
+                                    </h4>
+                                    <p style="font-size: 12.5px; color: var(--gt-zinc-500); line-height: 1.45; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        @act.Description
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Activity Footer & Add/Remove Action Buttons -->
+                            <div style="padding: 12px 18px 16px; border-top: 1px solid var(--gt-border-subtle); display: flex; align-items: center; justify-content: space-between; background: var(--gt-zinc-50);">
+                                <div>
+                                    <div style="font-size: 10px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Estimated Cost</div>
+                                    <div style="font-size: 17px; font-weight: 800; color: var(--gt-brand-emerald);">
+                                        @(act.EstimatedCost == 0 ? "Free" : "$" + act.EstimatedCost.ToString("N0"))
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <!-- Quick View button -->
+                                    <button type="button" class="gt-tag-btn" onclick="openQuickView('activity', @act.ActivityId)" style="padding: 6px 10px; font-size: 12px;" title="Quick View Activity Details">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+
+                                    <!-- Add / Remove from Trip Button -->
+                                    @if (act.IsAddedToUserTrip)
+                                    {
+                                        <button type="button" id="btnAct-@act.ActivityId" class="gt-tag-btn" style="background: #ECFDF5; border-color: #A7F3D0; color: #065F46; padding: 6px 12px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" onclick="promptRemoveActivity(@act.ActivityId, '@act.Title.Replace("'", "\\'")')">
+                                            <i class="fa-solid fa-check" style="color: #10B981;"></i> Added
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" id="btnAct-@act.ActivityId" class="gt-btn-add" style="padding: 6px 14px; font-size: 12px; font-weight: 700;" onclick="openAddToTripModal(@act.ActivityId, '@act.Title.Replace("'", "\\'")')">
+                                            <i class="fa-solid fa-plus"></i> Add to Trip
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
     </div>
 </div>
 
 <!-- ==========================================================================
-     5. ADD ACTIVITY TO TRIP MODAL
+     6. UNIVERSAL QUICK VIEW MODAL (FOR BOTH CITIES & ACTIVITIES)
      ========================================================================== -->
-<div id="addToTripModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
-    <div style="background: #FFFFFF; border-radius: var(--gt-radius-xl); max-width: 460px; width: 100%; padding: 28px; box-shadow: var(--gt-shadow-modal);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--gt-border-subtle); padding-bottom: 12px;">
-            <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-zinc-950);">
-                Add to Itinerary
-            </h3>
-            <button type="button" onclick="closeAddToTripModal()" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--gt-zinc-400);">&times;</button>
+<div id="quickViewModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--gt-radius-xl); max-width: 580px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--gt-shadow-modal); position: relative;">
+        
+        <!-- Modal Close Button -->
+        <button type="button" onclick="closeQuickView()" style="position: absolute; top: 16px; right: 16px; z-index: 10; background: rgba(0,0,0,0.6); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px;">
+            &times;
+        </button>
+
+        <!-- Dynamic Quick View Image -->
+        <div style="height: 220px; position: relative; overflow: hidden; border-radius: var(--gt-radius-xl) var(--gt-radius-xl) 0 0;">
+            <img id="qvImage" src="" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;" />
+            <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);"></div>
+            
+            <span id="qvBadge" class="gt-card-badge gt-badge-trending" style="position: absolute; top: 14px; left: 16px;"></span>
+
+            <div style="position: absolute; bottom: 14px; left: 18px; right: 18px; color: white;">
+                <h3 id="qvTitle" style="font-size: 22px; font-weight: 800; color: white; margin-bottom: 2px;"></h3>
+                <p id="qvLocation" style="font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 600;"></p>
+            </div>
         </div>
 
-        <p id="modalActivityTitle" style="font-size: 14px; font-weight: 600; color: var(--gt-brand-primary); margin-bottom: 16px;"></p>
+        <!-- Dynamic Content Body -->
+        <div style="padding: 24px 28px;">
+            
+            <!-- Quick Stats Bar -->
+            <div id="qvStatsBar" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: var(--gt-zinc-50); border: 1px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 12px 16px; margin-bottom: 20px;">
+                <!-- Populated via JS -->
+            </div>
+
+            <h4 style="font-size: 13px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; margin-bottom: 6px;">Description &amp; Highlights</h4>
+            <p id="qvDescription" style="font-size: 14px; color: var(--gt-zinc-700); line-height: 1.6; margin-bottom: 20px; white-space: pre-line;"></p>
+
+            <!-- Actions inside Quick View -->
+            <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--gt-border-subtle); padding-top: 16px;">
+                <button type="button" class="gt-tag-btn" onclick="closeQuickView()" style="padding: 8px 18px;">Close</button>
+                <div id="qvActionContainer">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     7. ADD CITY TO TRIP MODAL
+     ========================================================================== -->
+<div id="addCityModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--gt-radius-xl); max-width: 480px; width: 100%; padding: 28px; box-shadow: var(--gt-shadow-modal);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--gt-border-subtle); padding-bottom: 12px;">
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-zinc-950);">
+                <i class="fa-solid fa-map-location-dot" style="color: var(--gt-brand-primary); margin-right: 6px;"></i>
+                Add City Section to Itinerary
+            </h3>
+            <button type="button" onclick="closeAddCityModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gt-zinc-400);">&times;</button>
+        </div>
+
+        <p id="modalCityName" style="font-size: 14px; font-weight: 700; color: var(--gt-brand-primary); margin-bottom: 16px;"></p>
 
         @if (Model.UserTrips.Count == 0)
         {
             <div style="background: var(--gt-zinc-50); border: 1px dashed var(--gt-zinc-300); border-radius: var(--gt-radius-md); padding: 20px; text-align: center; margin-bottom: 16px;">
                 <p style="font-size: 13.5px; color: var(--gt-zinc-600); margin-bottom: 12px;">You don't have any active itineraries yet.</p>
-                <a href="@Url.Action("Create", "Trips")" class="gt-btn-add" style="display: inline-flex; padding: 8px 18px; font-size: 13px;">
+                <a href="@Url.Action("Create", "User")" class="gt-btn-add" style="display: inline-flex; padding: 8px 18px; font-size: 13px;">
+                    <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Create a Trip First
+                </a>
+            </div>
+        }
+        else
+        {
+            <input type="hidden" id="modalCityIdInput" value="" />
+
+            <div class="gt-form-group" style="margin-bottom: 14px;">
+                <label class="gt-form-label">Select Your Target Trip:</label>
+                <select id="modalCityTripSelect" class="gt-auth-input">
+                    @foreach (var trip in Model.UserTrips)
+                    {
+                        <option value="@trip.TripId">
+                            @trip.Title (@trip.StartDate.ToString("MMM dd") - @trip.EndDate.ToString("MMM dd, yyyy"))
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                <div class="gt-form-group">
+                    <label class="gt-form-label">Transport Mode</label>
+                    <select id="modalCityTransportMode" class="gt-auth-input">
+                        <option value="Flight">Flight</option>
+                        <option value="Train">High-Speed Train</option>
+                        <option value="Car Rental">Car Rental</option>
+                        <option value="Ferry">Ferry</option>
+                    </select>
+                </div>
+                <div class="gt-form-group">
+                    <label class="gt-form-label">Estimated Stay Budget ($)</label>
+                    <input type="number" id="modalCityStayCost" class="gt-auth-input" value="300" />
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="gt-tag-btn" onclick="closeAddCityModal()" style="padding: 8px 18px;">Cancel</button>
+                <button type="button" class="gt-btn-auth-primary" onclick="confirmAddCityToTrip()" style="width: auto; padding: 8px 24px;">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Add City to Trip</span>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ==========================================================================
+     8. ADD ACTIVITY TO TRIP MODAL
+     ========================================================================== -->
+<div id="addToTripModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--gt-radius-xl); max-width: 460px; width: 100%; padding: 28px; box-shadow: var(--gt-shadow-modal);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--gt-border-subtle); padding-bottom: 12px;">
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-zinc-950);">
+                <i class="fa-solid fa-ticket" style="color: var(--gt-brand-primary); margin-right: 6px;"></i>
+                Add Activity to Itinerary
+            </h3>
+            <button type="button" onclick="closeAddToTripModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gt-zinc-400);">&times;</button>
+        </div>
+
+        <p id="modalActivityTitle" style="font-size: 14px; font-weight: 700; color: var(--gt-brand-primary); margin-bottom: 16px;"></p>
+
+        @if (Model.UserTrips.Count == 0)
+        {
+            <div style="background: var(--gt-zinc-50); border: 1px dashed var(--gt-zinc-300); border-radius: var(--gt-radius-md); padding: 20px; text-align: center; margin-bottom: 16px;">
+                <p style="font-size: 13.5px; color: var(--gt-zinc-600); margin-bottom: 12px;">You don't have any active itineraries yet.</p>
+                <a href="@Url.Action("Create", "User")" class="gt-btn-add" style="display: inline-flex; padding: 8px 18px; font-size: 13px;">
                     <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Create a Trip First
                 </a>
             </div>
@@ -262,12 +527,12 @@
             <input type="hidden" id="selectedModalActivityId" value="" />
 
             <div class="gt-form-group" style="margin-bottom: 20px;">
-                <label class="gt-form-label">Select Your Trip:</label>
+                <label class="gt-form-label">Select Your Destination Trip:</label>
                 <select id="modalTripSelect" class="gt-auth-input">
                     @foreach (var trip in Model.UserTrips)
                     {
                         <option value="@trip.TripId">
-                            @trip.Title (@trip.StartDate.ToString("MMM dd, yyyy"))
+                            @trip.Title (@trip.StartDate.ToString("MMM dd") - @trip.EndDate.ToString("MMM dd, yyyy"))
                         </option>
                     }
                 </select>
@@ -276,31 +541,193 @@
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
                 <button type="button" class="gt-tag-btn" onclick="closeAddToTripModal()" style="padding: 8px 18px;">Cancel</button>
                 <button type="button" class="gt-btn-auth-primary" onclick="confirmAddActivityToTrip()" style="width: auto; padding: 8px 24px;">
-                    <span>Add Activity</span>
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Add to Itinerary</span>
                 </button>
             </div>
         }
     </div>
 </div>
 
+<!-- ==========================================================================
+     9. REMOVE CONFIRMATION MODAL
+     ========================================================================== -->
+<div id="removeConfirmModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--gt-radius-xl); max-width: 440px; width: 100%; padding: 26px; box-shadow: var(--gt-shadow-modal); text-align: center;">
+        <div style="width: 50px; height: 50px; border-radius: 50%; background: #FEE2E2; color: #DC2626; display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 16px;">
+            <i class="fa-regular fa-trash-can"></i>
+        </div>
+        <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-zinc-950); margin-bottom: 8px;">Remove Activity?</h3>
+        <p id="removeActivityModalText" style="font-size: 13.5px; color: var(--gt-zinc-600); margin-bottom: 20px;"></p>
+        
+        <input type="hidden" id="removeActivityIdInput" value="" />
+
+        <div class="gt-form-group" style="margin-bottom: 20px; text-align: left;">
+            <label class="gt-form-label">From Trip:</label>
+            <select id="removeActivityTripSelect" class="gt-auth-input">
+                @foreach (var trip in Model.UserTrips)
+                {
+                    <option value="@trip.TripId">@trip.Title</option>
+                }
+            </select>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 10px;">
+            <button type="button" class="gt-tag-btn" onclick="closeRemoveConfirmModal()" style="padding: 8px 18px;">Cancel</button>
+            <button type="button" class="gt-btn-auth-primary" style="background: #DC2626; border-color: #DC2626; width: auto; padding: 8px 24px;" onclick="confirmRemoveActivity()">
+                <span>Confirm Remove</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
+        // ── Tab Switcher ──────────────────────────────────────────────────────────
         function setExploreTab(tab) {
+            document.getElementById('activeTabInput').value = tab;
+            document.getElementById('tabBtnAll').classList.remove('active');
+            document.getElementById('tabBtnCities').classList.remove('active');
+            document.getElementById('tabBtnActivities').classList.remove('active');
+
             const cities = document.getElementById('citiesContainer');
             const activities = document.getElementById('activitiesContainer');
 
             if (tab === 'cities') {
+                document.getElementById('tabBtnCities').classList.add('active');
                 cities.style.display = 'block';
                 activities.style.display = 'none';
             } else if (tab === 'activities') {
+                document.getElementById('tabBtnActivities').classList.add('active');
                 cities.style.display = 'none';
                 activities.style.display = 'block';
             } else {
+                document.getElementById('tabBtnAll').classList.add('active');
                 cities.style.display = 'block';
                 activities.style.display = 'block';
             }
         }
 
+        function submitSearch() {
+            document.getElementById('exploreSearchForm').submit();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchKeywordInput').value = '';
+            submitSearch();
+        }
+
+        // ── Quick View Modal Logic ────────────────────────────────────────────────
+        function openQuickView(type, id) {
+            $.get('@Url.Action("GetQuickView", "Explore")', { type: type, id: id }, function(res) {
+                if (!res.success) {
+                    showToast('⚠️ Could not load item details.');
+                    return;
+                }
+
+                document.getElementById('qvImage').src = res.imageUrl || 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80';
+                document.getElementById('qvDescription').innerText = res.description;
+
+                const statsBar = document.getElementById('qvStatsBar');
+                const actionContainer = document.getElementById('qvActionContainer');
+
+                if (res.type === 'city') {
+                    document.getElementById('qvBadge').innerText = res.region;
+                    document.getElementById('qvTitle').innerText = res.name;
+                    document.getElementById('qvLocation').innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + res.name + ', ' + res.country;
+
+                    statsBar.innerHTML = `
+                        <div>
+                            <div style="font-size: 10px; font-weight:700; color:var(--gt-zinc-400); text-transform:uppercase;">Daily Cost</div>
+                            <div style="font-size:15px; font-weight:800; color:var(--gt-zinc-950);">$${res.avgDailyCost}/day</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 10px; font-weight:700; color:var(--gt-zinc-400); text-transform:uppercase;">Cost Tier</div>
+                            <div style="font-size:13px; font-weight:700; color:var(--gt-brand-primary);">${res.costIndex}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 10px; font-weight:700; color:var(--gt-zinc-400); text-transform:uppercase;">Popularity</div>
+                            <div style="font-size:14px; font-weight:800; color:#F59E0B;">★ ${res.popularityScore}</div>
+                        </div>
+                    `;
+
+                    actionContainer.innerHTML = `
+                        <button type="button" class="gt-btn-auth-primary" onclick="closeQuickView(); openAddCityModal(${res.id}, '${res.name.replace(/'/g, "\\'")}', '${res.country.replace(/'/g, "\\'")}')" style="width:auto; padding:8px 22px;">
+                            <i class="fa-solid fa-plus"></i> Add City to Trip
+                        </button>
+                    `;
+                } else {
+                    document.getElementById('qvBadge').innerText = res.categoryName;
+                    document.getElementById('qvTitle').innerText = res.title;
+                    document.getElementById('qvLocation').innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + res.cityName + ', ' + res.country;
+
+                    const costDisplay = res.estimatedCost === 0 ? 'Free' : '$' + res.estimatedCost;
+                    statsBar.innerHTML = `
+                        <div>
+                            <div style="font-size: 10px; font-weight:700; color:var(--gt-zinc-400); text-transform:uppercase;">Cost</div>
+                            <div style="font-size:15px; font-weight:800; color:var(--gt-brand-emerald);">${costDisplay}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 10px; font-weight:700; color:var(--gt-zinc-400); text-transform:uppercase;">Duration</div>
+                            <div style="font-size:13px; font-weight:700; color:var(--gt-zinc-800);">${res.durationHours} Hours</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 10px; font-weight:700; color:var(--gt-zinc-400); text-transform:uppercase;">Rating</div>
+                            <div style="font-size:14px; font-weight:800; color:#F59E0B;">★ ${res.rating}</div>
+                        </div>
+                    `;
+
+                    actionContainer.innerHTML = `
+                        <button type="button" class="gt-btn-auth-primary" onclick="closeQuickView(); openAddToTripModal(${res.id}, '${res.title.replace(/'/g, "\\'")}')" style="width:auto; padding:8px 22px;">
+                            <i class="fa-solid fa-plus"></i> Add Activity to Trip
+                        </button>
+                    `;
+                }
+
+                document.getElementById('quickViewModal').style.display = 'flex';
+            });
+        }
+
+        function closeQuickView() {
+            document.getElementById('quickViewModal').style.display = 'none';
+        }
+
+        // ── Add City to Trip ──────────────────────────────────────────────────────
+        function openAddCityModal(cityId, cityName, country) {
+            document.getElementById('modalCityIdInput').value = cityId;
+            document.getElementById('modalCityName').innerText = 'Selected Destination: ' + cityName + ', ' + country;
+            document.getElementById('addCityModal').style.display = 'flex';
+        }
+
+        function closeAddCityModal() {
+            document.getElementById('addCityModal').style.display = 'none';
+        }
+
+        function confirmAddCityToTrip() {
+            const tripId = document.getElementById('modalCityTripSelect').value;
+            const cityId = document.getElementById('modalCityIdInput').value;
+            const transportMode = document.getElementById('modalCityTransportMode').value;
+            const stayCost = document.getElementById('modalCityStayCost').value;
+
+            $.post('@Url.Action("AddCityToTrip", "Explore")', {
+                tripId: tripId,
+                cityId: cityId,
+                transportMode: transportMode,
+                accommodationCost: stayCost
+            }, function(res) {
+                closeAddCityModal();
+                if (res.success) {
+                    showToast(res.message);
+                } else {
+                    showToast('⚠️ ' + (res.message || 'Could not add city.'));
+                }
+            }).fail(function() {
+                closeAddCityModal();
+                window.location.href = '@Url.Action("Login", "Account")';
+            });
+        }
+
+        // ── Add Activity to Trip ──────────────────────────────────────────────────
         function openAddToTripModal(activityId, title) {
             document.getElementById('selectedModalActivityId').value = activityId;
             document.getElementById('modalActivityTitle').innerText = 'Selected: ' + title;
@@ -319,13 +746,59 @@
                 closeAddToTripModal();
                 if (res.success) {
                     showToast(res.message);
+                    // Update button UI dynamically
+                    const btn = document.getElementById('btnAct-' + activityId);
+                    if (btn) {
+                        btn.className = 'gt-tag-btn';
+                        btn.style.background = '#ECFDF5';
+                        btn.style.borderColor = '#A7F3D0';
+                        btn.style.color = '#065F46';
+                        btn.innerHTML = '<i class="fa-solid fa-check" style="color: #10B981;"></i> Added';
+                        btn.onclick = function() { promptRemoveActivity(activityId, res.message); };
+                    }
                 } else {
-                    showToast(res.message || 'Could not add activity.');
+                    showToast('⚠️ ' + (res.message || 'Could not add activity.'));
                 }
             }).fail(function() {
                 closeAddToTripModal();
                 window.location.href = '@Url.Action("Login", "Account")';
             });
         }
+
+        // ── Remove Activity from Trip ─────────────────────────────────────────────
+        function promptRemoveActivity(activityId, title) {
+            document.getElementById('removeActivityIdInput').value = activityId;
+            document.getElementById('removeActivityModalText').innerText = `Are you sure you want to remove this activity from your itinerary?`;
+            document.getElementById('removeConfirmModal').style.display = 'flex';
+        }
+
+        function closeRemoveConfirmModal() {
+            document.getElementById('removeConfirmModal').style.display = 'none';
+        }
+
+        function confirmRemoveActivity() {
+            const tripId = document.getElementById('removeActivityTripSelect').value;
+            const activityId = document.getElementById('removeActivityIdInput').value;
+
+            $.post('@Url.Action("RemoveActivityFromTrip", "Explore")', { tripId: tripId, activityId: activityId }, function(res) {
+                closeRemoveConfirmModal();
+                if (res.success) {
+                    showToast(res.message);
+                    // Revert button UI to "+ Add to Trip"
+                    const btn = document.getElementById('btnAct-' + activityId);
+                    if (btn) {
+                        btn.className = 'gt-btn-add';
+                        btn.style.background = '';
+                        btn.style.borderColor = '';
+                        btn.style.color = '';
+                        btn.innerHTML = '<i class="fa-solid fa-plus"></i> Add to Trip';
+                        btn.onclick = function() { openAddToTripModal(activityId, ''); };
+                    }
+                } else {
+                    showToast('⚠️ ' + (res.message || 'Could not remove activity.'));
+                }
+            });
+        }
     </script>
 }
+
