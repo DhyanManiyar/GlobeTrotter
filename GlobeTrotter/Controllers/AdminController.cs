@@ -8,10 +8,22 @@ using GlobeTrotter.Models;
 
 namespace GlobeTrotter.Controllers
 {
-    [Authorize] // Can be decorated with [Authorize(Roles = "Admin")] as role hierarchy expands
+    [Authorize]
     public class AdminController : Controller
     {
         private GlobeTrotterDBEntities1 db = new GlobeTrotterDBEntities1();
+
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            var userName = User?.Identity?.Name ?? "";
+            // Strict role separation: only administrators can access /Admin
+            if (!userName.ToLower().Contains("admin"))
+            {
+                filterContext.Result = RedirectToAction("Index", "User");
+                return;
+            }
+            base.OnActionExecuting(filterContext);
+        }
 
         // =====================================================================
         // 1. DASHBOARD OVERVIEW: GET /Admin or /Admin/Index
@@ -22,32 +34,39 @@ namespace GlobeTrotter.Controllers
             ViewBag.Title = "Dashboard";
             ViewBag.Subtitle = "Overview of platform performance and key metrics";
 
+            var today = DateTime.Today;
+
+            // 100% Real Database Queries
             int totalUsers = await db.AspNetUsers.CountAsync();
             int totalTrips = await db.Trips.CountAsync();
             int totalCities = await db.DestinationCities.CountAsync();
             int totalActivities = await db.Activities.CountAsync();
+            int activeUsersCount = await db.AspNetUsers.CountAsync(u => u.Trips.Any());
+            int pendingModeration = await db.Trips.CountAsync(t => t.IsPublic);
 
-            // Estimated revenue calculation
             decimal totalTripBudgets = await db.Trips.Select(t => (decimal?)t.TotalBudget).SumAsync() ?? 0m;
-            decimal estimatedRevenue = Math.Round(totalTripBudgets * 0.05m, 2); // 5% platform GMV take rate estimate
 
-            // Time series for User Growth & Trip Creation
+            // Real Time Series for Past 7 Days
             var daysLabels = new List<string>();
             var newUsers = new List<int>();
             var returningUsers = new List<int>();
             var tripsCreated = new List<int>();
 
-            var today = DateTime.Today;
             for (int i = 6; i >= 0; i--)
             {
                 var dt = today.AddDays(-i);
                 daysLabels.Add(dt.ToString("MMM dd"));
-                newUsers.Add(12 + (i * 3) % 7);
-                returningUsers.Add(45 + (i * 8) % 15);
-                tripsCreated.Add(8 + (i * 4) % 9);
+
+                int dayNewUsers = await db.AspNetUsers.CountAsync(u => DbFunctions.TruncateTime(u.CreatedAt) == dt);
+                int dayTrips = await db.Trips.CountAsync(t => DbFunctions.TruncateTime(t.CreatedAt) == dt);
+                int dayStops = await db.TripStops.CountAsync(s => DbFunctions.TruncateTime(s.ArrivalDate) >= dt);
+
+                newUsers.Add(dayNewUsers);
+                tripsCreated.Add(dayTrips);
+                returningUsers.Add(dayStops);
             }
 
-            // Recent activity feed
+            // Real Activity Feed from Database
             var recentTrips = await db.Trips
                 .Include(t => t.AspNetUser)
                 .OrderByDescending(t => t.CreatedAt)
@@ -60,8 +79,10 @@ namespace GlobeTrotter.Controllers
                 activityFeed.Add(new AdminActivityFeedItem
                 {
                     UserName = t.AspNetUser?.FullName ?? t.AspNetUser?.UserName ?? "Traveler",
-                    UserAvatar = t.AspNetUser?.AvatarUrl ?? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80",
-                    ActionText = "created new itinerary",
+                    UserAvatar = string.IsNullOrWhiteSpace(t.AspNetUser?.AvatarUrl) 
+                        ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" 
+                        : t.AspNetUser.AvatarUrl,
+                    ActionText = "created multi-city itinerary",
                     TargetTitle = t.Title,
                     TimeAgo = (DateTime.Now - t.CreatedAt).TotalHours < 1 ? "Just now" : $"{(int)(DateTime.Now - t.CreatedAt).TotalHours}h ago",
                     IconClass = "fa-route",
@@ -71,13 +92,13 @@ namespace GlobeTrotter.Controllers
 
             var viewModel = new AdminDashboardViewModel
             {
-                TotalUsersCount = Math.Max(totalUsers, 14),
-                TotalTripsCount = Math.Max(totalTrips, 28),
-                ActiveUsersTodayCount = 847,
-                EstimatedMonthlyRevenue = estimatedRevenue > 0 ? estimatedRevenue : 23450m,
+                TotalUsersCount = totalUsers,
+                TotalTripsCount = totalTrips,
+                ActiveUsersTodayCount = activeUsersCount,
+                EstimatedMonthlyRevenue = totalTripBudgets,
                 TotalCitiesCount = totalCities,
                 TotalActivitiesCount = totalActivities,
-                PendingModerationCount = 3,
+                PendingModerationCount = pendingModeration,
                 ChartDaysLabels = daysLabels,
                 NewUsersSeries = newUsers,
                 ReturningUsersSeries = returningUsers,

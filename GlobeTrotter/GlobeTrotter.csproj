@@ -184,6 +184,7 @@
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\AdminViewModels.cs" />
     <Compile Include="Models\CommunityViewModels.cs" />
+    <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\ProfileViewModels.cs" />
     <Compile Include="Models\TripViewModels.cs" />
     <Compile Include="Models\Activity.cs">
@@ -208,7 +209,6 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\IdentityModels.cs" />
-    <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\Model1.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

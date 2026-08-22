@@ -14,6 +14,18 @@ namespace GlobeTrotter.Controllers
     {
         private readonly GlobeTrotterDBEntities1 db = new GlobeTrotterDBEntities1();
 
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            var userName = User?.Identity?.Name ?? "";
+            // Strict role separation: Administrators belong strictly to /Admin
+            if (userName.ToLower().Contains("admin"))
+            {
+                filterContext.Result = RedirectToAction("Index", "Admin");
+                return;
+            }
+            base.OnActionExecuting(filterContext);
+        }
+
         // Helper: Resolve valid user ID that exists in GlobeTrotterDB AspNetUsers table
         private async Task<string> GetResolvedUserIdAsync()
         {

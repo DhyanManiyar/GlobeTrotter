@@ -821,7 +821,6 @@ a:hover {
     border-radius: var(--gt-radius-lg);
     border: 1px solid var(--gt-border);
     display: flex;
-    height: 175px;
     overflow: hidden;
     transition: all 0.2s ease;
     text-decoration: none;

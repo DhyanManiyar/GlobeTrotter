@@ -80,22 +80,7 @@
             </button>
         }
 
-        <!-- 1-Click Quick Demo Sign-In Credentials -->
-        <div style="margin-top: 20px; border-top: 1px dashed var(--gt-border); padding-top: 16px;">
-            <div style="font-size: 11px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; text-align: center; margin-bottom: 10px; letter-spacing: 0.05em;">
-                Quick Demo Sign-In:
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <button type="button" onclick="fillDemoCredentials('admin@globetrotter.io', 'Pass@123')" class="gt-tag-btn" style="padding: 8px 10px; font-size: 12px; font-weight: 700; justify-content: center; background: rgba(15,23,42,0.06); color: #0F172A; border-color: rgba(15,23,42,0.2);">
-                    <i class="fa-solid fa-shield-halved" style="margin-right: 4px; color: #3B82F6;"></i> Admin Panel
-                </button>
-                <button type="button" onclick="fillDemoCredentials('alex.traveler@globetrotter.com', 'Pass@123')" class="gt-tag-btn" style="padding: 8px 10px; font-size: 12px; font-weight: 700; justify-content: center; background: rgba(99,102,241,0.06); color: #4F46E5; border-color: rgba(99,102,241,0.2);">
-                    <i class="fa-solid fa-user" style="margin-right: 4px;"></i> Traveler User
-                </button>
-            </div>
-        </div>
-
-        <div class="gt-auth-switch" style="margin-top: 16px;">
+        <div class="gt-auth-switch">
             <span>Don't have an account?</span>
             <a href="@Url.Action("Register", "Account")">Sign up here</a>
         </div>
@@ -117,12 +102,6 @@
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
             }
-        }
-
-        function fillDemoCredentials(email, password) {
-            document.getElementById('loginEmailInput').value = email;
-            document.getElementById('loginPasswordInput').value = password;
-            document.getElementById('loginForm').submit();
         }
     </script>
 }
