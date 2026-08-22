@@ -300,8 +300,8 @@
                                     </button>
                                 }
 
-                                <a href="javascript:void(0)" onclick="showToast('Loading Itinerary for @trip.Title...')" class="gt-btn-add" style="padding: 6px 14px; font-size: 12.5px;">
-                                    <span>Manage</span>
+                                <a href="@Url.Action("BuildItinerary", "Trips", new { id = trip.TripId })" class="gt-btn-add" style="padding: 6px 14px; font-size: 12.5px;">
+                                    <span>Build Itinerary</span>
                                     <i class="fa-solid fa-arrow-right" style="font-size: 10px;"></i>
                                 </a>
                             </div>

@@ -1,0 +1,339 @@
+@model GlobeTrotter.Models.BuildItineraryViewModel
+@{
+    ViewBag.Title = "Build Itinerary - " + Model.Title;
+    string userAvatar = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
+}
+
+<div class="gt-auth-page" style="padding: 40px 20px 80px; display: block; max-width: 960px; margin: 0 auto;">
+    <div class="gt-hero-ambient-glow" style="top: 2%;"></div>
+
+    <!-- Top App Navigation / Header Matching Wireframe -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding: 14px 20px; background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-xl); box-shadow: var(--gt-shadow-xs);">
+        <a href="@Url.Action("Index", "Trips")" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+            <div class="gt-brand-icon" style="width: 34px; height: 34px; font-size: 15px;">
+                <i class="fa-solid fa-earth-americas"></i>
+            </div>
+            <span style="font-family: var(--gt-font-display); font-size: 18px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.03em;">
+                GlobeTrotter
+            </span>
+        </a>
+
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <a href="@Url.Action("Index", "Trips")" class="gt-tag-btn" style="padding: 6px 14px; font-size: 13px;">
+                <i class="fa-solid fa-arrow-left" style="margin-right: 4px;"></i> My Dashboard
+            </a>
+            <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 2px solid var(--gt-brand-light); box-shadow: var(--gt-shadow-xs);">
+                <img src="@userAvatar" alt="User" style="width: 100%; height: 100%; object-fit: cover;" />
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="gt-val-summary" style="background: #ECFDF5; border-color: #A7F3D0; color: #065F46; margin-bottom: 20px; display:flex; align-items:center; justify-content:space-between;">
+            <div>
+                <i class="fa-solid fa-circle-check" style="color: #10B981; margin-right: 8px;"></i>
+                <span>@TempData["SuccessMessage"]</span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" style="background:none; border:none; color:#065F46; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    }
+
+    <!-- Trip Overview Banner -->
+    <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 22px 28px; box-shadow: var(--gt-shadow-xs); margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <h1 style="font-size: 22px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.02em;">
+                    @Model.Title
+                </h1>
+                <span class="gt-tier-tag" style="background: rgba(99, 102, 241, 0.08); color: var(--gt-brand-primary); font-weight: 700;">
+                    @Model.Sections.Count Sections
+                </span>
+            </div>
+            <p style="font-size: 13.5px; color: var(--gt-zinc-500); margin-top: 4px;">
+                <i class="fa-regular fa-calendar" style="margin-right: 4px;"></i>
+                @Model.StartDate.ToString("MMM dd, yyyy") - @Model.EndDate.ToString("MMM dd, yyyy")
+            </p>
+        </div>
+
+        <!-- Live Financial Gauge -->
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="text-align: right;">
+                <span style="font-size: 11.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Total Plan Budget</span>
+                <div style="font-size: 20px; font-weight: 800; color: var(--gt-zinc-950);">
+                    $@Model.TotalCalculatedCost.ToString("N0") <span style="font-size: 13px; font-weight: 500; color: var(--gt-zinc-400);">/ $@Model.TotalBudget.ToString("N0")</span>
+                </div>
+            </div>
+            <a href="@Url.Action("Edit", "Trips", new { id = Model.TripId })" class="gt-tag-btn" style="padding: 8px 14px;" title="Edit Trip Details">
+                <i class="fa-solid fa-gear"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ======================================================================
+         BUILD ITINERARY SECTIONS (SCREEN 5 WIREFRAME LAYOUT)
+         ====================================================================== -->
+    <div id="itinerarySectionsContainer" style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 28px;">
+        @if (Model.Sections.Count == 0)
+        {
+            <div style="background: #FFFFFF; border: 1px dashed var(--gt-zinc-300); border-radius: var(--gt-radius-xl); padding: 48px 20px; text-align: center;">
+                <p style="font-size: 15px; font-weight: 600; color: var(--gt-zinc-600); margin-bottom: 16px;">
+                    No sections added yet. Click "+ Add another Section" below to add your first destination or activity block!
+                </p>
+            </div>
+        }
+        else
+        {
+            foreach (var sec in Model.Sections)
+            {
+                <div class="gt-itinerary-section-card" style="background: #FFFFFF; border: 1.5px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 24px 26px; box-shadow: var(--gt-shadow-card); transition: all 0.2s ease;">
+                    <!-- Section Header -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px;">
+                            <span style="color: var(--gt-brand-primary);">Section @sec.SectionNumber:</span>
+                            <span>@sec.PlaceName, @sec.Country</span>
+                        </h3>
+
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button type="button" class="gt-tag-btn" onclick="openAddActivityModal(@sec.TripStopId, '@sec.PlaceName')" style="padding: 5px 12px; font-size: 12.5px;" title="Add Activity to Section">
+                                <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Activity
+                            </button>
+                            
+                            @using (Html.BeginForm("DeleteSection", "Trips", new { stopId = sec.TripStopId, tripId = Model.TripId }, FormMethod.Post, new { onsubmit = "return confirm('Remove Section " + sec.SectionNumber + " from itinerary?');" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="gt-tag-btn" style="color: #DC2626; border-color: rgba(220,38,38,0.2); padding: 5px 9px;" title="Delete Section">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Section Body / Information Area -->
+                    <div style="background: var(--gt-zinc-50); border: 1px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 14px 16px; margin-bottom: 16px;">
+                        <p style="font-size: 14px; color: var(--gt-zinc-700); line-height: 1.5; margin-bottom: 8px;">
+                            @(string.IsNullOrWhiteSpace(sec.Notes) ? "All the necessary information about this section. This can be anything like travel section, hotel or any other activity." : sec.Notes)
+                        </p>
+
+                        <div style="display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--gt-zinc-500); margin-top: 6px;">
+                            <span><i class="fa-solid fa-hotel" style="color: var(--gt-brand-primary); margin-right: 4px;"></i> Stay: <strong>@sec.AccommodationDetails</strong> ($@sec.AccommodationCost.ToString("N0"))</span>
+                            <span><i class="fa-solid fa-plane" style="color: #06B6D4; margin-right: 4px;"></i> Transport: <strong>@sec.TransportMode</strong> ($@sec.TransportCost.ToString("N0"))</span>
+                        </div>
+
+                        <!-- Activities within this section -->
+                        @if (sec.Activities.Count > 0)
+                        {
+                            <div style="margin-top: 12px; border-top: 1px dashed var(--gt-zinc-200); padding-top: 10px;">
+                                <div style="font-size: 11.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; margin-bottom: 6px;">
+                                    Planned Activities (@sec.Activities.Count):
+                                </div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    @foreach (var act in sec.Activities)
+                                    {
+                                        <div style="background: #FFFFFF; border: 1px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 4px 10px; font-size: 12px; display: flex; align-items: center; gap: 6px; box-shadow: var(--gt-shadow-xs);">
+                                            <i class="fa-solid fa-ticket" style="color: var(--gt-brand-primary); font-size: 11px;"></i>
+                                            <span style="font-weight: 600; color: var(--gt-zinc-900);">@act.CustomTitle</span>
+                                            <span style="color: var(--gt-brand-emerald); font-weight: 700;">$@act.Cost.ToString("N0")</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Section Footer Info Pills Matching Screen 5 Wireframe -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <!-- Date Range Pill -->
+                        <div style="background: #FFFFFF; border: 1.5px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; font-size: 13.5px;">
+                            <span style="font-weight: 600; color: var(--gt-zinc-500);">Date Range:</span>
+                            <span style="font-weight: 700; color: var(--gt-zinc-950);">@sec.DateRangeDisplay</span>
+                        </div>
+
+                        <!-- Budget of this section Pill -->
+                        <div style="background: #FFFFFF; border: 1.5px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; font-size: 13.5px;">
+                            <span style="font-weight: 600; color: var(--gt-zinc-500);">Budget of this section:</span>
+                            <span style="font-weight: 800; color: var(--gt-brand-primary);">$@sec.SectionBudget.ToString("N0")</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- ======================================================================
+         "+ ADD ANOTHER SECTION" BUTTON & MODAL/COLLAPSIBLE FORM (SCREEN 5)
+         ====================================================================== -->
+    <div style="text-align: center; margin-bottom: 40px;">
+        <button type="button" class="gt-btn-auth-primary" onclick="toggleAddSectionForm()" style="display: inline-flex; width: auto; padding: 14px 36px; font-size: 15px; border-radius: var(--gt-radius-lg);">
+            <i class="fa-solid fa-plus"></i>
+            <span>Add another Section</span>
+        </button>
+    </div>
+
+    <!-- Add Section Inline Form (Collapsible) -->
+    <div id="addSectionCard" style="display: none; background: #FFFFFF; border: 2px dashed var(--gt-brand-light); border-radius: var(--gt-radius-xl); padding: 28px 32px; box-shadow: var(--gt-shadow-md); margin-bottom: 40px;">
+        <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-zinc-950); margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-map-pin" style="color: var(--gt-brand-primary);"></i>
+            Configure New Itinerary Section
+        </h3>
+
+        @using (Html.BeginForm("AddSection", "Trips", FormMethod.Post, new { role = "form" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="TripId" value="@Model.TripId" />
+
+            <div class="gt-form-grid">
+                <!-- Place / City -->
+                <div class="gt-form-group">
+                    <label class="gt-form-label">Destination Place *</label>
+                    <div class="gt-input-box">
+                        <i class="fa-solid fa-city input-icon"></i>
+                        <select name="CityId" class="gt-auth-input" required>
+                            @foreach (var city in Model.AvailableCities)
+                            {
+                                <option value="@city.CityId">@city.Name, @city.Country ($@city.AvgDailyCost:N0/day)</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Transport Mode -->
+                <div class="gt-form-group">
+                    <label class="gt-form-label">Transport Mode</label>
+                    <div class="gt-input-box">
+                        <i class="fa-solid fa-plane input-icon"></i>
+                        <select name="TransportMode" class="gt-auth-input">
+                            <option value="Flight">Flight</option>
+                            <option value="Train / Rail">High-speed Train</option>
+                            <option value="Rental Car / Drive">Rental Car</option>
+                            <option value="Ferry / Cruise">Ferry</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Arrival Date -->
+                <div class="gt-form-group">
+                    <label class="gt-form-label">Section Start Date *</label>
+                    <div class="gt-input-box">
+                        <i class="fa-regular fa-calendar input-icon"></i>
+                        <input type="date" name="ArrivalDate" class="gt-auth-input" value="@Model.EndDate.ToString("yyyy-MM-dd")" required />
+                    </div>
+                </div>
+
+                <!-- Departure Date -->
+                <div class="gt-form-group">
+                    <label class="gt-form-label">Section End Date *</label>
+                    <div class="gt-input-box">
+                        <i class="fa-regular fa-calendar-check input-icon"></i>
+                        <input type="date" name="DepartureDate" class="gt-auth-input" value="@Model.EndDate.AddDays(4).ToString("yyyy-MM-dd")" required />
+                    </div>
+                </div>
+
+                <!-- Hotel / Accommodation Details -->
+                <div class="gt-form-group">
+                    <label class="gt-form-label">Accommodation Stay / Hotel Notes</label>
+                    <div class="gt-input-box">
+                        <i class="fa-solid fa-hotel input-icon"></i>
+                        <input type="text" name="AccommodationDetails" class="gt-auth-input" placeholder="e.g. Grand Boutique Hotel / Airbnb" />
+                    </div>
+                </div>
+
+                <!-- Accommodation Cost -->
+                <div class="gt-form-group">
+                    <label class="gt-form-label">Accommodation Budget ($)</label>
+                    <div class="gt-input-box">
+                        <i class="fa-solid fa-dollar-sign input-icon"></i>
+                        <input type="number" name="AccommodationCost" class="gt-auth-input" placeholder="350.00" />
+                    </div>
+                </div>
+
+                <!-- Notes / Information about this section -->
+                <div class="gt-form-group full-width">
+                    <label class="gt-form-label">Section Overview & Objectives</label>
+                    <textarea name="Notes" class="gt-auth-textarea" placeholder="All necessary information for this stop (e.g. check-in times, sightseeing goals, meeting spots)..." rows="3"></textarea>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;">
+                <button type="button" class="gt-tag-btn" onclick="toggleAddSectionForm()" style="padding: 10px 20px;">Cancel</button>
+                <button type="submit" class="gt-btn-auth-primary" style="width: auto; padding: 10px 28px;">
+                    <i class="fa-solid fa-check"></i> Save Section
+                </button>
+            </div>
+        }
+    </div>
+
+    <!-- Quick Modal to Add Activity to a Section -->
+    <div id="addActivityModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: #FFFFFF; border-radius: var(--gt-radius-xl); max-width: 480px; width: 100%; padding: 28px; box-shadow: var(--gt-shadow-modal);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-zinc-950);">
+                    Add Activity to Section
+                </h3>
+                <button type="button" onclick="closeAddActivityModal()" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--gt-zinc-400);">&times;</button>
+            </div>
+
+            @using (Html.BeginForm("AddActivityToSection", "Trips", new { tripId = Model.TripId }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="modalTripStopId" name="TripStopId" value="" />
+
+                <div class="gt-form-group" style="margin-bottom: 14px;">
+                    <label class="gt-form-label">Activity Title *</label>
+                    <input type="text" name="Title" class="gt-auth-input" placeholder="e.g. Louvre Museum Guided Tour" required />
+                </div>
+
+                <div class="gt-form-group" style="margin-bottom: 14px;">
+                    <label class="gt-form-label">Category</label>
+                    <select name="CategoryName" class="gt-auth-input">
+                        <option value="Sightseeing">Sightseeing</option>
+                        <option value="Food & Dining">Food & Dining</option>
+                        <option value="Culture & History">Culture & History</option>
+                        <option value="Adventure & Nature">Adventure & Nature</option>
+                        <option value="Entertainment">Entertainment</option>
+                    </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">Cost ($)</label>
+                        <input type="number" name="Cost" class="gt-auth-input" placeholder="45.00" />
+                    </div>
+                    <div class="gt-form-group">
+                        <label class="gt-form-label">Duration (Hours)</label>
+                        <input type="number" step="0.5" name="DurationHours" class="gt-auth-input" value="2.5" />
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+                    <button type="button" class="gt-tag-btn" onclick="closeAddActivityModal()" style="padding: 8px 18px;">Cancel</button>
+                    <button type="submit" class="gt-btn-auth-primary" style="width: auto; padding: 8px 24px;">Add Activity</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleAddSectionForm() {
+            const card = document.getElementById('addSectionCard');
+            if (card.style.display === 'none' || card.style.display === '') {
+                card.style.display = 'block';
+                card.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                card.style.display = 'none';
+            }
+        }
+
+        function openAddActivityModal(stopId, placeName) {
+            document.getElementById('modalTripStopId').value = stopId;
+            const modal = document.getElementById('addActivityModal');
+            modal.style.display = 'flex';
+        }
+
+        function closeAddActivityModal() {
+            document.getElementById('addActivityModal').style.display = 'none';
+        }
+    </script>
+}

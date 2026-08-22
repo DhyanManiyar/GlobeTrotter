@@ -1,3 +1,4 @@
+
 using System;
 using System.Globalization;
 using System.Linq;
@@ -176,7 +177,7 @@ namespace GlobeTrotter.Controllers
                 if (result.Succeeded)
                 {
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Trips");
                 }
                 AddErrors(result);
             }
@@ -458,11 +459,11 @@ namespace GlobeTrotter.Controllers
 
         private ActionResult RedirectToLocal(string returnUrl)
         {
-            if (Url.IsLocalUrl(returnUrl))
+            if (Url.IsLocalUrl(returnUrl) && returnUrl != "/" && !returnUrl.Equals("/Home", StringComparison.OrdinalIgnoreCase) && !returnUrl.Equals("/Home/Index", StringComparison.OrdinalIgnoreCase))
             {
                 return Redirect(returnUrl);
             }
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Trips");
         }
 
         internal class ChallengeResult : HttpUnauthorizedResult
