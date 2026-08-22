@@ -245,5 +245,77 @@ namespace GlobeTrotter.Models
         public string Notes { get; set; }
         public bool IsCompleted { get; set; }
     }
+
+    // =========================================================================
+    // GOOGLE MAPS PLATFORM EXPLORER & ROUTE VISUALIZATION MODELS
+    // =========================================================================
+    public class TravelMapViewModel
+    {
+        public string GoogleMapsApiKey { get; set; }
+        public List<DestinationCityMapItem> Cities { get; set; } = new List<DestinationCityMapItem>();
+        public List<ActivityMapItem> Activities { get; set; } = new List<ActivityMapItem>();
+        public List<TripMapItem> UserTrips { get; set; } = new List<TripMapItem>();
+        public int? SelectedTripId { get; set; }
+    }
+
+    public class DestinationCityMapItem
+    {
+        public int CityId { get; set; }
+        public string Name { get; set; }
+        public string Country { get; set; }
+        public string Region { get; set; }
+        public string Description { get; set; }
+        public string ImageUrl { get; set; }
+        public decimal AvgDailyCost { get; set; }
+        public string CostIndex { get; set; }
+        public decimal PopularityScore { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public int ActivitiesCount { get; set; }
+    }
+
+    public class ActivityMapItem
+    {
+        public int ActivityId { get; set; }
+        public int CityId { get; set; }
+        public string CityName { get; set; }
+        public string Country { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string Category { get; set; }
+        public decimal Cost { get; set; }
+        public decimal DurationHours { get; set; }
+        public decimal Rating { get; set; }
+        public string ImageUrl { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+    }
+
+    public class TripMapItem
+    {
+        public int TripId { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public decimal TotalBudget { get; set; }
+        public List<TripStopMapItem> Stops { get; set; } = new List<TripStopMapItem>();
+    }
+
+    public class TripStopMapItem
+    {
+        public int TripStopId { get; set; }
+        public int StopOrder { get; set; }
+        public int CityId { get; set; }
+        public string CityName { get; set; }
+        public string Country { get; set; }
+        public DateTime ArrivalDate { get; set; }
+        public DateTime DepartureDate { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public string TransportMode { get; set; }
+        public decimal AccommodationCost { get; set; }
+        public List<string> Activities { get; set; } = new List<string>();
+    }
 }
 

@@ -1,0 +1,1113 @@
+@model GlobeTrotter.Models.TravelMapViewModel
+@{
+    ViewBag.Title = "Interactive World Travel Map & Route Visualizer | GlobeTrotter";
+    var serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+    string citiesJson = serializer.Serialize(Model.Cities);
+    string activitiesJson = serializer.Serialize(Model.Activities);
+    string tripsJson = serializer.Serialize(Model.UserTrips);
+}
+
+<!-- Leaflet CSS for fallback/toggle map engine -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<style>
+    /* Google Maps & Leaflet Canvas & Layout Styles */
+    .gt-map-page-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        background: #0F172A;
+        z-index: 1000;
+        overflow: hidden;
+    }
+
+    .gt-map-topbar {
+        height: 60px;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        z-index: 20;
+        color: white;
+    }
+
+    .gt-map-main-area {
+        flex: 1;
+        position: relative;
+        display: flex;
+        overflow: hidden;
+    }
+
+    #googleMapCanvas, #leafletMapCanvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background: #1E293B;
+    }
+
+    /* Floating Left Sidebar Panel */
+    .gt-map-sidebar {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        bottom: 16px;
+        width: 420px;
+        max-width: calc(100vw - 32px);
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--gt-border);
+        border-radius: var(--gt-radius-xl);
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.35);
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        overflow: hidden;
+    }
+
+    .gt-map-sidebar.collapsed {
+        transform: translateX(-445px);
+    }
+
+    .gt-sidebar-toggle-btn {
+        position: absolute;
+        top: 20px;
+        left: 446px;
+        z-index: 101;
+        background: #FFFFFF;
+        border: 1px solid var(--gt-border);
+        box-shadow: var(--gt-shadow-md);
+        border-radius: var(--gt-radius-full);
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--gt-zinc-700);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .gt-sidebar-toggle-btn:hover {
+        background: var(--gt-brand-primary);
+        color: white;
+    }
+
+    .gt-sidebar-toggle-btn.collapsed {
+        left: 20px;
+    }
+
+    /* Floating Coordinate HUD */
+    .gt-coord-hud {
+        position: absolute;
+        bottom: 24px;
+        right: 24px;
+        background: rgba(15, 23, 42, 0.88);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #F8FAFC;
+        padding: 8px 16px;
+        border-radius: var(--gt-radius-full);
+        font-family: 'Space Grotesk', monospace, sans-serif;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        z-index: 50;
+    }
+
+    /* Floating Distance Ruler HUD */
+    .gt-ruler-hud {
+        position: absolute;
+        top: 16px;
+        right: 24px;
+        background: #FFFFFF;
+        border: 1px solid var(--gt-border);
+        border-radius: var(--gt-radius-lg);
+        padding: 10px 16px;
+        box-shadow: var(--gt-shadow-lg);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        z-index: 50;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--gt-zinc-800);
+    }
+
+    /* Custom scrollbar for sidebar lists */
+    .gt-sidebar-scroll {
+        overflow-y: auto;
+        padding: 14px 18px 20px;
+        flex: 1;
+    }
+    .gt-sidebar-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+    .gt-sidebar-scroll::-webkit-scrollbar-thumb {
+        background: var(--gt-zinc-300);
+        border-radius: 4px;
+    }
+
+    /* Filter Pill Buttons */
+    .gt-map-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: var(--gt-radius-full);
+        font-size: 12px;
+        font-weight: 600;
+        border: 1px solid var(--gt-border);
+        background: #FFFFFF;
+        color: var(--gt-zinc-700);
+        cursor: pointer;
+        transition: all 0.15s ease;
+        white-space: nowrap;
+    }
+    .gt-map-pill:hover, .gt-map-pill.active {
+        background: var(--gt-brand-primary);
+        color: white;
+        border-color: var(--gt-brand-primary);
+    }
+
+    /* Place Card inside list */
+    .gt-map-place-card {
+        background: #FFFFFF;
+        border: 1px solid var(--gt-zinc-200);
+        border-radius: var(--gt-radius-lg);
+        padding: 12px;
+        margin-bottom: 10px;
+        box-shadow: var(--gt-shadow-xs);
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: flex;
+        gap: 12px;
+    }
+    .gt-map-place-card:hover {
+        border-color: var(--gt-brand-primary);
+        box-shadow: var(--gt-shadow-md);
+        transform: translateY(-1px);
+    }
+
+    /* Turn by turn step item */
+    .gt-route-step {
+        display: flex;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px dashed var(--gt-zinc-200);
+        font-size: 12.5px;
+        color: var(--gt-zinc-700);
+    }
+
+    /* Autocomplete dropdown suggestions */
+    .gt-suggest-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #FFFFFF;
+        border: 1px solid var(--gt-border);
+        border-radius: var(--gt-radius-lg);
+        box-shadow: var(--gt-shadow-xl);
+        max-height: 220px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+    }
+    .gt-suggest-item {
+        padding: 8px 14px;
+        font-size: 12.5px;
+        color: var(--gt-zinc-800);
+        cursor: pointer;
+        border-bottom: 1px solid var(--gt-zinc-100);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .gt-suggest-item:hover {
+        background: rgba(99,102,241,0.08);
+        color: var(--gt-brand-primary);
+    }
+</style>
+
+<div class="gt-map-page-wrapper">
+    
+    <!-- ======================================================================
+         1. TOP NAVIGATION & CONTROLS BAR
+         ====================================================================== -->
+    <header class="gt-map-topbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <a href="@Url.Action("Index", "Explore")" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
+                <div class="gt-brand-icon" style="width: 34px; height: 34px; font-size: 16px; background: linear-gradient(135deg, #6366F1, #06B6D4);">
+                    <i class="fa-solid fa-earth-americas"></i>
+                </div>
+                <div>
+                    <span style="font-family: var(--gt-font-display); font-size: 17px; font-weight: 800; letter-spacing: -0.02em;">GlobeTrotter Maps</span>
+                    <span style="font-size: 10.5px; background: rgba(99,102,241,0.3); color: #818CF8; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 4px;">STUDIO</span>
+                </div>
+            </a>
+
+            <!-- Quick Mode Selectors -->
+            <div style="display: flex; gap: 6px; background: rgba(255,255,255,0.08); padding: 3px 6px; border-radius: var(--gt-radius-full);">
+                <button type="button" class="gt-map-pill active" id="btnModeExplore" onclick="switchMapMode('explore')" style="background: transparent; color: #E2E8F0; border: none;">
+                    <i class="fa-solid fa-compass"></i> Explore &amp; Places
+                </button>
+                <button type="button" class="gt-map-pill" id="btnModeRoute" onclick="switchMapMode('route')" style="background: transparent; color: #94A3B8; border: none;">
+                    <i class="fa-solid fa-route"></i> Route &amp; Distance
+                </button>
+                <button type="button" class="gt-map-pill" id="btnModeTrips" onclick="switchMapMode('trips')" style="background: transparent; color: #94A3B8; border: none;">
+                    <i class="fa-solid fa-plane-departure"></i> Trip Itineraries
+                </button>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <!-- Map Engine Switcher (Google Maps vs OpenStreetMap) -->
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94A3B8;">
+                <i class="fa-solid fa-server"></i>
+                <select id="mapEngineSelect" onchange="switchMapEngine(this.value)" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: var(--gt-radius-md); padding: 4px 8px; font-size: 12px; outline: none; cursor: pointer;">
+                    <option value="google" selected style="background:#1E293B; color:white;">Google Maps Canvas</option>
+                    <option value="leaflet" style="background:#1E293B; color:white;">OpenStreetMap Live (Free)</option>
+                </select>
+            </div>
+
+            <!-- Map Style Selector -->
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94A3B8;">
+                <i class="fa-solid fa-layer-group"></i>
+                <select id="mapStyleSelect" onchange="changeMapType(this.value)" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: var(--gt-radius-md); padding: 4px 8px; font-size: 12px; outline: none; cursor: pointer;">
+                    <option value="dark" selected style="background:#1E293B; color:white;">Dark Explorer (Night)</option>
+                    <option value="roadmap" style="background:#1E293B; color:white;">Roadmap Standard</option>
+                    <option value="silver" style="background:#1E293B; color:white;">Silver Minimalist</option>
+                    <option value="hybrid" style="background:#1E293B; color:white;">Satellite + Labels</option>
+                    <option value="terrain" style="background:#1E293B; color:white;">Terrain 3D</option>
+                </select>
+            </div>
+
+            <!-- Recenter / Global View -->
+            <button type="button" class="gt-tag-btn" onclick="resetGlobalView()" style="background: rgba(255,255,255,0.08); color: white; border-color: rgba(255,255,255,0.2); padding: 6px 12px; font-size: 12px;" title="Reset to Global World View">
+                <i class="fa-solid fa-globe"></i> World View
+            </button>
+
+            <!-- Back to Hub -->
+            <a href="@Url.Action("Index", "Explore")" class="gt-tag-btn" style="background: rgba(255,255,255,0.08); color: white; border-color: rgba(255,255,255,0.2); padding: 6px 14px; font-size: 12px; text-decoration: none;">
+                <i class="fa-solid fa-arrow-left" style="margin-right: 4px;"></i> Back to Explore
+            </a>
+        </div>
+    </header>
+
+    <!-- ======================================================================
+         2. MAP CANVAS + FLOATING SIDEBAR & HUDS
+         ====================================================================== -->
+    <main class="gt-map-main-area">
+        
+        <!-- Sidebar Toggle Trigger -->
+        <button type="button" class="gt-sidebar-toggle-btn" id="sidebarToggleBtn" onclick="toggleSidebar()" title="Toggle Sidebar Panel">
+            <i class="fa-solid fa-chevron-left" id="sidebarToggleIcon"></i>
+        </button>
+
+        <!-- Floating Sidebar Panel -->
+        <aside class="gt-map-sidebar" id="mapSidebar">
+            
+            <!-- Sidebar Header / Search Input with Smart Suggestion Fallback -->
+            <div style="padding: 16px 18px 12px; border-bottom: 1px solid var(--gt-border-subtle); background: #FFFFFF; position: relative;">
+                <div class="gt-input-box" style="margin-bottom: 10px; position: relative;">
+                    <i class="fa-solid fa-magnifying-glass input-icon" style="color: var(--gt-brand-primary);"></i>
+                    <input type="text" id="placesAutocompleteInput" class="gt-auth-input" placeholder="Search city, landmark, Bhavnagar, Paris..." style="padding-left: 38px; font-size: 13.5px;" oninput="onSearchInput(this.value)" autocomplete="off" />
+                    
+                    <!-- Fallback Autocomplete Suggestion List -->
+                    <div id="smartSuggestDropdown" class="gt-suggest-dropdown"></div>
+                </div>
+
+                <!-- Mode Specific Header Tabs -->
+                <div id="exploreTabHeader" style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;">
+                    <button type="button" class="gt-map-pill active" onclick="filterNearbyPlaces('all', this)"><i class="fa-solid fa-layer-group"></i> All</button>
+                    <button type="button" class="gt-map-pill" onclick="filterNearbyPlaces('tourist_attraction', this)"><i class="fa-solid fa-landmark"></i> Sights</button>
+                    <button type="button" class="gt-map-pill" onclick="filterNearbyPlaces('restaurant', this)"><i class="fa-solid fa-utensils"></i> Dining</button>
+                    <button type="button" class="gt-map-pill" onclick="filterNearbyPlaces('cafe', this)"><i class="fa-solid fa-mug-saucer"></i> Cafes</button>
+                    <button type="button" class="gt-map-pill" onclick="filterNearbyPlaces('lodging', this)"><i class="fa-solid fa-hotel"></i> Hotels</button>
+                </div>
+            </div>
+
+            <!-- TAB 1: EXPLORE & PLACES SEARCH CONTENT -->
+            <div id="panelExploreContent" class="gt-sidebar-scroll">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span id="placesFoundLabel" style="font-size: 12px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">12 Featured Global Cities</span>
+                    <button type="button" onclick="searchCurrentMapCenter()" class="gt-tag-btn" style="padding: 3px 8px; font-size: 11px;">
+                        <i class="fa-solid fa-arrows-rotate"></i> Search This Area
+                    </button>
+                </div>
+
+                <div id="placesResultsList">
+                    @foreach (var city in Model.Cities)
+                    {
+                        <div class="gt-map-place-card" onclick="flyToLocation(@city.Latitude, @city.Longitude, 13, '@city.Name', 'city', @city.CityId)">
+                            <img src="@city.ImageUrl" alt="@city.Name" style="width: 72px; height: 72px; border-radius: var(--gt-radius-md); object-fit: cover;" />
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h4 style="font-size: 14px; font-weight: 800; color: var(--gt-zinc-950); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@city.Name</h4>
+                                    <span style="font-size: 11px; font-weight: 800; color: #F59E0B;"><i class="fa-solid fa-star"></i> @city.PopularityScore.ToString("F1")</span>
+                                </div>
+                                <p style="font-size: 11.5px; color: var(--gt-zinc-500); margin: 2px 0 6px;">@city.Country • @city.Region</p>
+                                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px;">
+                                    <span style="font-weight: 700; color: var(--gt-brand-primary);">$@city.AvgDailyCost.ToString("N0")/day avg</span>
+                                    <span style="color: var(--gt-zinc-400);">@city.ActivitiesCount activities</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- TAB 2: ROUTE & DISTANCE CALCULATOR CONTENT -->
+            <div id="panelRouteContent" class="gt-sidebar-scroll" style="display: none;">
+                <h4 style="font-size: 14px; font-weight: 800; color: var(--gt-zinc-950); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-route" style="color: var(--gt-brand-primary);"></i> Smart Turn-by-Turn Route Engine
+                </h4>
+
+                <!-- Origin Input -->
+                <div class="gt-form-group" style="margin-bottom: 10px; position: relative;">
+                    <label class="gt-form-label" style="font-size: 11px;">Origin Starting Point (A)</label>
+                    <div class="gt-input-box">
+                        <i class="fa-solid fa-circle-dot input-icon" style="color: #10B981;"></i>
+                        <input type="text" id="routeOriginInput" class="gt-auth-input" placeholder="e.g. Ahmedabad or click map" style="font-size: 12.5px; padding-left: 36px;" />
+                    </div>
+                </div>
+
+                <!-- Destination Input -->
+                <div class="gt-form-group" style="margin-bottom: 12px; position: relative;">
+                    <label class="gt-form-label" style="font-size: 11px;">Destination (B)</label>
+                    <div class="gt-input-box">
+                        <i class="fa-solid fa-location-dot input-icon" style="color: #DC2626;"></i>
+                        <input type="text" id="routeDestinationInput" class="gt-auth-input" placeholder="e.g. Bhavnagar, Gujarat or click map" style="font-size: 12.5px; padding-left: 36px;" />
+                    </div>
+                </div>
+
+                <!-- Travel Mode Selector -->
+                <div style="display: flex; gap: 6px; margin-bottom: 14px;">
+                    <button type="button" class="gt-map-pill active" id="btnModeDriving" onclick="setTravelMode('DRIVING', this)"><i class="fa-solid fa-car"></i> Drive</button>
+                    <button type="button" class="gt-map-pill" id="btnModeTransit" onclick="setTravelMode('TRANSIT', this)"><i class="fa-solid fa-train"></i> Transit / Flight</button>
+                    <button type="button" class="gt-map-pill" id="btnModeWalking" onclick="setTravelMode('WALKING', this)"><i class="fa-solid fa-person-walking"></i> Walk</button>
+                    <button type="button" class="gt-map-pill" id="btnModeBicycling" onclick="setTravelMode('BICYCLING', this)"><i class="fa-solid fa-bicycle"></i> Bike</button>
+                </div>
+
+                <!-- Route Action Buttons -->
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                    <button type="button" id="btnCalculateRoute" class="gt-btn-auth-primary" onclick="calculateRouteDirections()" style="flex: 1; padding: 10px 16px; font-size: 13px; font-weight: 700; justify-content: center;">
+                        <i class="fa-solid fa-calculator" style="margin-right: 4px;"></i> Calculate Route
+                    </button>
+                    <button type="button" class="gt-tag-btn" onclick="clearActiveRoute()" style="padding: 10px 14px; font-size: 13px;" title="Clear Route">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+
+                <!-- Route Summary Stats Card -->
+                <div id="routeStatsSummaryCard" style="display: none; background: var(--gt-zinc-50); border: 1px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 14px; margin-bottom: 14px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px;">
+                        <div>
+                            <span style="font-size: 10.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Total Distance</span>
+                            <div id="routeTotalDistanceVal" style="font-size: 18px; font-weight: 800; color: var(--gt-brand-primary);">0 km</div>
+                        </div>
+                        <div>
+                            <span style="font-size: 10.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Est. Travel Time</span>
+                            <div id="routeTotalDurationVal" style="font-size: 18px; font-weight: 800; color: var(--gt-zinc-950);">0 mins</div>
+                        </div>
+                    </div>
+                    <div id="routeMilesVal" style="font-size: 11.5px; color: var(--gt-zinc-500);"></div>
+                </div>
+
+                <!-- Step-by-Step Directions Accordion -->
+                <div id="routeTurnByTurnContainer" style="display: none;">
+                    <h5 style="font-size: 12px; font-weight: 700; color: var(--gt-zinc-500); text-transform: uppercase; margin-bottom: 8px;">Turn-by-Turn Guidance</h5>
+                    <div id="routeStepsList"></div>
+                </div>
+            </div>
+
+            <!-- TAB 3: TRIP ITINERARY VISUALIZER CONTENT -->
+            <div id="panelTripsContent" class="gt-sidebar-scroll" style="display: none;">
+                <h4 style="font-size: 14px; font-weight: 800; color: var(--gt-zinc-950); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-plane-departure" style="color: var(--gt-brand-primary);"></i> Multi-Stop Itinerary Route
+                </h4>
+
+                @if (Model.UserTrips.Count == 0)
+                {
+                    <div style="background: var(--gt-zinc-50); border: 1px dashed var(--gt-zinc-300); border-radius: var(--gt-radius-md); padding: 24px; text-align: center;">
+                        <p style="font-size: 13px; color: var(--gt-zinc-600); margin-bottom: 10px;">No saved trips available to map yet.</p>
+                        <a href="@Url.Action("Create", "User")" class="gt-btn-add" style="display: inline-flex; padding: 6px 14px; font-size: 12px;">+ Plan a Trip</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="gt-form-group" style="margin-bottom: 14px;">
+                        <label class="gt-form-label" style="font-size: 11px;">Select Trip to Display on Map:</label>
+                        <select id="userTripSelector" class="gt-auth-input" style="font-size: 13px;" onchange="loadTripOnMap(parseInt(this.value))">
+                            @foreach (var trip in Model.UserTrips)
+                            {
+                                <option value="@trip.TripId" selected="@(Model.SelectedTripId == trip.TripId)">
+                                    @trip.Title (@trip.Stops.Count stops)
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div id="tripStopsSummaryList"></div>
+                }
+            </div>
+
+            <!-- Selected Pin Information Card (Bottom of Sidebar) -->
+            <div id="selectedPinHUD" style="display: none; padding: 14px 18px; background: #F8FAFC; border-top: 1px solid var(--gt-border); border-bottom-left-radius: var(--gt-radius-xl); border-bottom-right-radius: var(--gt-radius-xl);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                    <div>
+                        <span id="pinTypeBadge" class="gt-tier-tag" style="font-size: 10px; margin-bottom: 2px;">Selected Pin</span>
+                        <h4 id="pinTitleText" style="font-size: 14px; font-weight: 800; color: var(--gt-zinc-950); margin: 0;"></h4>
+                    </div>
+                    <button type="button" onclick="document.getElementById('selectedPinHUD').style.display='none'" style="background:none; border:none; color:var(--gt-zinc-400); cursor:pointer;">&times;</button>
+                </div>
+                <p id="pinAddressText" style="font-size: 11.5px; color: var(--gt-zinc-500); line-height: 1.4; margin-bottom: 8px;"></p>
+                <div style="display: flex; gap: 6px;">
+                    <button type="button" class="gt-tag-btn" onclick="setAsRouteOrigin()" style="flex:1; padding: 4px 8px; font-size: 11px; justify-content: center;">
+                        <i class="fa-solid fa-play" style="color: #10B981; margin-right: 3px;"></i> Start Route
+                    </button>
+                    <button type="button" class="gt-tag-btn" onclick="setAsRouteDestination()" style="flex:1; padding: 4px 8px; font-size: 11px; justify-content: center;">
+                        <i class="fa-solid fa-flag-checkered" style="color: #DC2626; margin-right: 3px;"></i> End Route
+                    </button>
+                    <button type="button" class="gt-tag-btn" onclick="copyPinCoordinates()" style="padding: 4px 8px; font-size: 11px;" title="Copy Lat/Lng">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Map Canvases (Google Maps + Leaflet Fallback) -->
+        <div id="googleMapCanvas"></div>
+        <div id="leafletMapCanvas" style="display: none;"></div>
+
+        <!-- Real-Time Cursor & Pin Coordinates HUD -->
+        <div class="gt-coord-hud">
+            <span><i class="fa-solid fa-location-crosshairs" style="color: #38BDF8; margin-right: 4px;"></i> <strong id="hudLat">-</strong>, <strong id="hudLng">-</strong></span>
+            <span style="color: rgba(255,255,255,0.3);">|</span>
+            <span style="cursor: pointer;" onclick="copyCurrentCoordinates()" title="Click to copy coordinates"><i class="fa-regular fa-copy"></i> Copy</span>
+        </div>
+
+        <!-- Distance Measurement Tool HUD (Top Right) -->
+        <div class="gt-ruler-hud" id="rulerToolHud" style="display: none;">
+            <i class="fa-solid fa-ruler-combined" style="color: var(--gt-brand-primary);"></i>
+            <span>Straight-Line Distance: <strong id="rulerDistanceText" style="color: var(--gt-brand-primary);">0 km</strong></span>
+            <button type="button" onclick="clearRulerTool()" style="background: none; border: none; color: var(--gt-zinc-400); cursor: pointer;">&times;</button>
+        </div>
+
+    </main>
+</div>
+
+<!-- ==========================================================================
+     3. HYBRID MAP SCRIPT & DUAL ROUTING ENGINE
+     ========================================================================== -->
+<script>
+    const CITIES_DATA = @Html.Raw(citiesJson);
+    const ACTIVITIES_DATA = @Html.Raw(activitiesJson);
+    const TRIPS_DATA = @Html.Raw(tripsJson);
+
+    let activeEngine = 'google'; // 'google' or 'leaflet'
+    let googleMap = null;
+    let leafletMap = null;
+
+    let geocoder = null;
+    let placesService = null;
+    let directionsService = null;
+    let directionsRenderer = null;
+    let autocomplete = null;
+
+    let googleMarkers = [];
+    let leafletMarkers = [];
+    let googlePolyline = null;
+    let leafletPolyline = null;
+    let customPin = null;
+
+    let selectedLocation = { lat: 48.8566, lng: 2.3522, name: 'Paris', address: 'Paris, France' };
+    let currentTravelMode = 'DRIVING';
+
+    // Catch Google Maps Auth Failures & switch gracefully
+    window.gm_authFailure = function() {
+        console.warn("Google Maps API Key Authentication failed. Seamlessly activating OpenStreetMap Live Engine.");
+        showToast("ℹ️ Google API key has restrictions. Switched to OpenStreetMap routing engine.");
+        switchMapEngine('leaflet');
+    };
+
+    // ── 1. Init Google Map ───────────────────────────────────────────────────
+    function initGlobeTrotterMap() {
+        try {
+            googleMap = new google.maps.Map(document.getElementById('googleMapCanvas'), {
+                center: { lat: 22.0, lng: 75.0 },
+                zoom: 4,
+                minZoom: 2,
+                maxZoom: 20,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false,
+                zoomControl: true
+            });
+
+            geocoder = new google.maps.Geocoder();
+            placesService = new google.maps.places.PlacesService(googleMap);
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map: googleMap,
+                suppressMarkers: false,
+                polylineOptions: { strokeColor: '#6366F1', strokeWeight: 5, strokeOpacity: 0.85 }
+            });
+
+            // Google Map Click & Hover Listeners
+            googleMap.addListener('mousemove', function(e) {
+                document.getElementById('hudLat').innerText = e.latLng.lat().toFixed(5);
+                document.getElementById('hudLng').innerText = e.latLng.lng().toFixed(5);
+            });
+
+            googleMap.addListener('click', function(e) {
+                const lat = e.latLng.lat();
+                const lng = e.latLng.lng();
+                reverseGeocodePoint(lat, lng);
+            });
+
+            renderCatalogMarkers();
+        } catch(err) {
+            console.error("Google Map init error:", err);
+            switchMapEngine('leaflet');
+        }
+    }
+
+    // ── 2. Init Leaflet Map ──────────────────────────────────────────────────
+    function initLeafletMap() {
+        if (leafletMap) return;
+
+        leafletMap = L.map('leafletMapCanvas', {
+            zoomControl: true
+        }).setView([22.0, 75.0], 5);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(leafletMap);
+
+        leafletMap.on('mousemove', function(e) {
+            document.getElementById('hudLat').innerText = e.latlng.lat.toFixed(5);
+            document.getElementById('hudLng').innerText = e.latlng.lng.toFixed(5);
+        });
+
+        leafletMap.on('click', function(e) {
+            reverseGeocodePoint(e.latlng.lat, e.latlng.lng);
+        });
+
+        renderCatalogMarkers();
+    }
+
+    // ── Switch Map Engine ────────────────────────────────────────────────────
+    function switchMapEngine(engine) {
+        activeEngine = engine;
+        document.getElementById('mapEngineSelect').value = engine;
+
+        const gCanvas = document.getElementById('googleMapCanvas');
+        const lCanvas = document.getElementById('leafletMapCanvas');
+
+        if (engine === 'leaflet') {
+            gCanvas.style.display = 'none';
+            lCanvas.style.display = 'block';
+            initLeafletMap();
+            setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 200);
+        } else {
+            lCanvas.style.display = 'none';
+            gCanvas.style.display = 'block';
+            if (!googleMap && typeof google !== 'undefined' && google.maps) {
+                initGlobeTrotterMap();
+            }
+        }
+    }
+
+    // ── Render Catalog Cities & Activities on Active Map ──────────────────────
+    function renderCatalogMarkers() {
+        CITIES_DATA.forEach(city => {
+            if (city.Latitude === 0 && city.Longitude === 0) return;
+
+            // Google Map marker
+            if (googleMap) {
+                const m = new google.maps.Marker({
+                    position: { lat: city.Latitude, lng: city.Longitude },
+                    map: googleMap,
+                    title: city.Name,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 8,
+                        fillColor: '#6366F1',
+                        fillOpacity: 1,
+                        strokeColor: '#FFFFFF',
+                        strokeWeight: 2
+                    }
+                });
+                m.addListener('click', () => dropCustomPin(city.Latitude, city.Longitude, city.Name, `${city.Name}, ${city.Country}`));
+                googleMarkers.push(m);
+            }
+
+            // Leaflet marker
+            if (leafletMap) {
+                const lm = L.circleMarker([city.Latitude, city.Longitude], {
+                    radius: 8,
+                    fillColor: '#6366F1',
+                    color: '#FFFFFF',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 1
+                }).addTo(leafletMap);
+
+                lm.bindPopup(`<b>${city.Name}</b><br/>${city.Country} • Avg $${city.AvgDailyCost}/day`);
+                lm.on('click', () => dropCustomPin(city.Latitude, city.Longitude, city.Name, `${city.Name}, ${city.Country}`));
+                leafletMarkers.push(lm);
+            }
+        });
+    }
+
+    // ── Universal Reverse Geocoding ──────────────────────────────────────────
+    async function reverseGeocodePoint(lat, lng) {
+        let name = 'Selected Coordinates';
+        let address = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const data = await res.json();
+            if (data && data.display_name) {
+                address = data.display_name;
+                name = data.address?.city || data.address?.town || data.address?.village || data.address?.state || 'Selected Location';
+            }
+        } catch(e) {
+            console.warn("Reverse geocode fallback used coords:", e);
+        }
+
+        dropCustomPin(lat, lng, name, address);
+    }
+
+    // ── Drop Custom Pin ──────────────────────────────────────────────────────
+    function dropCustomPin(lat, lng, name, address) {
+        selectedLocation = { lat, lng, name, address };
+
+        // Pin on Google Map
+        if (googleMap) {
+            if (customPin) customPin.setMap(null);
+            customPin = new google.maps.Marker({
+                position: { lat, lng },
+                map: googleMap,
+                animation: google.maps.Animation.DROP
+            });
+        }
+
+        // Pin on Leaflet
+        if (leafletMap) {
+            L.popup()
+                .setLatLng([lat, lng])
+                .setContent(`<b>${name}</b><br/>${address}`)
+                .openOn(leafletMap);
+        }
+
+        document.getElementById('pinTitleText').innerText = name;
+        document.getElementById('pinAddressText').innerText = address;
+        document.getElementById('selectedPinHUD').style.display = 'block';
+
+        const originInput = document.getElementById('routeOriginInput');
+        const destInput = document.getElementById('routeDestinationInput');
+        if (originInput && !originInput.value) {
+            originInput.value = name;
+            originInput.dataset.lat = lat;
+            originInput.dataset.lng = lng;
+        } else if (destInput && !destInput.value) {
+            destInput.value = name;
+            destInput.dataset.lat = lat;
+            destInput.dataset.lng = lng;
+        }
+    }
+
+    // ── Smart Autocomplete & Suggestion Search ────────────────────────────────
+    let searchDebounceTimer = null;
+    function onSearchInput(query) {
+        clearTimeout(searchDebounceTimer);
+        const dropdown = document.getElementById('smartSuggestDropdown');
+
+        if (!query || query.length < 2) {
+            dropdown.style.display = 'none';
+            return;
+        }
+
+        searchDebounceTimer = setTimeout(async () => {
+            let html = '';
+
+            // 1. Local catalog matches
+            const qLower = query.toLowerCase();
+            const matchedCities = CITIES_DATA.filter(c => c.Name.toLowerCase().includes(qLower) || c.Country.toLowerCase().includes(qLower));
+            matchedCities.forEach(c => {
+                html += `
+                    <div class="gt-suggest-item" onclick="selectSuggestion(${c.Latitude}, ${c.Longitude}, '${c.Name.replace(/'/g, "\\'")}', '${c.Name}, ${c.Country}')">
+                        <i class="fa-solid fa-city" style="color:var(--gt-brand-primary);"></i>
+                        <div><strong>${c.Name}</strong>, <span style="color:#64748B;">${c.Country}</span></div>
+                    </div>
+                `;
+            });
+
+            // 2. Nominatim OpenStreetMap Geocoding suggestions
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+                const results = await res.json();
+                if (results && results.length > 0) {
+                    results.forEach(item => {
+                        const lat = parseFloat(item.lat);
+                        const lng = parseFloat(item.lon);
+                        const label = item.display_name.split(',').slice(0, 3).join(',');
+                        html += `
+                            <div class="gt-suggest-item" onclick="selectSuggestion(${lat}, ${lng}, '${label.replace(/'/g, "\\'")}', '${item.display_name.replace(/'/g, "\\'")}')">
+                                <i class="fa-solid fa-location-dot" style="color:#DC2626;"></i>
+                                <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.display_name}</div>
+                            </div>
+                        `;
+                    });
+                }
+            } catch(e) {
+                console.warn("Nominatim search error:", e);
+            }
+
+            if (html) {
+                dropdown.innerHTML = html;
+                dropdown.style.display = 'block';
+            } else {
+                dropdown.style.display = 'none';
+            }
+        }, 250);
+    }
+
+    function selectSuggestion(lat, lng, name, address) {
+        document.getElementById('placesAutocompleteInput').value = name;
+        document.getElementById('smartSuggestDropdown').style.display = 'none';
+        flyToLocation(lat, lng, 13, name, 'search');
+    }
+
+    // ── Geocode Query Helper ──────────────────────────────────────────────────
+    async function resolveLocationCoords(query, inputElement) {
+        if (inputElement && inputElement.dataset.lat && inputElement.dataset.lng) {
+            return { lat: parseFloat(inputElement.dataset.lat), lng: parseFloat(inputElement.dataset.lng), name: query };
+        }
+
+        // Check if query is coordinates
+        const coordMatch = query.match(/^([-+]?[0-9]*\.?[0-9]+)[\s,]+([-+]?[0-9]*\.?[0-9]+)$/);
+        if (coordMatch) {
+            return { lat: parseFloat(coordMatch[1]), lng: parseFloat(coordMatch[2]), name: query };
+        }
+
+        // Check local cities catalog
+        const foundCity = CITIES_DATA.find(c => c.Name.equalsIgnoreCase ? c.Name.equalsIgnoreCase(query) : c.Name.toLowerCase() === query.toLowerCase());
+        if (foundCity && foundCity.Latitude !== 0) {
+            return { lat: foundCity.Latitude, lng: foundCity.Longitude, name: foundCity.Name };
+        }
+
+        // Fallback to Nominatim
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+            const data = await res.json();
+            if (data && data.length > 0) {
+                return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), name: data[0].display_name.split(',')[0] };
+            }
+        } catch(e) {
+            console.error("Geocoding failed for:", query, e);
+        }
+
+        return null;
+    }
+
+    // ── 3. SMART HYBRID ROUTE ENGINE (Google Directions + OSRM Fallback) ───────
+    async function calculateRouteDirections() {
+        const originInput = document.getElementById('routeOriginInput');
+        const destInput = document.getElementById('routeDestinationInput');
+        const originVal = originInput.value.trim();
+        const destVal = destInput.value.trim();
+
+        if (!originVal || !destVal) {
+            showToast('⚠️ Please specify both Origin and Destination.');
+            return;
+        }
+
+        const btn = document.getElementById('btnCalculateRoute');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Calculating Route...';
+
+        const origin = await resolveLocationCoords(originVal, originInput);
+        const destination = await resolveLocationCoords(destVal, destInput);
+
+        if (!origin || !destination) {
+            btn.innerHTML = '<i class="fa-solid fa-calculator"></i> Calculate Route';
+            showToast('⚠️ Could not find coordinates for one of the locations.');
+            return;
+        }
+
+        // Try OSRM / Open Source Routing Engine (100% Free, reliable, avoids API key issues)
+        try {
+            const osrmProfile = currentTravelMode === 'WALKING' ? 'foot' : (currentTravelMode === 'BICYCLING' ? 'bike' : 'driving');
+            const osrmUrl = `https://router.project-osrm.org/route/v1/${osrmProfile}/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson&steps=true`;
+
+            const res = await fetch(osrmUrl);
+            const data = await res.json();
+
+            if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                const route = data.routes[0];
+                const distanceKm = (route.distance / 1000).toFixed(1);
+                const distanceMiles = (route.distance * 0.000621371).toFixed(1);
+                const hours = Math.floor(route.duration / 3600);
+                const mins = Math.floor((route.duration % 3600) / 60);
+                const timeStr = hours > 0 ? `${hours} hrs ${mins} mins` : `${mins} mins`;
+
+                // Display Stats
+                document.getElementById('routeTotalDistanceVal').innerText = `${distanceKm} km`;
+                document.getElementById('routeTotalDurationVal').innerText = timeStr;
+                document.getElementById('routeMilesVal').innerText = `Distance: ${distanceMiles} miles • Mode: ${currentTravelMode.toLowerCase()}`;
+
+                // Render Turn-by-Turn Steps
+                let stepsHtml = '';
+                route.legs.forEach(leg => {
+                    leg.steps.forEach((step, idx) => {
+                        const stepDist = step.distance > 1000 ? `${(step.distance/1000).toFixed(1)} km` : `${Math.round(step.distance)} m`;
+                        const instruction = step.maneuver?.type === 'depart' ? `Depart from <strong>${origin.name}</strong>` : (step.name ? `Proceed onto <strong>${step.name}</strong>` : `Continue along route`);
+                        stepsHtml += `
+                            <div class="gt-route-step">
+                                <span style="font-weight:700; color:var(--gt-brand-primary); min-width:20px;">${idx + 1}.</span>
+                                <div style="flex:1;">${instruction} <span style="color:var(--gt-zinc-400); font-size:11px;">(${stepDist})</span></div>
+                            </div>
+                        `;
+                    });
+                });
+                document.getElementById('routeStepsList').innerHTML = stepsHtml;
+
+                document.getElementById('routeStatsSummaryCard').style.display = 'block';
+                document.getElementById('routeTurnByTurnContainer').style.display = 'block';
+
+                // Draw Path on Maps
+                drawRoutePolyline(route.geometry.coordinates, origin, destination);
+
+                showToast(`🚗 Route calculated: ${distanceKm} km (${timeStr})`);
+            } else {
+                // Spherical Geodesic Flight Fallback
+                calculateSphericalFlightRoute(origin, destination);
+            }
+        } catch(err) {
+            console.warn("OSRM routing fallback to geodesic:", err);
+            calculateSphericalFlightRoute(origin, destination);
+        } finally {
+            btn.innerHTML = '<i class="fa-solid fa-calculator"></i> Calculate Route';
+        }
+    }
+
+    // ── Geodesic Flight Route Calculation (Cross-continent/Direct) ───────────
+    function calculateSphericalFlightRoute(origin, destination) {
+        const R = 6371; // Earth radius in km
+        const dLat = (destination.lat - origin.lat) * Math.PI / 180;
+        const dLng = (destination.lng - origin.lng) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(origin.lat * Math.PI / 180) * Math.cos(destination.lat * Math.PI / 180) *
+                  Math.sin(dLng/2) * Math.sin(dLng/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const distanceKm = (R * c).toFixed(1);
+        const distanceMiles = (distanceKm * 0.621371).toFixed(1);
+        const flightHours = (distanceKm / 800).toFixed(1); // 800 km/h avg flight
+
+        document.getElementById('routeTotalDistanceVal').innerText = `${distanceKm} km`;
+        document.getElementById('routeTotalDurationVal').innerText = `~${flightHours} hrs (Flight)`;
+        document.getElementById('routeMilesVal').innerText = `Direct Geodesic: ${distanceMiles} miles`;
+        document.getElementById('routeStepsList').innerHTML = `
+            <div class="gt-route-step"><span style="font-weight:700; color:#10B981;">1.</span><div>Depart ${origin.name} (${origin.lat.toFixed(3)}, ${origin.lng.toFixed(3)})</div></div>
+            <div class="gt-route-step"><span style="font-weight:700; color:#6366F1;">2.</span><div>Direct transit route over ${distanceKm} km</div></div>
+            <div class="gt-route-step"><span style="font-weight:700; color:#DC2626;">3.</span><div>Arrive at ${destination.name} (${destination.lat.toFixed(3)}, ${destination.lng.toFixed(3)})</div></div>
+        `;
+        document.getElementById('routeStatsSummaryCard').style.display = 'block';
+        document.getElementById('routeTurnByTurnContainer').style.display = 'block';
+
+        const lineCoords = [
+            [origin.lng, origin.lat],
+            [destination.lng, destination.lat]
+        ];
+        drawRoutePolyline(lineCoords, origin, destination);
+        showToast(`✈️ Direct distance calculated: ${distanceKm} km`);
+    }
+
+    // ── Draw Polyline on active Map ──────────────────────────────────────────
+    function drawRoutePolyline(coords, origin, destination) {
+        // Coords are [lng, lat]
+        const latLngs = coords.map(c => [c[1], c[0]]);
+
+        // Leaflet Drawing
+        if (leafletMap) {
+            if (leafletPolyline) leafletMap.removeLayer(leafletPolyline);
+            leafletPolyline = L.polyline(latLngs, { color: '#6366F1', weight: 5, opacity: 0.85 }).addTo(leafletMap);
+            leafletMap.fitBounds(leafletPolyline.getBounds(), { padding: [40, 40] });
+        }
+
+        // Google Maps Drawing
+        if (googleMap && typeof google !== 'undefined' && google.maps) {
+            if (googlePolyline) googlePolyline.setMap(null);
+            const gPath = coords.map(c => ({ lat: c[1], lng: c[0] }));
+            googlePolyline = new google.maps.Polyline({
+                path: gPath,
+                geodesic: true,
+                strokeColor: '#6366F1',
+                strokeOpacity: 0.85,
+                strokeWeight: 5,
+                map: googleMap
+            });
+
+            const bounds = new google.maps.LatLngBounds();
+            gPath.forEach(p => bounds.extend(p));
+            googleMap.fitBounds(bounds);
+        }
+    }
+
+    function clearActiveRoute() {
+        if (leafletPolyline && leafletMap) { leafletMap.removeLayer(leafletPolyline); leafletPolyline = null; }
+        if (googlePolyline) { googlePolyline.setMap(null); googlePolyline = null; }
+        if (directionsRenderer) directionsRenderer.setDirections({ routes: [] });
+
+        document.getElementById('routeStatsSummaryCard').style.display = 'none';
+        document.getElementById('routeTurnByTurnContainer').style.display = 'none';
+        document.getElementById('routeOriginInput').value = '';
+        document.getElementById('routeDestinationInput').value = '';
+    }
+
+    // ── Fly To Location ──────────────────────────────────────────────────────
+    function flyToLocation(lat, lng, zoom, name, type) {
+        if (leafletMap && activeEngine === 'leaflet') {
+            leafletMap.setView([lat, lng], zoom || 13);
+        }
+        if (googleMap && activeEngine === 'google') {
+            googleMap.panTo({ lat, lng });
+            googleMap.setZoom(zoom || 13);
+        }
+        dropCustomPin(lat, lng, name, `${name} (${type})`);
+    }
+
+    function resetGlobalView() {
+        if (leafletMap) leafletMap.setView([22.0, 75.0], 3);
+        if (googleMap) { googleMap.setCenter({ lat: 22.0, lng: 75.0 }); googleMap.setZoom(3); }
+    }
+
+    function switchMapMode(mode) {
+        document.querySelectorAll('.gt-map-topbar .gt-map-pill').forEach(p => {
+            p.classList.remove('active');
+            p.style.color = '#94A3B8';
+        });
+
+        document.getElementById('panelExploreContent').style.display = 'none';
+        document.getElementById('panelRouteContent').style.display = 'none';
+        document.getElementById('panelTripsContent').style.display = 'none';
+
+        if (mode === 'route') {
+            document.getElementById('btnModeRoute').classList.add('active');
+            document.getElementById('btnModeRoute').style.color = '#E2E8F0';
+            document.getElementById('panelRouteContent').style.display = 'block';
+        } else if (mode === 'trips') {
+            document.getElementById('btnModeTrips').classList.add('active');
+            document.getElementById('btnModeTrips').style.color = '#E2E8F0';
+            document.getElementById('panelTripsContent').style.display = 'block';
+        } else {
+            document.getElementById('btnModeExplore').classList.add('active');
+            document.getElementById('btnModeExplore').style.color = '#E2E8F0';
+            document.getElementById('panelExploreContent').style.display = 'block';
+        }
+    }
+
+    function setTravelMode(mode, btn) {
+        currentTravelMode = mode;
+        document.querySelectorAll('#panelRouteContent .gt-map-pill').forEach(p => p.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        calculateRouteDirections();
+    }
+
+    function setAsRouteOrigin() {
+        const input = document.getElementById('routeOriginInput');
+        input.value = selectedLocation.name;
+        input.dataset.lat = selectedLocation.lat;
+        input.dataset.lng = selectedLocation.lng;
+        switchMapMode('route');
+    }
+
+    function setAsRouteDestination() {
+        const input = document.getElementById('routeDestinationInput');
+        input.value = selectedLocation.name;
+        input.dataset.lat = selectedLocation.lat;
+        input.dataset.lng = selectedLocation.lng;
+        switchMapMode('route');
+    }
+
+    function copyPinCoordinates() {
+        const text = `${selectedLocation.lat.toFixed(6)}, ${selectedLocation.lng.toFixed(6)}`;
+        navigator.clipboard.writeText(text);
+        showToast(`📋 Copied: ${text}`);
+    }
+
+    function copyCurrentCoordinates() {
+        const lat = document.getElementById('hudLat').innerText;
+        const lng = document.getElementById('hudLng').innerText;
+        const text = `${lat}, ${lng}`;
+        navigator.clipboard.writeText(text);
+        showToast(`📋 Copied coordinates: ${text}`);
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('mapSidebar');
+        const toggleBtn = document.getElementById('sidebarToggleBtn');
+        const icon = document.getElementById('sidebarToggleIcon');
+
+        sidebar.classList.toggle('collapsed');
+        toggleBtn.classList.toggle('collapsed');
+        icon.className = sidebar.classList.contains('collapsed') ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left';
+    }
+
+    function changeMapType(type) {
+        if (googleMap) {
+            if (type === 'dark' || type === 'silver') {
+                googleMap.setMapTypeId('roadmap');
+            } else {
+                googleMap.setMapTypeId(type);
+            }
+        }
+    }
+
+    // ── Load Trip on Map ─────────────────────────────────────────────────────
+    function loadTripOnMap(tripId) {
+        const trip = TRIPS_DATA.find(t => t.TripId === tripId);
+        if (!trip || !trip.Stops || trip.Stops.length === 0) return;
+
+        const coords = trip.Stops.map(s => [s.Longitude, s.Latitude]);
+        drawRoutePolyline(coords, { name: trip.Stops[0].CityName, lat: trip.Stops[0].Latitude, lng: trip.Stops[0].Longitude }, { name: trip.Stops[trip.Stops.length - 1].CityName, lat: trip.Stops[trip.Stops.length - 1].Latitude, lng: trip.Stops[trip.Stops.length - 1].Longitude });
+
+        let stopsHtml = '';
+        trip.Stops.forEach(s => {
+            stopsHtml += `
+                <div class="gt-map-place-card" onclick="flyToLocation(${s.Latitude}, ${s.Longitude}, 13, '${s.CityName}', 'stop')">
+                    <div style="width:28px; height:28px; border-radius:50%; background:var(--gt-brand-primary); color:white; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px;">${s.StopOrder}</div>
+                    <div style="flex:1;">
+                        <h4 style="font-size:14px; font-weight:800; margin:0;">${s.CityName}</h4>
+                        <p style="font-size:11.5px; color:#64748B; margin:2px 0;">${s.TransportMode} • Stay: $${s.AccommodationCost}</p>
+                    </div>
+                </div>
+            `;
+        });
+        document.getElementById('tripStopsSummaryList').innerHTML = stopsHtml;
+        showToast(`✈️ Loaded '${trip.Title}' with ${trip.Stops.length} stops!`);
+    }
+
+    // Auto-init Leaflet on startup in background for instant fallback
+    window.addEventListener('DOMContentLoaded', () => {
+        initLeafletMap();
+    });
+</script>
+
+<!-- Google Maps JavaScript API with Libraries -->
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=@Model.GoogleMapsApiKey&libraries=places,geometry&callback=initGlobeTrotterMap"></script>

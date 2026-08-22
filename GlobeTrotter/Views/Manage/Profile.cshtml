@@ -199,12 +199,16 @@
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
                     <div style="display: flex; gap: 8px; background: #FFFFFF; border: 1px solid var(--gt-border); padding: 4px 6px; border-radius: var(--gt-radius-full); box-shadow: var(--gt-shadow-xs);">
                         <button type="button" class="gt-nav-link active" id="tabBtnUpcoming" onclick="showProfileTab('upcoming', this)">
-                            Upcoming Journeys (@Model.UpcomingTrips.Count)
+                            Upcoming Journeys (@Model.UpcomingTrips.Count@(Model.UpcomingTripsCount > Model.UpcomingTrips.Count ? $" of {Model.UpcomingTripsCount}" : ""))
                         </button>
                         <button type="button" class="gt-nav-link" id="tabBtnPrevious" onclick="showProfileTab('previous', this)">
                             Previous Trips (@Model.PreviousTrips.Count)
                         </button>
                     </div>
+
+                    <a href="@Url.Action("Trip", "User")" style="font-size: 12.5px; font-weight: 700; color: var(--gt-brand-primary); text-decoration: none;">
+                        All Trips &rarr;
+                    </a>
                 </div>
 
                 <!-- Upcoming Trips Panel -->
@@ -213,7 +217,7 @@
                     {
                         <div style="background: #FFFFFF; border: 1px dashed var(--gt-zinc-300); border-radius: var(--gt-radius-xl); padding: 40px 20px; text-align: center;">
                             <p style="font-size: 14px; color: var(--gt-zinc-500); margin-bottom: 14px;">No upcoming trips scheduled yet.</p>
-                            <a href="@Url.Action("Create", "Trips")" class="gt-btn-add" style="display: inline-flex; padding: 8px 18px; font-size: 13px;">
+                            <a href="@Url.Action("Create", "User")" class="gt-btn-add" style="display: inline-flex; padding: 8px 18px; font-size: 13px;">
                                 <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Plan New Adventure
                             </a>
                         </div>
@@ -237,11 +241,20 @@
                                     </div>
                                     <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; border-top: 1px solid var(--gt-zinc-100); padding-top: 8px;">
                                         <span style="font-size: 12.5px; font-weight: 700; color: var(--gt-brand-primary);">$@trip.TotalBudget.ToString("N0") Budget</span>
-                                        <a href="@Url.Action("BuildItinerary", "Trips", new { id = trip.TripId })" class="gt-btn-add" style="padding: 4px 12px; font-size: 12px;">
+                                        <a href="@Url.Action("BuildItinerary", "User", new { id = trip.TripId })" class="gt-btn-add" style="padding: 4px 12px; font-size: 12px;">
                                             <span>Manage</span> &rarr;
                                         </a>
                                     </div>
                                 </div>
+                            </div>
+                        }
+
+                        if (Model.UpcomingTripsCount > Model.UpcomingTrips.Count)
+                        {
+                            <div style="text-align: center; margin-top: 4px;">
+                                <a href="@Url.Action("Trip", "User")" class="gt-tag-btn" style="padding: 8px 18px; font-size: 12.5px; font-weight: 700; color: var(--gt-brand-primary);">
+                                    <i class="fa-solid fa-arrow-right" style="margin-right: 4px;"></i> View All @Model.UpcomingTripsCount Journeys in My Trips
+                                </a>
                             </div>
                         }
                     }

@@ -494,6 +494,112 @@ namespace GlobeTrotter.Controllers
             }
         }
 
+        // =====================================================================
+        // 6. GOOGLE MAPS PLATFORM EXPLORER & ROUTE VISUALIZATION
+        // =====================================================================
+        [HttpGet]
+        public async Task<ActionResult> Map(int? tripId = null)
+        {
+            var apiKey = System.Configuration.ConfigurationManager.AppSettings["GoogleMapsApiKey"] ?? "AIzaSyBVLAn7DuCYEjq3819bRwlvrVGb_vhL_FI";
+
+            var cities = await db.DestinationCities
+                .Include(c => c.Activities)
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+
+            var cityMapItems = cities.Select(c => new DestinationCityMapItem
+            {
+                CityId = c.CityId,
+                Name = c.Name,
+                Country = c.Country,
+                Region = c.Region,
+                Description = c.Description,
+                ImageUrl = c.ImageUrl,
+                AvgDailyCost = c.AvgDailyCost,
+                CostIndex = c.CostIndex,
+                PopularityScore = c.PopularityScore,
+                Latitude = c.Latitude.HasValue ? (double)c.Latitude.Value : 0.0,
+                Longitude = c.Longitude.HasValue ? (double)c.Longitude.Value : 0.0,
+                ActivitiesCount = c.Activities.Count
+            }).ToList();
+
+            var rawActs = await db.Activities
+                .Include(a => a.DestinationCity)
+                .Include(a => a.ActivityCategory)
+                .ToListAsync();
+
+            var actMapItems = rawActs.Select((a, idx) => {
+                double lat = a.DestinationCity?.Latitude.HasValue == true ? (double)a.DestinationCity.Latitude.Value : 0.0;
+                double lng = a.DestinationCity?.Longitude.HasValue == true ? (double)a.DestinationCity.Longitude.Value : 0.0;
+                // Jitter slightly so activity markers in the same city are spread around the city center
+                double jitterLat = lat + (Math.Sin(idx * 1.7) * 0.018);
+                double jitterLng = lng + (Math.Cos(idx * 1.7) * 0.018);
+
+                return new ActivityMapItem
+                {
+                    ActivityId = a.ActivityId,
+                    CityId = a.CityId,
+                    CityName = a.DestinationCity?.Name ?? "City",
+                    Country = a.DestinationCity?.Country ?? "",
+                    Title = a.Title,
+                    Description = a.Description,
+                    Category = a.ActivityCategory?.CategoryName ?? "Sightseeing",
+                    Cost = a.EstimatedCost,
+                    DurationHours = a.DurationHours,
+                    Rating = a.Rating,
+                    ImageUrl = a.ImageUrl,
+                    Latitude = jitterLat,
+                    Longitude = jitterLng
+                };
+            }).ToList();
+
+            var userId = await GetResolvedUserIdAsync();
+            var userTrips = !string.IsNullOrEmpty(userId)
+                ? await db.Trips
+                    .Include(t => t.TripStops.Select(s => s.DestinationCity))
+                    .Include(t => t.TripStops.Select(s => s.TripActivities))
+                    .Where(t => t.UserId == userId)
+                    .OrderByDescending(t => t.StartDate)
+                    .ToListAsync()
+                : new List<Trip>();
+
+            var tripMapItems = userTrips.Select(t => new TripMapItem
+            {
+                TripId = t.TripId,
+                Title = t.Title,
+                Description = t.Description,
+                StartDate = t.StartDate,
+                EndDate = t.EndDate,
+                TotalBudget = t.TotalBudget,
+                Stops = t.TripStops.OrderBy(s => s.StopOrder).Select(s => new TripStopMapItem
+                {
+                    TripStopId = s.TripStopId,
+                    StopOrder = s.StopOrder,
+                    CityId = s.CityId,
+                    CityName = s.DestinationCity?.Name ?? "Stop",
+                    Country = s.DestinationCity?.Country ?? "",
+                    ArrivalDate = s.ArrivalDate,
+                    DepartureDate = s.DepartureDate,
+                    Latitude = s.DestinationCity?.Latitude.HasValue == true ? (double)s.DestinationCity.Latitude.Value : 0.0,
+                    Longitude = s.DestinationCity?.Longitude.HasValue == true ? (double)s.DestinationCity.Longitude.Value : 0.0,
+                    TransportMode = s.TransportMode,
+                    AccommodationCost = s.AccommodationCost,
+                    Activities = s.TripActivities.Select(ta => ta.CustomTitle).ToList()
+                }).ToList()
+            }).ToList();
+
+            var model = new TravelMapViewModel
+            {
+                GoogleMapsApiKey = apiKey,
+                Cities = cityMapItems,
+                Activities = actMapItems,
+                UserTrips = tripMapItems,
+                SelectedTripId = tripId ?? tripMapItems.FirstOrDefault()?.TripId
+            };
+
+            return View(model);
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

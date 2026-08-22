@@ -157,10 +157,10 @@
         </div>
 
         <!-- ==================================================================
-             3. TAB SWITCHER (ALL RESULTS / DESTINATION CITIES / ACTIVITIES)
+             3. TAB SWITCHER (ALL RESULTS / DESTINATION CITIES / ACTIVITIES / MAP)
              ================================================================== -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
-            <div style="display: flex; gap: 6px; background: #FFFFFF; border: 1px solid var(--gt-border); padding: 4px 6px; border-radius: var(--gt-radius-full); box-shadow: var(--gt-shadow-xs);">
+            <div style="display: flex; gap: 6px; background: #FFFFFF; border: 1px solid var(--gt-border); padding: 4px 6px; border-radius: var(--gt-radius-full); box-shadow: var(--gt-shadow-xs); flex-wrap: wrap;">
                 <button type="button" class="gt-nav-link @(currentTab == "all" ? "active" : "")" id="tabBtnAll" onclick="setExploreTab('all')">
                     <i class="fa-solid fa-border-all" style="margin-right: 5px;"></i> All Results (@(Model.Cities.Count + Model.Activities.Count))
                 </button>
@@ -170,10 +170,19 @@
                 <button type="button" class="gt-nav-link @(currentTab == "activities" ? "active" : "")" id="tabBtnActivities" onclick="setExploreTab('activities')">
                     <i class="fa-solid fa-ticket" style="margin-right: 5px;"></i> Activities &amp; Sights (@Model.Activities.Count)
                 </button>
+                <a href="@Url.Action("Map", "Explore")" class="gt-nav-link" style="color: var(--gt-brand-primary); font-weight: 700; background: rgba(99,102,241,0.06); text-decoration: none;">
+                    <i class="fa-solid fa-map-location-dot" style="margin-right: 5px; color: var(--gt-brand-primary);"></i> Interactive Map Studio
+                </a>
             </div>
 
-            <div style="font-size: 13px; color: var(--gt-zinc-500);">
-                Found <strong>@Model.Cities.Count</strong> destinations and <strong>@Model.Activities.Count</strong> activities
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 13px; color: var(--gt-zinc-500);">
+                    Found <strong>@Model.Cities.Count</strong> destinations &amp; <strong>@Model.Activities.Count</strong> activities
+                </span>
+                <a href="@Url.Action("Map", "Explore")" class="gt-btn-auth-primary" style="padding: 6px 14px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-earth-americas"></i>
+                    <span>Open World Map</span>
+                </a>
             </div>
         </div>
 

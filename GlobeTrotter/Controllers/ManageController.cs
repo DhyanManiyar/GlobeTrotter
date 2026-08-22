@@ -151,6 +151,10 @@ namespace GlobeTrotter.Controllers
                 }
             }
 
+            // Limit to latest 5 upcoming trips (ordered by start date)
+            var latestUpcoming = upcomingList.OrderBy(t => t.StartDate).Take(5).ToList();
+            var latestPrevious = previousList.OrderByDescending(t => t.EndDate).Take(5).ToList();
+
             // Wishlist
             var wishlist = await db.SavedDestinations
                 .Include(sd => sd.DestinationCity)
@@ -185,8 +189,8 @@ namespace GlobeTrotter.Controllers
                 CitiesVisitedCount = visitedCities.Count,
                 TotalBudgetManaged = totalBudgetManaged,
                 WishlistSavedCount = wishlist.Count,
-                UpcomingTrips = upcomingList,
-                PreviousTrips = previousList,
+                UpcomingTrips = latestUpcoming,
+                PreviousTrips = latestPrevious,
                 WishlistCities = wishlist
             };
 
