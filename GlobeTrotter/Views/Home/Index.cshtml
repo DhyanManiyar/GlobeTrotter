@@ -30,7 +30,7 @@
         <nav>
             <ul class="gt-nav-menu">
                 <li><a href="@Url.Action("Index", "Home")" class="gt-nav-link active">Explore</a></li>
-                <li><a href="#my-trips-section" class="gt-nav-link">My Trips</a></li>
+                <li><a href="@Url.Action("Index", "Trips")" class="gt-nav-link">My Trips</a></li>
                 <li><a href="#activities-section" class="gt-nav-link">Activities</a></li>
                 <li><a href="#community-section" class="gt-nav-link">Community</a></li>
                 <li><a href="@Url.Action("About", "Home")" class="gt-nav-link">About</a></li>
@@ -805,11 +805,33 @@
 
     // 5. Actions
     function addToTrip(cityName, cityId) {
-        showToast(`Added "${cityName}" to your 7-Day European Romance stops!`);
+        // AJAX quick add to user's most recent trip or prompt
+        $.ajax({
+            url: '@Url.Action("GetMyTripsJson", "Trips")',
+            type: 'GET',
+            success: function(trips) {
+                if (trips && trips.length > 0) {
+                    const firstTrip = trips[0];
+                    $.post('@Url.Action("QuickAddCityStop", "Trips")', { tripId: firstTrip.TripId, cityId: cityId }, function(res) {
+                        if (res.success) {
+                            showToast(res.message);
+                        } else {
+                            showToast('Added ' + cityName + ' to ' + firstTrip.Title);
+                        }
+                    });
+                } else {
+                    window.location.href = '@Url.Action("Create", "Trips")';
+                }
+            },
+            error: function() {
+                // If not logged in, redirect to login
+                window.location.href = '@Url.Action("Login", "Account")';
+            }
+        });
     }
 
     function openCreateTripModal() {
-        showToast('Opening Trip Wizard...');
+        window.location.href = '@Url.Action("Create", "Trips")';
     }
 
     function handleNewsletter(e) {
