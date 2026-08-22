@@ -1,0 +1,114 @@
+@model GlobeTrotter.Models.BuildItineraryViewModel
+@{
+    ViewBag.Title = Model.Title + " - Shared Itinerary | GlobeTrotter";
+    int totalDays = Math.Max(1, (Model.EndDate - Model.StartDate).Days);
+}
+
+<div style="padding-top: 85px; padding-bottom: 80px;">
+    <div class="gt-container" style="max-width: 980px;">
+
+        <!-- Hero Header -->
+        <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-xl); overflow: hidden; box-shadow: var(--gt-shadow-card); margin-bottom: 32px;">
+            <div style="height: 240px; position: relative;">
+                <img src="@(string.IsNullOrWhiteSpace(Model.CoverImageUrl) ? "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80" : Model.CoverImageUrl)" alt="@Model.Title" style="width: 100%; height: 100%; object-fit: cover;" />
+                <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);"></div>
+                
+                <div style="position: absolute; bottom: 24px; left: 32px; right: 32px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                            <span class="gt-card-badge gt-badge-trending">
+                                <i class="fa-solid fa-earth-americas"></i> Public Itinerary
+                            </span>
+                            <span style="color: white; font-size: 13px; font-weight: 600;">
+                                Created by @Model.OwnerName
+                            </span>
+                        </div>
+                        <h1 style="font-size: 32px; font-weight: 800; color: white; letter-spacing: -0.03em; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                            @Model.Title
+                        </h1>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.85); margin-top: 4px;">
+                            <i class="fa-regular fa-calendar" style="margin-right: 4px;"></i>
+                            @Model.StartDate.ToString("MMM dd, yyyy") - @Model.EndDate.ToString("MMM dd, yyyy") (@totalDays Days • @Model.Sections.Count Stops)
+                        </p>
+                    </div>
+
+                    <!-- Clone Action Button -->
+                    @using (Html.BeginForm("Duplicate", "Trips", new { id = Model.TripId }, FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="gt-btn-auth-primary" style="width: auto; padding: 12px 26px; font-size: 14.5px; font-weight: 700; box-shadow: var(--gt-shadow-md);">
+                            <i class="fa-solid fa-code-fork"></i>
+                            <span>Clone to My Trips</span>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <!-- Highlights Bar -->
+            <div style="padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; background: #FFFFFF; border-top: 1px solid var(--gt-border-subtle);">
+                <p style="font-size: 14px; color: var(--gt-zinc-600); max-width: 600px; line-height: 1.4;">
+                    @Model.Description
+                </p>
+
+                <div style="text-align: right;">
+                    <div style="font-size: 11.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Estimated Budget</div>
+                    <div style="font-size: 22px; font-weight: 800; color: var(--gt-brand-primary);">
+                        $@Model.TotalCalculatedCost.ToString("N0") <span style="font-size: 13px; font-weight: 500; color: var(--gt-zinc-400);">@Model.Currency</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sequential Itinerary Sections -->
+        <h2 style="font-size: 22px; font-weight: 800; color: var(--gt-zinc-950); margin-bottom: 20px; letter-spacing: -0.02em;">
+            Trip Route & Itinerary Sections
+        </h2>
+
+        <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px;">
+            @foreach (var sec in Model.Sections)
+            {
+                <div style="background: #FFFFFF; border: 1.5px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 24px 28px; box-shadow: var(--gt-shadow-xs);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-zinc-950); display: flex; align-items: center; gap: 8px;">
+                            <span style="color: var(--gt-brand-primary);">Section @sec.SectionNumber:</span>
+                            <span>@sec.PlaceName, @sec.Country</span>
+                        </h3>
+                        <span class="gt-tag-btn" style="padding: 4px 10px; font-size: 12px; font-weight: 700;">
+                            @sec.DateRangeDisplay
+                        </span>
+                    </div>
+
+                    <div style="background: var(--gt-zinc-50); border: 1px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 14px 16px; margin-bottom: 16px;">
+                        <p style="font-size: 14px; color: var(--gt-zinc-700); line-height: 1.5; margin-bottom: 8px;">
+                            @sec.Notes
+                        </p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--gt-zinc-500);">
+                            <span>🏨 <strong>@sec.AccommodationDetails</strong> ($@sec.AccommodationCost.ToString("N0"))</span>
+                            <span>🚆 <strong>@sec.TransportMode</strong> ($@sec.TransportCost.ToString("N0"))</span>
+                            <span style="font-weight: 700; color: var(--gt-brand-emerald);">💰 Section Cost: $@sec.SectionBudget.ToString("N0")</span>
+                        </div>
+
+                        @if (sec.Activities.Count > 0)
+                        {
+                            <div style="margin-top: 12px; border-top: 1px dashed var(--gt-zinc-200); padding-top: 10px;">
+                                <div style="font-size: 11.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; margin-bottom: 6px;">
+                                    Activities (@sec.Activities.Count):
+                                </div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    @foreach (var act in sec.Activities)
+                                    {
+                                        <div style="background: #FFFFFF; border: 1px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 4px 10px; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+                                            <i class="fa-solid fa-ticket" style="color: var(--gt-brand-primary);"></i>
+                                            <span style="font-weight: 600;">@act.CustomTitle</span>
+                                            <span style="color: var(--gt-brand-emerald); font-weight: 700;">$@act.Cost.ToString("N0")</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

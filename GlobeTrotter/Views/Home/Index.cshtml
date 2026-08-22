@@ -29,10 +29,10 @@
         <!-- Nav Links -->
         <nav>
             <ul class="gt-nav-menu">
-                <li><a href="@Url.Action("Index", "Home")" class="gt-nav-link active">Explore</a></li>
+                <li><a href="@Url.Action("Index", "Explore")" class="gt-nav-link">Explore & Search</a></li>
                 <li><a href="@Url.Action("Index", "Trips")" class="gt-nav-link">My Trips</a></li>
-                <li><a href="#activities-section" class="gt-nav-link">Activities</a></li>
-                <li><a href="#community-section" class="gt-nav-link">Community</a></li>
+                <li><a href="@Url.Action("Index", "Explore", new { tab = "activities" })" class="gt-nav-link">Activities</a></li>
+                <li><a href="@Url.Action("Profile", "Manage")" class="gt-nav-link">Profile</a></li>
                 <li><a href="@Url.Action("About", "Home")" class="gt-nav-link">About</a></li>
             </ul>
         </nav>
@@ -52,10 +52,14 @@
                 {
                     @Html.AntiForgeryToken()
                 }
-                <div class="gt-user-pill" onclick="document.getElementById('logoutForm').submit()" title="Click to Log Off">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Avatar" class="gt-user-avatar" />
-                    <span>@User.Identity.Name</span>
-                    <i class="fa-solid fa-arrow-right-from-bracket" style="font-size: 10px; color: var(--gt-zinc-400); margin-left: 4px;"></i>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <a href="@Url.Action("Profile", "Manage")" class="gt-user-pill" style="text-decoration: none;" title="Go to Traveler Profile">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Avatar" class="gt-user-avatar" />
+                        <span>Profile</span>
+                    </a>
+                    <button type="button" onclick="document.getElementById('logoutForm').submit()" class="gt-tag-btn" style="padding: 6px 9px;" title="Log Off">
+                        <i class="fa-solid fa-arrow-right-from-bracket" style="color: var(--gt-zinc-500);"></i>
+                    </button>
                 </div>
             }
             else

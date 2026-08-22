@@ -113,6 +113,11 @@ namespace GlobeTrotter.Models
         public decimal TotalBudget { get; set; }
         public string Currency { get; set; } = "USD";
         public decimal TotalCalculatedCost { get; set; }
+        public string CoverImageUrl { get; set; }
+        public string ShareSlug { get; set; }
+        public bool IsPublic { get; set; }
+        public string OwnerName { get; set; }
+        public string OwnerAvatarUrl { get; set; }
         public List<ItinerarySectionViewModel> Sections { get; set; } = new List<ItinerarySectionViewModel>();
         public List<DestinationCity> AvailableCities { get; set; } = new List<DestinationCity>();
         public List<Activity> AvailableActivities { get; set; } = new List<Activity>();

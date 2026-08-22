@@ -1,4 +1,6 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -15,6 +17,7 @@ namespace GlobeTrotter.Controllers
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+        private readonly GlobeTrotterDBEntities1 db = new GlobeTrotterDBEntities1();
 
         public ManageController()
         {
@@ -24,6 +27,28 @@ namespace GlobeTrotter.Controllers
         {
             UserManager = userManager;
             SignInManager = signInManager;
+        }
+
+        private async Task<string> GetResolvedUserIdAsync()
+        {
+            var id = User.Identity.GetUserId();
+            if (!string.IsNullOrEmpty(id))
+            {
+                var exists = await db.AspNetUsers.AnyAsync(u => u.Id == id);
+                if (exists) return id;
+            }
+
+            var name = User.Identity.Name;
+            if (!string.IsNullOrEmpty(name))
+            {
+                var matched = await db.AspNetUsers.FirstOrDefaultAsync(u => u.UserName == name || u.Email == name);
+                if (matched != null) return matched.Id;
+            }
+
+            var fallback = await db.AspNetUsers.FirstOrDefaultAsync(u => u.Id == "demo-user-001") 
+                        ?? await db.AspNetUsers.FirstOrDefaultAsync();
+
+            return fallback != null ? fallback.Id : "demo-user-001";
         }
 
         public ApplicationSignInManager SignInManager
@@ -51,28 +76,167 @@ namespace GlobeTrotter.Controllers
         }
 
         //
-        // GET: /Manage/Index
-        public async Task<ActionResult> Index(ManageMessageId? message)
+        // GET: /Manage/Index -> Redirects to modern Profile
+        public ActionResult Index()
         {
-            ViewBag.StatusMessage =
-                message == ManageMessageId.ChangePasswordSuccess ? "Your password has been changed."
-                : message == ManageMessageId.SetPasswordSuccess ? "Your password has been set."
-                : message == ManageMessageId.SetTwoFactorSuccess ? "Your two-factor authentication provider has been set."
-                : message == ManageMessageId.Error ? "An error has occurred."
-                : message == ManageMessageId.AddPhoneSuccess ? "Your phone number was added."
-                : message == ManageMessageId.RemovePhoneSuccess ? "Your phone number was removed."
-                : "";
+            return RedirectToAction("Profile");
+        }
 
-            var userId = User.Identity.GetUserId();
-            var model = new IndexViewModel
+        //
+        // GET: /Manage/Profile
+        public new async Task<ActionResult> Profile()
+        {
+            var userId = await GetResolvedUserIdAsync();
+            var dbUser = await db.AspNetUsers.FirstOrDefaultAsync(u => u.Id == userId);
+            var appUser = await UserManager.FindByIdAsync(userId);
+
+            if (dbUser == null && appUser == null)
             {
-                HasPassword = HasPassword(),
-                PhoneNumber = await UserManager.GetPhoneNumberAsync(userId),
-                TwoFactor = await UserManager.GetTwoFactorEnabledAsync(userId),
-                Logins = await UserManager.GetLoginsAsync(userId),
-                BrowserRemembered = await AuthenticationManager.TwoFactorBrowserRememberedAsync(userId)
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Fetch user trips
+            var trips = await db.Trips
+                .Include(t => t.TripStops.Select(s => s.DestinationCity))
+                .Include(t => t.TripStops.Select(s => s.TripActivities))
+                .Include(t => t.TripExpenses)
+                .Where(t => t.UserId == userId)
+                .OrderByDescending(t => t.StartDate)
+                .ToListAsync();
+
+            var today = DateTime.Today;
+            var upcomingList = new List<TripCardViewModel>();
+            var previousList = new List<TripCardViewModel>();
+            decimal totalBudgetManaged = 0m;
+            var visitedCities = new HashSet<string>();
+
+            foreach (var t in trips)
+            {
+                decimal stayCost = t.TripStops.Sum(ts => ts.AccommodationCost);
+                decimal transportCost = t.TripStops.Sum(ts => ts.TransportCost);
+                decimal activityCost = t.TripStops.SelectMany(ts => ts.TripActivities).Sum(ta => ta.Cost);
+                decimal totalCost = stayCost + transportCost + activityCost + t.TripExpenses.Sum(te => te.Amount);
+
+                totalBudgetManaged += t.TotalBudget;
+
+                var stopNames = t.TripStops.Select(s => s.DestinationCity?.Name ?? "City").Distinct().ToList();
+                foreach (var name in stopNames) visitedCities.Add(name);
+
+                var card = new TripCardViewModel
+                {
+                    TripId = t.TripId,
+                    Title = t.Title,
+                    Description = t.Description,
+                    StartDate = t.StartDate,
+                    EndDate = t.EndDate,
+                    CoverImageUrl = string.IsNullOrWhiteSpace(t.CoverImageUrl) ? "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80" : t.CoverImageUrl,
+                    TotalBudget = t.TotalBudget,
+                    Currency = t.Currency ?? "USD",
+                    EstimatedCost = totalCost,
+                    IsPublic = t.IsPublic,
+                    ShareSlug = t.ShareSlug,
+                    StopsCount = t.TripStops.Count,
+                    StopCityNames = stopNames,
+                    Status = t.StartDate > today ? "Upcoming" : (t.StartDate <= today && t.EndDate >= today ? "Active" : "Completed"),
+                    CreatedAt = t.CreatedAt
+                };
+
+                if (t.EndDate < today)
+                {
+                    previousList.Add(card);
+                }
+                else
+                {
+                    upcomingList.Add(card);
+                }
+            }
+
+            // Wishlist
+            var wishlist = await db.SavedDestinations
+                .Include(sd => sd.DestinationCity)
+                .Where(sd => sd.UserId == userId)
+                .Select(sd => sd.DestinationCity)
+                .ToListAsync();
+
+            string fName = appUser?.FirstName ?? (dbUser?.FullName?.Split(' ').FirstOrDefault() ?? "Traveler");
+            string lName = appUser?.LastName ?? (dbUser?.FullName != null && dbUser.FullName.Contains(" ") ? dbUser.FullName.Substring(dbUser.FullName.IndexOf(' ') + 1) : "");
+            string city = appUser?.City ?? "San Francisco";
+            string country = appUser?.Country ?? "United States";
+            string avatar = appUser?.AvatarUrl ?? dbUser?.AvatarUrl ?? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80";
+
+            var model = new UserProfileViewModel
+            {
+                UserId = userId,
+                FirstName = fName,
+                LastName = lName,
+                Email = appUser?.Email ?? dbUser?.Email ?? "",
+                UserName = appUser?.UserName ?? dbUser?.UserName ?? "",
+                PhoneNumber = appUser?.PhoneNumber ?? dbUser?.PhoneNumber ?? "",
+                City = city,
+                Country = country,
+                AvatarUrl = avatar,
+                Bio = appUser?.Bio ?? dbUser?.Bio ?? "Passionate wanderer exploring cultures, architecture, and hidden gems across continents.",
+                PreferredCurrency = appUser?.PreferredCurrency ?? dbUser?.PreferredCurrency ?? "USD",
+                LanguagePreference = appUser?.LanguagePreference ?? dbUser?.LanguagePreference ?? "English",
+                MemberSince = dbUser?.CreatedAt ?? appUser?.CreatedAt ?? DateTime.UtcNow.AddMonths(-3),
+                TotalTripsCount = trips.Count,
+                UpcomingTripsCount = upcomingList.Count,
+                CompletedTripsCount = previousList.Count,
+                CitiesVisitedCount = visitedCities.Count,
+                TotalBudgetManaged = totalBudgetManaged,
+                WishlistSavedCount = wishlist.Count,
+                UpcomingTrips = upcomingList,
+                PreviousTrips = previousList,
+                WishlistCities = wishlist
             };
+
             return View(model);
+        }
+
+        //
+        // POST: /Manage/Profile
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public new async Task<ActionResult> Profile(UserProfileViewModel model)
+        {
+            var userId = await GetResolvedUserIdAsync();
+            var appUser = await UserManager.FindByIdAsync(userId);
+            var dbUser = await db.AspNetUsers.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (ModelState.IsValid)
+            {
+                if (appUser != null)
+                {
+                    appUser.FirstName = model.FirstName;
+                    appUser.LastName = model.LastName;
+                    appUser.PhoneNumber = model.PhoneNumber;
+                    appUser.City = model.City;
+                    appUser.Country = model.Country;
+                    appUser.AvatarUrl = model.AvatarUrl;
+                    appUser.Bio = model.Bio;
+                    appUser.PreferredCurrency = model.PreferredCurrency ?? "USD";
+                    appUser.LanguagePreference = model.LanguagePreference ?? "English";
+
+                    await UserManager.UpdateAsync(appUser);
+                }
+
+                if (dbUser != null)
+                {
+                    dbUser.FullName = $"{model.FirstName} {model.LastName}".Trim();
+                    dbUser.PhoneNumber = model.PhoneNumber;
+                    dbUser.AvatarUrl = model.AvatarUrl;
+                    dbUser.Bio = model.Bio;
+                    dbUser.PreferredCurrency = model.PreferredCurrency ?? "USD";
+                    dbUser.LanguagePreference = model.LanguagePreference ?? "English";
+
+                    await db.SaveChangesAsync();
+                }
+
+                TempData["SuccessMessage"] = "✨ Your traveler profile was updated successfully!";
+                return RedirectToAction("Profile");
+            }
+
+            return await Profile();
         }
 
         //

@@ -38,15 +38,17 @@
              ================================================================== -->
         <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 28px 32px; box-shadow: var(--gt-shadow-card); margin-bottom: 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
             <div style="display: flex; align-items: center; gap: 20px;">
-                <div style="position: relative;">
-                    <img src="@avatarUrl" alt="@userName" style="width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gt-brand-light); box-shadow: var(--gt-shadow-md);" />
+                <a href="@Url.Action("Profile", "Manage")" title="View & Edit Profile" style="position: relative; display: block;">
+                    <img src="@avatarUrl" alt="@userName" style="width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gt-brand-light); box-shadow: var(--gt-shadow-md); transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
                     <span style="position: absolute; bottom: 0; right: 0; background: var(--gt-brand-emerald); color: white; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: var(--gt-radius-full); border: 2px solid white;">PRO</span>
-                </div>
+                </a>
                 <div>
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <h1 style="font-size: 26px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.03em;">
-                            Welcome back, @userName!
-                        </h1>
+                        <a href="@Url.Action("Profile", "Manage")" style="text-decoration: none;">
+                            <h1 style="font-size: 26px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.03em;">
+                                Welcome back, @userName!
+                            </h1>
+                        </a>
                         <span class="gt-tag-btn" style="background: rgba(99, 102, 241, 0.08); border-color: rgba(99, 102, 241, 0.2); color: var(--gt-brand-primary);">
                             <i class="fa-solid fa-passport" style="margin-right: 4px;"></i> Globetrotter
                         </span>
@@ -58,12 +60,15 @@
             </div>
 
             <!-- Primary CTAs -->
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <a href="@Url.Action("Index", "Home")#explore-section" class="gt-tag-btn" style="padding: 10px 18px; font-size: 13.5px; font-weight: 600;">
-                    <i class="fa-solid fa-compass" style="margin-right: 6px;"></i> Explore Cities
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <a href="@Url.Action("Index", "Explore")" class="gt-tag-btn" style="padding: 10px 16px; font-size: 13.5px; font-weight: 600;">
+                    <i class="fa-solid fa-compass" style="margin-right: 6px; color: var(--gt-brand-primary);"></i> Explore & Search
                 </a>
-                <a href="@Url.Action("Create", "Trips")" class="gt-btn-add" style="padding: 10px 22px; font-size: 14px; font-weight: 700;">
-                    <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Plan New Trip
+                <a href="@Url.Action("Profile", "Manage")" class="gt-tag-btn" style="padding: 10px 16px; font-size: 13.5px; font-weight: 600;">
+                    <i class="fa-solid fa-user-gear" style="margin-right: 6px; color: var(--gt-zinc-500);"></i> Profile
+                </a>
+                <a href="@Url.Action("Create", "Trips")" class="gt-btn-add" style="padding: 10px 20px; font-size: 14px; font-weight: 700;">
+                    <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Plan Trip
                 </a>
             </div>
         </div>

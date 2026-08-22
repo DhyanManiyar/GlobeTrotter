@@ -1,0 +1,324 @@
+@model GlobeTrotter.Models.UserProfileViewModel
+@{
+    ViewBag.Title = "Traveler Profile - " + Model.FullName;
+}
+
+<div style="padding-top: 85px; padding-bottom: 80px;">
+    <div class="gt-container">
+        
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="gt-val-summary" style="background: #ECFDF5; border-color: #A7F3D0; color: #065F46; margin-bottom: 24px; display:flex; align-items:center; justify-content:space-between;">
+                <div>
+                    <i class="fa-solid fa-circle-check" style="color: #10B981; margin-right: 8px;"></i>
+                    <span>@TempData["SuccessMessage"]</span>
+                </div>
+                <button type="button" onclick="this.parentElement.remove()" style="background:none; border:none; color:#065F46; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        }
+
+        <!-- ==================================================================
+             1. HERO PROFILE CARD & STATS BANNER
+             ================================================================== -->
+        <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 32px 36px; box-shadow: var(--gt-shadow-card); margin-bottom: 32px; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; width: 300px; height: 100%; background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.08), transparent 70%); pointer-events: none;"></div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; position: relative; z-index: 1;">
+                <!-- User Identity -->
+                <div style="display: flex; align-items: center; gap: 24px;">
+                    <div class="gt-photo-circle" onclick="cycleProfileAvatarPreset()" title="Click to cycle avatar preset" style="width: 96px; height: 96px; border: 3px solid var(--gt-brand-light); box-shadow: var(--gt-shadow-md);">
+                        <img src="@Model.AvatarUrl" alt="@Model.FullName" id="profileAvatarDisplay" style="width: 100%; height: 100%; object-fit: cover;" />
+                        <span class="gt-photo-badge" style="width: 28px; height: 28px; bottom: 0; right: 0;">
+                            <i class="fa-solid fa-camera"></i>
+                        </span>
+                    </div>
+
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <h1 style="font-size: 28px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.03em;">
+                                @Model.FullName
+                            </h1>
+                            <span class="gt-tag-btn" style="background: rgba(99, 102, 241, 0.08); border-color: rgba(99, 102, 241, 0.2); color: var(--gt-brand-primary); font-size: 11.5px; font-weight: 700;">
+                                <i class="fa-solid fa-compass" style="margin-right: 4px;"></i> Active Traveler
+                            </span>
+                        </div>
+                        <p style="font-size: 13.5px; color: var(--gt-zinc-500); margin-top: 4px;">
+                            <i class="fa-solid fa-location-dot" style="margin-right: 4px; color: var(--gt-zinc-400);"></i>
+                            @(string.IsNullOrEmpty(Model.City) ? "World Citizen" : $"{Model.City}, {Model.Country}") • 
+                            <i class="fa-regular fa-calendar-check" style="margin-left: 6px; margin-right: 4px; color: var(--gt-zinc-400);"></i>
+                            Member since @Model.MemberSince.ToString("MMM yyyy")
+                        </p>
+                        <p style="font-size: 13.5px; color: var(--gt-zinc-600); margin-top: 8px; max-width: 580px; line-height: 1.4;">
+                            @Model.Bio
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div style="display: flex; gap: 10px;">
+                    <a href="@Url.Action("Index", "Trips")" class="gt-tag-btn" style="padding: 10px 18px; font-weight: 600;">
+                        <i class="fa-solid fa-map-location-dot" style="margin-right: 6px;"></i> My Dashboard
+                    </a>
+                    <a href="@Url.Action("Create", "Trips")" class="gt-btn-add" style="padding: 10px 20px; font-weight: 700;">
+                        <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Plan Trip
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--gt-border-subtle);">
+                <div style="background: var(--gt-zinc-50); border: 1px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 14px 18px;">
+                    <div style="font-size: 11.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Total Itineraries</div>
+                    <div style="font-size: 24px; font-weight: 800; color: var(--gt-zinc-950); margin-top: 2px;">@Model.TotalTripsCount</div>
+                </div>
+                <div style="background: var(--gt-zinc-50); border: 1px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 14px 18px;">
+                    <div style="font-size: 11.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Upcoming Journeys</div>
+                    <div style="font-size: 24px; font-weight: 800; color: var(--gt-brand-primary); margin-top: 2px;">@Model.UpcomingTripsCount</div>
+                </div>
+                <div style="background: var(--gt-zinc-50); border: 1px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 14px 18px;">
+                    <div style="font-size: 11.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Completed Trips</div>
+                    <div style="font-size: 24px; font-weight: 800; color: var(--gt-brand-emerald); margin-top: 2px;">@Model.CompletedTripsCount</div>
+                </div>
+                <div style="background: var(--gt-zinc-50); border: 1px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 14px 18px;">
+                    <div style="font-size: 11.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Budget Managed</div>
+                    <div style="font-size: 24px; font-weight: 800; color: var(--gt-zinc-950); margin-top: 2px;">$@Model.TotalBudgetManaged.ToString("N0")</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================================================================
+             2. DUAL COLUMN: EDIT PROFILE & TRIP HISTORY
+             ================================================================== -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: flex-start;">
+            
+            <!-- LEFT COLUMN: EDIT PERSONAL INFO -->
+            <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 32px; box-shadow: var(--gt-shadow-card);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid var(--gt-border-subtle); padding-bottom: 14px;">
+                    <h3 style="font-size: 18px; font-weight: 800; color: var(--gt-zinc-950); letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-user-gear" style="color: var(--gt-brand-primary);"></i>
+                        Edit Personal Information
+                    </h3>
+                </div>
+
+                @using (Html.BeginForm("Profile", "Manage", FormMethod.Post, new { role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.UserId)
+                    @Html.HiddenFor(m => m.AvatarUrl, new { id = "hiddenProfileAvatarUrl" })
+
+                    <div class="gt-form-grid" style="grid-template-columns: 1fr 1fr; gap: 14px 16px;">
+                        <!-- First Name & Last Name -->
+                        <div class="gt-form-group">
+                            <label class="gt-form-label" for="txtFirstName">First Name *</label>
+                            <div class="gt-input-box">
+                                <i class="fa-regular fa-user input-icon"></i>
+                                @Html.TextBoxFor(m => m.FirstName, new { @class = "gt-auth-input", id = "txtFirstName", required = "required" })
+                            </div>
+                            @Html.ValidationMessageFor(m => m.FirstName, "", new { @class = "field-validation-error" })
+                        </div>
+
+                        <div class="gt-form-group">
+                            <label class="gt-form-label" for="txtLastName">Last Name *</label>
+                            <div class="gt-input-box">
+                                <i class="fa-regular fa-user input-icon"></i>
+                                @Html.TextBoxFor(m => m.LastName, new { @class = "gt-auth-input", id = "txtLastName", required = "required" })
+                            </div>
+                            @Html.ValidationMessageFor(m => m.LastName, "", new { @class = "field-validation-error" })
+                        </div>
+
+                        <!-- Email & Phone -->
+                        <div class="gt-form-group">
+                            <label class="gt-form-label" for="txtEmail">Email Address</label>
+                            <div class="gt-input-box">
+                                <i class="fa-regular fa-envelope input-icon"></i>
+                                @Html.TextBoxFor(m => m.Email, new { @class = "gt-auth-input", id = "txtEmail", @readonly = "readonly", style = "background: var(--gt-zinc-100);" })
+                            </div>
+                        </div>
+
+                        <div class="gt-form-group">
+                            <label class="gt-form-label" for="txtPhone">Phone Number</label>
+                            <div class="gt-input-box">
+                                <i class="fa-solid fa-phone input-icon"></i>
+                                @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "gt-auth-input", id = "txtPhone", placeholder = "+1 (555) 000-0000" })
+                            </div>
+                        </div>
+
+                        <!-- City & Country -->
+                        <div class="gt-form-group">
+                            <label class="gt-form-label" for="txtCity">Home City</label>
+                            <div class="gt-input-box">
+                                <i class="fa-solid fa-city input-icon"></i>
+                                @Html.TextBoxFor(m => m.City, new { @class = "gt-auth-input", id = "txtCity", placeholder = "San Francisco" })
+                            </div>
+                        </div>
+
+                        <div class="gt-form-group">
+                            <label class="gt-form-label" for="txtCountry">Country</label>
+                            <div class="gt-input-box">
+                                <i class="fa-solid fa-globe input-icon"></i>
+                                @Html.TextBoxFor(m => m.Country, new { @class = "gt-auth-input", id = "txtCountry", placeholder = "United States" })
+                            </div>
+                        </div>
+
+                        <!-- Currency & Language -->
+                        <div class="gt-form-group">
+                            <label class="gt-form-label" for="selCurr">Preferred Currency</label>
+                            <div class="gt-input-box">
+                                <i class="fa-solid fa-dollar-sign input-icon"></i>
+                                @Html.DropDownListFor(m => m.PreferredCurrency, new SelectList(new[] { "USD", "EUR", "GBP", "JPY", "INR", "AUD", "CAD" }, Model.PreferredCurrency), new { @class = "gt-auth-input", id = "selCurr" })
+                            </div>
+                        </div>
+
+                        <div class="gt-form-group">
+                            <label class="gt-form-label" for="selLang">Language</label>
+                            <div class="gt-input-box">
+                                <i class="fa-solid fa-language input-icon"></i>
+                                @Html.DropDownListFor(m => m.LanguagePreference, new SelectList(new[] { "English", "Spanish", "French", "German", "Japanese", "Hindi" }, Model.LanguagePreference), new { @class = "gt-auth-input", id = "selLang" })
+                            </div>
+                        </div>
+
+                        <!-- Bio -->
+                        <div class="gt-form-group full-width" style="grid-column: 1 / -1;">
+                            <label class="gt-form-label" for="txtBio">Bio & Travel Preferences</label>
+                            @Html.TextAreaFor(m => m.Bio, new { @class = "gt-auth-textarea", id = "txtBio", rows = 3, placeholder = "Share your travel style, favorite bucket lists, dietary needs, or adventure goals..." })
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+                        <button type="submit" class="gt-btn-auth-primary" style="width: auto; padding: 11px 28px;">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Save Profile Changes</span>
+                        </button>
+                    </div>
+                }
+            </div>
+
+            <!-- RIGHT COLUMN: UPCOMING & PREVIOUS TRIPS -->
+            <div>
+                <!-- Tab Controls -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                    <div style="display: flex; gap: 8px; background: #FFFFFF; border: 1px solid var(--gt-border); padding: 4px 6px; border-radius: var(--gt-radius-full); box-shadow: var(--gt-shadow-xs);">
+                        <button type="button" class="gt-nav-link active" id="tabBtnUpcoming" onclick="showProfileTab('upcoming', this)">
+                            Upcoming Journeys (@Model.UpcomingTrips.Count)
+                        </button>
+                        <button type="button" class="gt-nav-link" id="tabBtnPrevious" onclick="showProfileTab('previous', this)">
+                            Previous Trips (@Model.PreviousTrips.Count)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Upcoming Trips Panel -->
+                <div id="panelUpcomingTrips" style="display: flex; flex-direction: column; gap: 16px;">
+                    @if (Model.UpcomingTrips.Count == 0)
+                    {
+                        <div style="background: #FFFFFF; border: 1px dashed var(--gt-zinc-300); border-radius: var(--gt-radius-xl); padding: 40px 20px; text-align: center;">
+                            <p style="font-size: 14px; color: var(--gt-zinc-500); margin-bottom: 14px;">No upcoming trips scheduled yet.</p>
+                            <a href="@Url.Action("Create", "Trips")" class="gt-btn-add" style="display: inline-flex; padding: 8px 18px; font-size: 13px;">
+                                <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Plan New Adventure
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var trip in Model.UpcomingTrips)
+                        {
+                            <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-lg); overflow: hidden; display: flex; box-shadow: var(--gt-shadow-xs); transition: all 0.2s ease;">
+                                <div style="width: 140px; min-width: 140px; position: relative;">
+                                    <img src="@trip.CoverImageUrl" alt="@trip.Title" style="width: 100%; height: 100%; object-fit: cover;" />
+                                    <span class="gt-trip-badge" style="position: absolute; top: 8px; left: 8px; font-size: 10px;">@trip.Status</span>
+                                </div>
+                                <div style="padding: 14px 18px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                                    <div>
+                                        <h4 style="font-size: 15px; font-weight: 700; color: var(--gt-zinc-950); margin-bottom: 2px;">@trip.Title</h4>
+                                        <p style="font-size: 12px; color: var(--gt-zinc-500);">
+                                            <i class="fa-regular fa-calendar" style="margin-right: 3px;"></i>
+                                            @trip.StartDate.ToString("MMM dd") - @trip.EndDate.ToString("MMM dd, yyyy") (@trip.DurationDays days)
+                                        </p>
+                                    </div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; border-top: 1px solid var(--gt-zinc-100); padding-top: 8px;">
+                                        <span style="font-size: 12.5px; font-weight: 700; color: var(--gt-brand-primary);">$@trip.TotalBudget.ToString("N0") Budget</span>
+                                        <a href="@Url.Action("BuildItinerary", "Trips", new { id = trip.TripId })" class="gt-btn-add" style="padding: 4px 12px; font-size: 12px;">
+                                            <span>Manage</span> &rarr;
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <!-- Previous Trips Panel -->
+                <div id="panelPreviousTrips" style="display: none; flex-direction: column; gap: 16px;">
+                    @if (Model.PreviousTrips.Count == 0)
+                    {
+                        <div style="background: #FFFFFF; border: 1px dashed var(--gt-zinc-300); border-radius: var(--gt-radius-xl); padding: 40px 20px; text-align: center;">
+                            <p style="font-size: 14px; color: var(--gt-zinc-500);">No completed past trips found.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var trip in Model.PreviousTrips)
+                        {
+                            <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-lg); overflow: hidden; display: flex; box-shadow: var(--gt-shadow-xs);">
+                                <div style="width: 140px; min-width: 140px; position: relative;">
+                                    <img src="@trip.CoverImageUrl" alt="@trip.Title" style="width: 100%; height: 100%; object-fit: cover;" />
+                                    <span class="gt-trip-badge" style="position: absolute; top: 8px; left: 8px; font-size: 10px; background: rgba(100, 116, 139, 0.9);">Completed</span>
+                                </div>
+                                <div style="padding: 14px 18px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                                    <div>
+                                        <h4 style="font-size: 15px; font-weight: 700; color: var(--gt-zinc-950); margin-bottom: 2px;">@trip.Title</h4>
+                                        <p style="font-size: 12px; color: var(--gt-zinc-500);">
+                                            <i class="fa-solid fa-check" style="color: var(--gt-brand-emerald); margin-right: 3px;"></i>
+                                            @trip.StartDate.ToString("MMM dd") - @trip.EndDate.ToString("MMM dd, yyyy")
+                                        </p>
+                                    </div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; border-top: 1px solid var(--gt-zinc-100); padding-top: 8px;">
+                                        <span style="font-size: 12.5px; color: var(--gt-zinc-500);">Spent: <strong>$@trip.EstimatedCost.ToString("N0")</strong></span>
+                                        <a href="@Url.Action("BuildItinerary", "Trips", new { id = trip.TripId })" class="gt-tag-btn" style="padding: 4px 10px; font-size: 12px;">
+                                            <span>View</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        const profileAvatarPresets = [
+            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+            "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80",
+            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
+            "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80"
+        ];
+        let avatarIdx = 0;
+
+        function cycleProfileAvatarPreset() {
+            avatarIdx = (avatarIdx + 1) % profileAvatarPresets.length;
+            const chosen = profileAvatarPresets[avatarIdx];
+            document.getElementById('profileAvatarDisplay').src = chosen;
+            document.getElementById('hiddenProfileAvatarUrl').value = chosen;
+            showToast('Selected new avatar photo preset!');
+        }
+
+        function showProfileTab(tabName, btn) {
+            document.querySelectorAll('#tabBtnUpcoming, #tabBtnPrevious').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (tabName === 'upcoming') {
+                document.getElementById('panelUpcomingTrips').style.display = 'flex';
+                document.getElementById('panelPreviousTrips').style.display = 'none';
+            } else {
+                document.getElementById('panelUpcomingTrips').style.display = 'none';
+                document.getElementById('panelPreviousTrips').style.display = 'flex';
+            }
+        }
+    </script>
+}

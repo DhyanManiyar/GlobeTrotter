@@ -456,6 +456,7 @@ namespace GlobeTrotter.Controllers
 
             var availableCities = await db.DestinationCities.OrderBy(c => c.Name).ToListAsync();
             var availableActivities = await db.Activities.OrderBy(a => a.Title).ToListAsync();
+            var user = await db.AspNetUsers.FindAsync(trip.UserId);
 
             var viewModel = new BuildItineraryViewModel
             {
@@ -467,9 +468,93 @@ namespace GlobeTrotter.Controllers
                 TotalBudget = trip.TotalBudget,
                 Currency = trip.Currency ?? "USD",
                 TotalCalculatedCost = totalCalculatedCost,
+                CoverImageUrl = trip.CoverImageUrl,
+                ShareSlug = trip.ShareSlug,
+                IsPublic = trip.IsPublic,
+                OwnerName = user?.FullName ?? user?.UserName ?? "Traveler",
+                OwnerAvatarUrl = user?.AvatarUrl ?? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80",
                 Sections = sections,
                 AvailableCities = availableCities,
                 AvailableActivities = availableActivities
+            };
+
+            return View(viewModel);
+        }
+
+        // =====================================================================
+        // PUBLIC SHARE & COMMUNITY ITINERARY VIEW
+        // =====================================================================
+        [AllowAnonymous]
+        public async Task<ActionResult> Share(int? id, string slug)
+        {
+            var query = db.Trips
+                .Include(t => t.TripStops.Select(s => s.DestinationCity))
+                .Include(t => t.TripStops.Select(s => s.TripActivities))
+                .AsQueryable();
+
+            Trip trip = null;
+            if (!string.IsNullOrEmpty(slug))
+            {
+                trip = await query.FirstOrDefaultAsync(t => t.ShareSlug == slug);
+            }
+            else if (id.HasValue)
+            {
+                trip = await query.FirstOrDefaultAsync(t => t.TripId == id.Value);
+            }
+
+            if (trip == null)
+            {
+                return HttpNotFound("The requested travel itinerary was not found or is private.");
+            }
+
+            var sections = new List<ItinerarySectionViewModel>();
+            int sectionNum = 1;
+            decimal totalCalculatedCost = 0m;
+
+            var orderedStops = trip.TripStops.OrderBy(s => s.StopOrder).ToList();
+            foreach (var stop in orderedStops)
+            {
+                decimal actCost = stop.TripActivities.Sum(a => a.Cost);
+                decimal sectionTotal = stop.AccommodationCost + stop.TransportCost + actCost;
+                totalCalculatedCost += sectionTotal;
+
+                sections.Add(new ItinerarySectionViewModel
+                {
+                    TripStopId = stop.TripStopId,
+                    SectionNumber = sectionNum++,
+                    PlaceName = stop.DestinationCity?.Name ?? "Destination Stop",
+                    Country = stop.DestinationCity?.Country ?? "",
+                    CityImageUrl = stop.DestinationCity?.ImageUrl ?? "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=400&q=80",
+                    ArrivalDate = stop.ArrivalDate,
+                    DepartureDate = stop.DepartureDate,
+                    SectionBudget = sectionTotal,
+                    AccommodationCost = stop.AccommodationCost,
+                    AccommodationDetails = stop.AccommodationDetails,
+                    TransportCost = stop.TransportCost,
+                    TransportMode = stop.TransportMode,
+                    Notes = stop.Notes,
+                    Activities = stop.TripActivities.OrderBy(a => a.OrderIndex).ToList()
+                });
+            }
+
+            var user = await db.AspNetUsers.FindAsync(trip.UserId);
+
+            var viewModel = new BuildItineraryViewModel
+            {
+                TripId = trip.TripId,
+                Title = trip.Title,
+                Description = trip.Description,
+                StartDate = trip.StartDate,
+                EndDate = trip.EndDate,
+                TotalBudget = trip.TotalBudget,
+                Currency = trip.Currency ?? "USD",
+                TotalCalculatedCost = totalCalculatedCost,
+                CoverImageUrl = trip.CoverImageUrl,
+                ShareSlug = trip.ShareSlug,
+                IsPublic = trip.IsPublic,
+                OwnerName = user?.FullName ?? user?.UserName ?? "Globetrotter Traveler",
+                OwnerAvatarUrl = user?.AvatarUrl ?? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80",
+                Sections = sections
             };
 
             return View(viewModel);
