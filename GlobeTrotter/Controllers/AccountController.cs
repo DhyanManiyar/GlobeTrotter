@@ -74,13 +74,33 @@ namespace GlobeTrotter.Controllers
                 return View(model);
             }
 
-            // Check if user exists by Email or UserName
-            var user = await UserManager.FindByEmailAsync(model.Email) ?? await UserManager.FindByNameAsync(model.Email);
-            string loginUserName = user != null ? user.UserName : model.Email;
+            string loginInput = (model.Email ?? "").Trim();
 
-            // This doesn't count login failures towards account lockout
-            // To enable password failures to trigger account lockout, change to shouldLockout: true
-            var result = await SignInManager.PasswordSignInAsync(loginUserName, model.Password, model.RememberMe, shouldLockout: false);
+            // Step 1: try to find by email first, then by username
+            var user = await UserManager.FindByEmailAsync(loginInput);
+            if (user == null)
+            {
+                user = await UserManager.FindByNameAsync(loginInput);
+            }
+
+            if (user == null)
+            {
+                ModelState.AddModelError("", "No account found with that email or username.");
+                return View(model);
+            }
+
+            // Step 2: verify password directly before signing in
+            bool passwordOk = await UserManager.CheckPasswordAsync(user, model.Password);
+            if (!passwordOk)
+            {
+                ModelState.AddModelError("", "Incorrect password. Please try again.");
+                return View(model);
+            }
+
+            // Step 3: sign out any stale session first, then sign in fresh
+            AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+            var result = await SignInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberMe, shouldLockout: false);
+
             switch (result)
             {
                 case SignInStatus.Success:
@@ -91,10 +111,11 @@ namespace GlobeTrotter.Controllers
                     return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
                 case SignInStatus.Failure:
                 default:
-                    ModelState.AddModelError("", "Invalid username or password.");
+                    ModelState.AddModelError("", "Login failed. Please check your credentials and try again.");
                     return View(model);
             }
         }
+
 
         //
         // GET: /Account/VerifyCode
@@ -406,7 +427,28 @@ namespace GlobeTrotter.Controllers
         public ActionResult LogOff()
         {
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
-            return RedirectToAction("Index", "Home");
+
+            // Prevent browser back-button from showing protected pages after logout
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            Response.Cache.SetExpires(DateTime.UtcNow.AddDays(-1));
+
+            return RedirectToAction("Login", "Account");
+        }
+
+        //
+        // GET: /Account/LogOff (supports direct link logout, e.g. from navbar)
+        [AllowAnonymous]
+        public ActionResult LogOffGet()
+        {
+            if (Request.IsAuthenticated)
+            {
+                AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+            }
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            Response.Cache.SetExpires(DateTime.UtcNow.AddDays(-1));
+            return RedirectToAction("Login", "Account");
         }
 
         //

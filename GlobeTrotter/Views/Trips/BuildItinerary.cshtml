@@ -277,9 +277,12 @@
                             </p>
                         </div>
 
+                        @{
+                            decimal dayBudget = activeSection != null ? (activeSection.SectionBudget / Math.Max(1, totalDays)) : 0m;
+                        }
                         <div style="border-top: 1px solid var(--gt-zinc-200); padding-top: 8px; font-size: 11.5px; color: var(--gt-zinc-600); display: flex; justify-content: space-between;">
                             <span>Stay: <strong>@(activeSection?.AccommodationDetails ?? "Standard")</strong></span>
-                            <span style="color: var(--gt-brand-emerald); font-weight: 700;">$@((activeSection?.SectionBudget / Math.Max(1, totalDays)).ToString("N0"))/day</span>
+                            <span style="color: var(--gt-brand-emerald); font-weight: 700;">$@dayBudget.ToString("N0")/day</span>
                         </div>
                     </div>
                 }

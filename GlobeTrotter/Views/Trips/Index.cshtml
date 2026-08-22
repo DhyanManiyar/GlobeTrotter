@@ -61,8 +61,11 @@
 
             <!-- Primary CTAs -->
             <div style="display: flex; align-items: center; gap: 10px;">
+                <a href="@Url.Action("Index", "Community")" class="gt-tag-btn" style="padding: 10px 16px; font-size: 13.5px; font-weight: 600;">
+                    <i class="fa-solid fa-users" style="margin-right: 6px; color: var(--gt-brand-primary);"></i> Community
+                </a>
                 <a href="@Url.Action("Index", "Explore")" class="gt-tag-btn" style="padding: 10px 16px; font-size: 13.5px; font-weight: 600;">
-                    <i class="fa-solid fa-compass" style="margin-right: 6px; color: var(--gt-brand-primary);"></i> Explore & Search
+                    <i class="fa-solid fa-compass" style="margin-right: 6px; color: var(--gt-brand-primary);"></i> Explore &amp; Search
                 </a>
                 <a href="@Url.Action("Profile", "Manage")" class="gt-tag-btn" style="padding: 10px 16px; font-size: 13.5px; font-weight: 600;">
                     <i class="fa-solid fa-user-gear" style="margin-right: 6px; color: var(--gt-zinc-500);"></i> Profile
@@ -70,6 +73,13 @@
                 <a href="@Url.Action("Create", "Trips")" class="gt-btn-add" style="padding: 10px 20px; font-size: 14px; font-weight: 700;">
                     <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Plan Trip
                 </a>
+                @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { style = "margin: 0;" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <button type="submit" title="Log out" style="display: flex; align-items: center; gap: 6px; padding: 10px 16px; font-size: 13.5px; font-weight: 700; border-radius: var(--gt-radius-md); border: 1.5px solid rgba(220,38,38,0.25); background: rgba(220,38,38,0.06); color: #DC2626; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(220,38,38,0.12)'; this.style.borderColor='rgba(220,38,38,0.45)';" onmouseout="this.style.background='rgba(220,38,38,0.06)'; this.style.borderColor='rgba(220,38,38,0.25)';">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </button>
+                }
             </div>
         </div>
 

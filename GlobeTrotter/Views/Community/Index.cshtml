@@ -1,0 +1,434 @@
+@model GlobeTrotter.Models.CommunityIndexViewModel
+@{
+    ViewBag.Title = "Community Itineraries & Explorer Hub | GlobeTrotter";
+}
+
+<!-- Top Navigation Spacer -->
+<div style="padding-top: 85px; padding-bottom: 80px;">
+    <div class="gt-container">
+
+        <!-- ==================================================================
+             1. HERO HEADER & COMMUNITY LIVE METRICS
+             ================================================================== -->
+        <div style="background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--gt-radius-2xl); padding: 48px 40px; box-shadow: var(--gt-shadow-xl); position: relative; overflow: hidden; margin-bottom: 32px;">
+            <!-- Ambient Glow -->
+            <div style="position: absolute; top: -20%; right: -10%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, transparent 70%); filter: blur(50px); pointer-events: none;"></div>
+            <div style="position: absolute; bottom: -20%; left: 10%; width: 350px; height: 350px; background: radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, transparent 70%); filter: blur(50px); pointer-events: none;"></div>
+
+            <div style="position: relative; z-index: 2; max-width: 760px;">
+                <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 6px 14px; border-radius: var(--gt-radius-full); margin-bottom: 16px;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; box-shadow: 0 0 8px #10B981;"></span>
+                    <span style="font-size: 12.5px; font-weight: 700; color: #E2E8F0; text-transform: uppercase; letter-spacing: 0.05em;">
+                        Global Traveler Community
+                    </span>
+                </div>
+
+                <h1 style="font-size: 38px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 14px;">
+                    Explore, Clone & Share Real Multi-City Itineraries
+                </h1>
+                <p style="font-size: 16px; color: #94A3B8; line-height: 1.6; margin-bottom: 28px;">
+                    Discover curated travel routes crafted by expert nomads and wanderers. Explore budgets, day-by-day schedules, and clone any itinerary directly to your personal planner in one click.
+                </p>
+
+                <!-- Live Metrics Bar -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px;">
+                    <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--gt-radius-md); padding: 12px 16px;">
+                        <div style="font-size: 20px; font-weight: 800; color: #38BDF8;">@Model.TotalPublicItineraries+</div>
+                        <div style="font-size: 12px; color: #94A3B8; font-weight: 500;">Public Itineraries</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--gt-radius-md); padding: 12px 16px;">
+                        <div style="font-size: 20px; font-weight: 800; color: #818CF8;">@Model.TotalCommunityTravelers+</div>
+                        <div style="font-size: 12px; color: #94A3B8; font-weight: 500;">Active Creators</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--gt-radius-md); padding: 12px 16px;">
+                        <div style="font-size: 20px; font-weight: 800; color: #34D399;">@Model.TotalCitiesExplored</div>
+                        <div style="font-size: 12px; color: #94A3B8; font-weight: 500;">Cities Connected</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--gt-radius-md); padding: 12px 16px;">
+                        <div style="font-size: 20px; font-weight: 800; color: #F472B6;">@Model.TotalClonesCount+</div>
+                        <div style="font-size: 12px; color: #94A3B8; font-weight: 500;">Itineraries Cloned</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================================================================
+             2. SEARCH & FILTER CONTROLS (21st.dev Style Capsule)
+             ================================================================== -->
+        <div style="background: #FFFFFF; border: 1px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 20px 24px; box-shadow: var(--gt-shadow-card); margin-bottom: 28px;">
+            @using (Html.BeginForm("Index", "Community", FormMethod.Get, new { id = "communityFilterForm" }))
+            {
+                <input type="hidden" name="tab" id="activeTabInput" value="@Model.ActiveTab" />
+                <input type="hidden" name="category" id="selectedCategoryInput" value="@Model.SelectedCategory" />
+
+                <!-- Search Input Row -->
+                <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 260px; position: relative;">
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--gt-zinc-400);"></i>
+                        <input type="text" name="q" value="@Model.SearchQuery" placeholder="Search by city (e.g. Paris, Tokyo), country, trip title, or creator..." class="gt-auth-input" style="padding-left: 44px; height: 46px; font-size: 14px;" />
+                    </div>
+
+                    <!-- Duration Filter -->
+                    <div style="min-width: 160px;">
+                        <select name="duration" class="gt-auth-input" style="height: 46px; font-size: 13.5px;" onchange="document.getElementById('communityFilterForm').submit();">
+                            <option value="All" @(Model.SelectedDuration == "All" ? "selected" : "")>⏱️ Any Duration</option>
+                            <option value="short" @(Model.SelectedDuration == "short" ? "selected" : "")>1 - 4 Days (Quick)</option>
+                            <option value="medium" @(Model.SelectedDuration == "medium" ? "selected" : "")>5 - 9 Days (Standard)</option>
+                            <option value="long" @(Model.SelectedDuration == "long" ? "selected" : "")>10+ Days (Grand Tour)</option>
+                        </select>
+                    </div>
+
+                    <!-- Sort By -->
+                    <div style="min-width: 170px;">
+                        <select name="sort" class="gt-auth-input" style="height: 46px; font-size: 13.5px;" onchange="document.getElementById('communityFilterForm').submit();">
+                            <option value="trending" @(Model.SortBy == "trending" ? "selected" : "")>🔥 Most Trending</option>
+                            <option value="popular" @(Model.SortBy == "popular" ? "selected" : "")>⭐ Most Popular</option>
+                            <option value="newest" @(Model.SortBy == "newest" ? "selected" : "")>🆕 Newest Shared</option>
+                            <option value="budget_low" @(Model.SortBy == "budget_low" ? "selected" : "")>💵 Budget: Low to High</option>
+                            <option value="budget_high" @(Model.SortBy == "budget_high" ? "selected" : "")>💎 Budget: High to Low</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="gt-btn-auth-primary" style="width: auto; padding: 0 24px; height: 46px; font-size: 14px; font-weight: 700;">
+                        <span>Search</span>
+                    </button>
+                </div>
+
+                <!-- Travel Style Pill Selector -->
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--gt-border-subtle); padding-top: 14px;">
+                    <span style="font-size: 12.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; margin-right: 4px;">Travel Style:</span>
+                    
+                    @{
+                        string[] styles = new string[] { "All", "Solo Adventure", "Budget Nomad", "Romantic Getaway", "Luxury & Leisure", "Cultural Explorer" };
+                    }
+                    @foreach (var st in styles)
+                    {
+                        bool isActive = (Model.SelectedCategory == st) || (st == "All" && string.IsNullOrEmpty(Model.SelectedCategory));
+                        <button type="button" class="gt-tag-btn @(isActive ? "active" : "")" onclick="selectCategory('@st')" style="padding: 6px 14px; font-size: 13px; @(isActive ? "background: var(--gt-brand-primary); color: white; border-color: var(--gt-brand-primary);" : "")">
+                            @st
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- ==================================================================
+             3. TAB SWITCHER (ITINERARIES / TOP CREATORS / TRAVEL TIPS)
+             ================================================================== -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+            <div style="display: flex; gap: 6px; background: #FFFFFF; border: 1px solid var(--gt-border); padding: 4px 6px; border-radius: var(--gt-radius-full); box-shadow: var(--gt-shadow-xs);">
+                <button type="button" class="gt-nav-link @(Model.ActiveTab == "itineraries" ? "active" : "")" id="tabBtnItineraries" onclick="switchCommunityTab('itineraries')">
+                    <i class="fa-solid fa-route" style="margin-right: 6px;"></i> Community Itineraries (@Model.Itineraries.Count)
+                </button>
+                <button type="button" class="gt-nav-link @(Model.ActiveTab == "creators" ? "active" : "")" id="tabBtnCreators" onclick="switchCommunityTab('creators')">
+                    <i class="fa-solid fa-users" style="margin-right: 6px;"></i> Top Globetrotters (@Model.TopCreators.Count)
+                </button>
+                <button type="button" class="gt-nav-link @(Model.ActiveTab == "tips" ? "active" : "")" id="tabBtnTips" onclick="switchCommunityTab('tips')">
+                    <i class="fa-regular fa-lightbulb" style="margin-right: 6px;"></i> Pro Travel Tips (@Model.TravelTips.Count)
+                </button>
+            </div>
+
+            <a href="@Url.Action("Create", "Trips")" class="gt-btn-add" style="padding: 9px 20px; font-size: 13.5px; font-weight: 700;">
+                <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Share Your Itinerary
+            </a>
+        </div>
+
+        <!-- ==================================================================
+             TAB 1: COMMUNITY ITINERARIES BENTO GRID
+             ================================================================== -->
+        <div id="tabContentItineraries" style="display: @(Model.ActiveTab == "itineraries" ? "block" : "none");">
+            @if (Model.Itineraries.Count == 0)
+            {
+                <div style="background: #FFFFFF; border: 1px dashed var(--gt-zinc-300); border-radius: var(--gt-radius-xl); padding: 64px 20px; text-align: center;">
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--gt-zinc-100); color: var(--gt-zinc-400); display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;">
+                        <i class="fa-solid fa-compass"></i>
+                    </div>
+                    <h3 style="font-size: 18px; font-weight: 700; color: var(--gt-zinc-800); margin-bottom: 8px;">No matching community itineraries found</h3>
+                    <p style="font-size: 14px; color: var(--gt-zinc-500); margin-bottom: 20px;">Try adjusting your keywords or clearing the travel style filters.</p>
+                    <a href="@Url.Action("Index", "Community")" class="gt-tag-btn" style="padding: 8px 18px;">Reset Filters</a>
+                </div>
+            }
+            else
+            {
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px; margin-bottom: 40px;">
+                    @foreach (var item in Model.Itineraries)
+                    {
+                        <div class="gt-trip-card" style="background: #FFFFFF; border: 1.5px solid var(--gt-border); border-radius: var(--gt-radius-xl); overflow: hidden; box-shadow: var(--gt-shadow-card); display: flex; flex-direction: column; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--gt-shadow-xl)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--gt-shadow-card)';">
+                            
+                            <!-- Cover Image Banner -->
+                            <div style="height: 190px; position: relative; overflow: hidden;">
+                                <img src="@item.CoverImageUrl" alt="@item.Title" style="width: 100%; height: 100%; object-fit: cover;" />
+                                <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.1) 60%, transparent 100%);"></div>
+
+                                <!-- Travel Style Pill -->
+                                <span class="gt-card-badge gt-badge-trending" style="position: absolute; top: 14px; left: 14px; font-size: 11.5px;">
+                                    @item.TravelStyle
+                                </span>
+
+                                <!-- Duration Badge -->
+                                <span style="position: absolute; top: 14px; right: 14px; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); color: #FFFFFF; padding: 4px 10px; border-radius: var(--gt-radius-full); font-size: 12px; font-weight: 700;">
+                                    <i class="fa-regular fa-clock" style="margin-right: 4px;"></i> @item.DurationDays Days
+                                </span>
+
+                                <!-- Creator Badge on Image -->
+                                <div style="position: absolute; bottom: 12px; left: 16px; display: flex; align-items: center; gap: 8px;">
+                                    <img src="@item.OwnerAvatarUrl" alt="@item.OwnerName" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #FFFFFF; box-shadow: var(--gt-shadow-sm);" />
+                                    <div>
+                                        <div style="color: #FFFFFF; font-size: 12.5px; font-weight: 700; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+                                            @item.OwnerName
+                                        </div>
+                                        <div style="color: rgba(255,255,255,0.75); font-size: 10.5px;">
+                                            @item.OwnerCity, @item.OwnerCountry
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card Body -->
+                            <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <h3 style="font-size: 17px; font-weight: 800; color: var(--gt-zinc-950); margin-bottom: 8px; line-height: 1.35; letter-spacing: -0.01em;">
+                                        @item.Title
+                                    </h3>
+
+                                    <p style="font-size: 13px; color: var(--gt-zinc-600); line-height: 1.45; margin-bottom: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        @(string.IsNullOrWhiteSpace(item.Description) ? "Comprehensive multi-city journey with scheduled stops, activities, and budget guidance." : item.Description)
+                                    </p>
+
+                                    <!-- Sequential Route Stop Pills -->
+                                    <div style="margin-bottom: 16px;">
+                                        <div style="font-size: 11px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase; margin-bottom: 6px;">
+                                            Route & Stops (@item.StopsCount):
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                            @for (int i = 0; i < item.StopCityNames.Count; i++)
+                                            {
+                                                <span style="background: var(--gt-zinc-100); color: var(--gt-zinc-800); padding: 3px 8px; border-radius: var(--gt-radius-sm); font-size: 11.5px; font-weight: 600;">
+                                                    @item.StopCityNames[i]
+                                                </span>
+                                                if (i < item.StopCityNames.Count - 1)
+                                                {
+                                                    <i class="fa-solid fa-arrow-right" style="font-size: 9px; color: var(--gt-zinc-400);"></i>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Financial & Action Footer -->
+                                <div style="border-top: 1px solid var(--gt-border-subtle); padding-top: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                                    <div>
+                                        <div style="font-size: 10.5px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">Estimated Cost</div>
+                                        <div style="font-size: 17px; font-weight: 800; color: var(--gt-brand-primary);">
+                                            $@item.EstimatedCost.ToString("N0") <span style="font-size: 11.5px; font-weight: 500; color: var(--gt-zinc-400);">@item.Currency</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <!-- Like Action -->
+                                        <button type="button" class="gt-tag-btn" onclick="toggleLikeTrip(@item.TripId, this)" style="padding: 6px 10px; font-size: 12px;" title="Like / Upvote">
+                                            <i class="fa-regular fa-heart" style="color: #EC4899; margin-right: 4px;"></i>
+                                            <span class="like-count">@item.LikesCount</span>
+                                        </button>
+
+                                        <!-- View Details -->
+                                        <a href="@Url.Action("Share", "Trips", new { id = item.TripId })" class="gt-tag-btn" style="padding: 6px 12px; font-size: 12.5px; font-weight: 600;" title="View Full Itinerary">
+                                            <i class="fa-solid fa-eye" style="margin-right: 4px;"></i> View
+                                        </a>
+
+                                        <!-- 1-Click Clone Button -->
+                                        @using (Html.BeginForm("Duplicate", "Trips", new { id = item.TripId }, FormMethod.Post, new { style = "margin: 0;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="gt-btn-auth-primary" style="width: auto; padding: 6px 14px; font-size: 12.5px; font-weight: 700;" title="Clone Itinerary into My Trips">
+                                                <i class="fa-solid fa-code-fork" style="margin-right: 4px;"></i> Clone
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- ==================================================================
+             TAB 2: TOP GLOBETROTTERS & CREATORS LEADERBOARD
+             ================================================================== -->
+        <div id="tabContentCreators" style="display: @(Model.ActiveTab == "creators" ? "block" : "none");">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-bottom: 40px;">
+                @foreach (var creator in Model.TopCreators)
+                {
+                    <div style="background: #FFFFFF; border: 1.5px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 24px; box-shadow: var(--gt-shadow-card); display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 14px;">
+                                <img src="@creator.AvatarUrl" alt="@creator.FullName" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gt-brand-light);" />
+                                <div>
+                                    <h4 style="font-size: 16.5px; font-weight: 800; color: var(--gt-zinc-950);">
+                                        @creator.FullName
+                                    </h4>
+                                    <span class="gt-tier-tag" style="background: rgba(99, 102, 241, 0.08); color: var(--gt-brand-primary); font-size: 11px;">
+                                        @creator.BadgeTitle
+                                    </span>
+                                </div>
+                            </div>
+
+                            <p style="font-size: 13px; color: var(--gt-zinc-600); line-height: 1.45; margin-bottom: 16px;">
+                                @creator.Bio
+                            </p>
+
+                            <!-- Creator Highlights -->
+                            <div style="display: flex; gap: 14px; margin-bottom: 14px; background: var(--gt-zinc-50); border: 1px solid var(--gt-zinc-200); border-radius: var(--gt-radius-md); padding: 10px 14px;">
+                                <div>
+                                    <div style="font-size: 14px; font-weight: 800; color: var(--gt-zinc-900);">@creator.PublicTripsCount</div>
+                                    <div style="font-size: 11px; color: var(--gt-zinc-500);">Trips Published</div>
+                                </div>
+                                <div style="border-left: 1px solid var(--gt-zinc-200); padding-left: 14px;">
+                                    <div style="font-size: 14px; font-weight: 800; color: var(--gt-brand-emerald);">@creator.TotalClonesReceived+</div>
+                                    <div style="font-size: 11px; color: var(--gt-zinc-500);">Community Clones</div>
+                                </div>
+                            </div>
+
+                            @if (creator.TopDestinations.Count > 0)
+                            {
+                                <div style="font-size: 11.5px; color: var(--gt-zinc-500);">
+                                    Favorite Hubs: <strong>@string.Join(" • ", creator.TopDestinations)</strong>
+                                </div>
+                            }
+                        </div>
+
+                        <div style="margin-top: 16px; border-top: 1px solid var(--gt-border-subtle); padding-top: 12px; display: flex; justify-content: flex-end;">
+                            <a href="@Url.Action("Index", "Community", new { q = creator.FullName })" class="gt-tag-btn" style="padding: 6px 14px; font-size: 12.5px;">
+                                View Shared Journeys <i class="fa-solid fa-arrow-right" style="margin-left: 4px;"></i>
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- ==================================================================
+             TAB 3: PRO TRAVEL TIPS & GUIDES
+             ================================================================== -->
+        <div id="tabContentTips" style="display: @(Model.ActiveTab == "tips" ? "block" : "none");">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-bottom: 40px;">
+                @foreach (var tip in Model.TravelTips)
+                {
+                    <div style="background: #FFFFFF; border: 1.5px solid var(--gt-border); border-radius: var(--gt-radius-xl); padding: 24px; box-shadow: var(--gt-shadow-card); display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <span class="gt-tag-btn" style="background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.2); color: #065F46; font-size: 11.5px; font-weight: 700;">
+                                    📍 @tip.CityName, @tip.Country
+                                </span>
+                                <span style="font-size: 11px; font-weight: 700; color: var(--gt-zinc-400); text-transform: uppercase;">
+                                    @tip.Tag
+                                </span>
+                            </div>
+
+                            <h4 style="font-size: 16px; font-weight: 800; color: var(--gt-zinc-950); margin-bottom: 8px;">
+                                @tip.Title
+                            </h4>
+
+                            <p style="font-size: 13.5px; color: var(--gt-zinc-600); line-height: 1.5; margin-bottom: 16px;">
+                                "@tip.Content"
+                            </p>
+                        </div>
+
+                        <div style="border-top: 1px solid var(--gt-border-subtle); padding-top: 12px; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <img src="@tip.AuthorAvatarUrl" alt="@tip.AuthorName" style="width: 26px; height: 26px; border-radius: 50%; object-fit: cover;" />
+                                <span style="font-size: 12px; font-weight: 600; color: var(--gt-zinc-700);">@tip.AuthorName</span>
+                            </div>
+                            <span style="font-size: 12px; color: var(--gt-zinc-500); font-weight: 600;">
+                                <i class="fa-regular fa-thumbs-up" style="color: var(--gt-brand-primary); margin-right: 4px;"></i> @tip.HelpfulCount found helpful
+                            </span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- ==================================================================
+             4. BOTTOM CALL-TO-ACTION (SHARE YOUR JOURNEY)
+             ================================================================== -->
+        <div style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border-radius: var(--gt-radius-2xl); padding: 40px; text-align: center; color: white; box-shadow: var(--gt-shadow-lg);">
+            <div class="gt-brand-icon" style="width: 48px; height: 48px; font-size: 20px; margin: 0 auto 16px;">
+                <i class="fa-solid fa-earth-americas"></i>
+            </div>
+            <h2 style="font-size: 26px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.02em;">
+                Ready to inspire fellow travelers around the world?
+            </h2>
+            <p style="font-size: 14.5px; color: #94A3B8; max-width: 540px; margin: 0 auto 24px; line-height: 1.5;">
+                Publish your past or upcoming itineraries to the GlobeTrotter Community. Help fellow nomads explore smarter and manage multi-city budgets with confidence.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <a href="@Url.Action("Create", "Trips")" class="gt-btn-auth-primary" style="width: auto; padding: 12px 28px; font-size: 14.5px; font-weight: 700;">
+                    <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Create New Itinerary
+                </a>
+                <a href="@Url.Action("Index", "Trips")" class="gt-tag-btn" style="padding: 12px 24px; font-size: 14.5px; background: rgba(255,255,255,0.08); color: white; border-color: rgba(255,255,255,0.2);">
+                    My Trips Dashboard
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function switchCommunityTab(tabName) {
+            document.getElementById('activeTabInput').value = tabName;
+            
+            document.getElementById('tabBtnItineraries').classList.remove('active');
+            document.getElementById('tabBtnCreators').classList.remove('active');
+            document.getElementById('tabBtnTips').classList.remove('active');
+
+            document.getElementById('tabContentItineraries').style.display = 'none';
+            document.getElementById('tabContentCreators').style.display = 'none';
+            document.getElementById('tabContentTips').style.display = 'none';
+
+            if (tabName === 'creators') {
+                document.getElementById('tabBtnCreators').classList.add('active');
+                document.getElementById('tabContentCreators').style.display = 'block';
+            } else if (tabName === 'tips') {
+                document.getElementById('tabBtnTips').classList.add('active');
+                document.getElementById('tabContentTips').style.display = 'block';
+            } else {
+                document.getElementById('tabBtnItineraries').classList.add('active');
+                document.getElementById('tabContentItineraries').style.display = 'block';
+            }
+        }
+
+        function selectCategory(category) {
+            document.getElementById('selectedCategoryInput').value = category;
+            document.getElementById('communityFilterForm').submit();
+        }
+
+        function toggleLikeTrip(tripId, btn) {
+            $.ajax({
+                url: '@Url.Action("ToggleLike", "Community")',
+                type: 'POST',
+                data: { id: tripId },
+                success: function (res) {
+                    if (res.success) {
+                        const countSpan = btn.querySelector('.like-count');
+                        if (countSpan) {
+                            countSpan.innerText = res.likesCount;
+                        }
+                        const icon = btn.querySelector('i');
+                        if (icon) {
+                            icon.classList.remove('fa-regular');
+                            icon.classList.add('fa-solid');
+                        }
+                        showToast('❤️ ' + res.message);
+                    }
+                },
+                error: function () {
+                    showToast('❤️ Added to community favorites!');
+                }
+            });
+        }
+    </script>
+}
