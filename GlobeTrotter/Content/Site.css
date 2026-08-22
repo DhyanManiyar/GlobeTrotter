@@ -1304,3 +1304,345 @@ a:hover {
         grid-template-columns: 1fr;
     }
 }
+
+/* ==========================================================================
+   12. AUTH MODULE (LOGIN & REGISTRATION - 21ST.DEV & UI-UX PRO MAX STYLE)
+   ========================================================================== */
+.gt-auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    position: relative;
+}
+
+.gt-auth-card {
+    background: #FFFFFF;
+    border: 1px solid var(--gt-border);
+    border-radius: var(--gt-radius-xl);
+    box-shadow: 0 10px 40px -6px rgba(0, 0, 0, 0.07), 0 0 0 1px rgba(0, 0, 0, 0.02);
+    width: 100%;
+    position: relative;
+    z-index: 2;
+    padding: 36px 36px 32px;
+}
+
+.gt-auth-card.login-card {
+    max-width: 440px;
+}
+
+.gt-auth-card.register-card {
+    max-width: 720px;
+}
+
+/* Circular Photo Top Avatar */
+.gt-auth-photo-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    position: relative;
+}
+
+.gt-photo-circle {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: var(--gt-zinc-100);
+    border: 2px dashed var(--gt-zinc-300);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    box-shadow: var(--gt-shadow-xs);
+}
+
+.gt-photo-circle:hover {
+    border-color: var(--gt-brand-light);
+    transform: scale(1.04);
+}
+
+.gt-photo-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.gt-photo-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--gt-zinc-500);
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+.gt-photo-placeholder i {
+    font-size: 24px;
+    color: var(--gt-zinc-400);
+}
+
+.gt-photo-badge {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 26px;
+    height: 26px;
+    background: var(--gt-zinc-950);
+    border: 2px solid #FFFFFF;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 11px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.gt-auth-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--gt-zinc-950);
+    text-align: center;
+    letter-spacing: -0.03em;
+    margin-bottom: 4px;
+}
+
+.gt-auth-subtitle {
+    font-size: 13.5px;
+    color: var(--gt-zinc-500);
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+/* Form Grid */
+.gt-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 18px;
+    margin-bottom: 20px;
+}
+
+.gt-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.gt-form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.gt-form-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--gt-zinc-700);
+    letter-spacing: -0.01em;
+}
+
+.gt-input-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.gt-input-box i.input-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--gt-zinc-400);
+    font-size: 14px;
+    pointer-events: none;
+    transition: color 0.15s ease;
+}
+
+.gt-auth-input {
+    width: 100%;
+    padding: 10px 14px 10px 38px;
+    background: var(--gt-zinc-50);
+    border: 1px solid var(--gt-zinc-200);
+    border-radius: var(--gt-radius-md);
+    color: var(--gt-zinc-900);
+    font-size: 13.5px;
+    font-weight: 500;
+    outline: none;
+    font-family: inherit;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gt-auth-input:focus {
+    background: #FFFFFF;
+    border-color: var(--gt-brand-light);
+    box-shadow: 0 0 0 3.5px rgba(99, 102, 241, 0.12);
+}
+
+.gt-auth-input:focus + i.input-icon,
+.gt-input-box:focus-within i.input-icon {
+    color: var(--gt-brand-primary);
+}
+
+.gt-auth-textarea {
+    width: 100%;
+    min-height: 85px;
+    padding: 10px 14px;
+    background: var(--gt-zinc-50);
+    border: 1px solid var(--gt-zinc-200);
+    border-radius: var(--gt-radius-md);
+    color: var(--gt-zinc-900);
+    font-size: 13.5px;
+    font-weight: 500;
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
+    transition: all 0.18s ease;
+}
+
+.gt-auth-textarea:focus {
+    background: #FFFFFF;
+    border-color: var(--gt-brand-light);
+    box-shadow: 0 0 0 3.5px rgba(99, 102, 241, 0.12);
+}
+
+/* Password Toggle Icon Button */
+.gt-pwd-toggle-btn {
+    position: absolute;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: var(--gt-zinc-400);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 4px;
+}
+
+.gt-pwd-toggle-btn:hover {
+    color: var(--gt-zinc-800);
+}
+
+/* Checkbox and Links */
+.gt-form-extras {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    margin: 12px 0 24px;
+}
+
+.gt-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--gt-zinc-600);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.gt-checkbox-label input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--gt-zinc-950);
+    cursor: pointer;
+}
+
+.gt-forgot-link {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--gt-brand-primary);
+}
+
+.gt-forgot-link:hover {
+    color: var(--gt-brand-light);
+    text-decoration: underline;
+}
+
+/* Auth Submit Button */
+.gt-btn-auth-primary {
+    width: 100%;
+    background: var(--gt-zinc-950);
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 24px;
+    border-radius: var(--gt-radius-md);
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gt-btn-auth-primary:hover {
+    background: var(--gt-brand-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.35);
+}
+
+.gt-btn-auth-primary:active {
+    transform: translateY(0);
+}
+
+/* Footer / Switch Auth View */
+.gt-auth-switch {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--gt-zinc-500);
+}
+
+.gt-auth-switch a {
+    font-weight: 700;
+    color: var(--gt-zinc-950);
+    margin-left: 4px;
+}
+
+.gt-auth-switch a:hover {
+    color: var(--gt-brand-primary);
+    text-decoration: underline;
+}
+
+/* Validation Alert */
+.gt-val-summary {
+    background: #FEF2F2;
+    border: 1px solid #FCA5A5;
+    border-radius: var(--gt-radius-md);
+    padding: 10px 14px;
+    color: #DC2626;
+    font-size: 12.5px;
+    font-weight: 500;
+    margin-bottom: 18px;
+}
+
+.gt-val-summary ul {
+    list-style: disc;
+    margin-left: 16px;
+    margin-top: 4px;
+}
+
+.field-validation-error {
+    color: #DC2626;
+    font-size: 11.5px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+@media (max-width: 600px) {
+    .gt-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .gt-auth-card {
+        padding: 24px 20px;
+    }
+}
+

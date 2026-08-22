@@ -45,12 +45,24 @@
                 <span class="gt-badge-dot"></span>
             </button>
 
-            <!-- User Pill -->
-            <div class="gt-user-pill" onclick="showToast('Alex Rivera (demo-user-001) • Free Tier')">
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Alex" class="gt-user-avatar" />
-                <span>Alex</span>
-                <i class="fa-solid fa-chevron-down" style="font-size: 10px; color: var(--gt-zinc-400);"></i>
-            </div>
+            <!-- User Pill / Auth Actions -->
+            @if (Request.IsAuthenticated)
+            {
+                using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", style = "display:none;" }))
+                {
+                    @Html.AntiForgeryToken()
+                }
+                <div class="gt-user-pill" onclick="document.getElementById('logoutForm').submit()" title="Click to Log Off">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Avatar" class="gt-user-avatar" />
+                    <span>@User.Identity.Name</span>
+                    <i class="fa-solid fa-arrow-right-from-bracket" style="font-size: 10px; color: var(--gt-zinc-400); margin-left: 4px;"></i>
+                </div>
+            }
+            else
+            {
+                <a href="@Url.Action("Login", "Account")" class="gt-tag-btn" style="padding: 6px 14px; font-weight: 600;">Log in</a>
+                <a href="@Url.Action("Register", "Account")" class="gt-btn-add" style="padding: 6px 14px; font-weight: 600;">Sign up</a>
+            }
         </div>
     </div>
 </header>

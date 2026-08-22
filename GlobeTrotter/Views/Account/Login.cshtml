@@ -1,65 +1,107 @@
-﻿@using GlobeTrotter.Models
+@using GlobeTrotter.Models
 @model LoginViewModel
 @{
-    ViewBag.Title = "Log in";
+    ViewBag.Title = "Traveler Login";
 }
 
-<main aria-labelledby="title">
-    <h2 id="title">@ViewBag.Title.</h2>
-    <div class="row">
-        <div class="col-md-8">
-            <section id="loginForm">
-                @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
-                {
-                    @Html.AntiForgeryToken()
-                    <h4>Use a local account to log in.</h4>
-                    <hr />
-                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                    <div class="row">
-                        @Html.LabelFor(m => m.Email, new { @class = "col-md-2 col-form-label" })
-                        <div class="col-md-10">
-                            @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
-                            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-                    <div class="row">
-                        @Html.LabelFor(m => m.Password, new { @class = "col-md-2 col-form-label" })
-                        <div class="col-md-10">
-                            @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
-                            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="offset-md-2 col-md-10">
-                            <div class="checkbox">
-                                @Html.CheckBoxFor(m => m.RememberMe)
-                                @Html.LabelFor(m => m.RememberMe)
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="offset-md-2 col-md-10">
-                            <input type="submit" value="Log in" class="btn btn-outline-dark" />
-                        </div>
-                    </div>
-                    <p>
-                        @Html.ActionLink("Register as a new user", "Register")
-                    </p>
-                    @* Enable this once you have account confirmation enabled for password reset functionality
-                        <p>
-                            @Html.ActionLink("Forgot your password?", "ForgotPassword")
-                        </p>*@
-                }
-            </section>
+<div class="gt-auth-page">
+    <div class="gt-hero-ambient-glow" style="top: 10%;"></div>
+
+    <div class="gt-auth-card login-card">
+        <!-- Photo/Avatar Circle (Screen 1 Mockup) -->
+        <div class="gt-auth-photo-wrap">
+            <div class="gt-photo-circle" id="loginAvatarPreview">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" alt="Traveler Photo" id="loginAvatarImg" />
+                <span class="gt-photo-badge">
+                    <i class="fa-solid fa-lock"></i>
+                </span>
+            </div>
         </div>
-        <div class="col-md-4">
-            <section id="socialLoginForm">
-                @Html.Partial("_ExternalLoginsListPartial", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
-            </section>
+
+        <h2 class="gt-auth-title">Welcome Back</h2>
+        <p class="gt-auth-subtitle">Log in to manage your multi-city itineraries & budgets</p>
+
+        @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form", id = "loginForm" }))
+        {
+            @Html.AntiForgeryToken()
+
+            if (!ViewData.ModelState.IsValid && ViewData.ModelState[""] != null && ViewData.ModelState[""].Errors.Count > 0)
+            {
+                <div class="gt-val-summary">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    @Html.ValidationSummary(true, "")
+                </div>
+            }
+
+            <div class="gt-form-group" style="margin-bottom: 16px;">
+                <label class="gt-form-label" for="loginEmailInput">Username / Email</label>
+                <div class="gt-input-box">
+                    <i class="fa-regular fa-user input-icon"></i>
+                    @Html.TextBoxFor(m => m.Email, new { 
+                        @class = "gt-auth-input", 
+                        id = "loginEmailInput", 
+                        placeholder = "alex.traveler@globetrotter.com", 
+                        autocomplete = "username",
+                        required = "required"
+                    })
+                </div>
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "field-validation-error" })
+            </div>
+
+            <div class="gt-form-group" style="margin-bottom: 8px;">
+                <label class="gt-form-label" for="loginPasswordInput">Password</label>
+                <div class="gt-input-box">
+                    <i class="fa-solid fa-key input-icon"></i>
+                    @Html.PasswordFor(m => m.Password, new { 
+                        @class = "gt-auth-input", 
+                        id = "loginPasswordInput", 
+                        placeholder = "••••••••", 
+                        autocomplete = "current-password",
+                        required = "required"
+                    })
+                    <button type="button" class="gt-pwd-toggle-btn" onclick="togglePasswordVisibility('loginPasswordInput', this)" aria-label="Toggle password visibility">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "field-validation-error" })
+            </div>
+
+            <div class="gt-form-extras">
+                <label class="gt-checkbox-label">
+                    @Html.CheckBoxFor(m => m.RememberMe)
+                    <span>Remember me</span>
+                </label>
+                <a href="javascript:void(0)" class="gt-forgot-link" onclick="alert('Demo password for pre-seeded users is: Pass@123')">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="gt-btn-auth-primary">
+                <span>Login</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        }
+
+        <div class="gt-auth-switch">
+            <span>Don't have an account?</span>
+            <a href="@Url.Action("Register", "Account")">Sign up here</a>
         </div>
     </div>
-</main>
+</div>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = "password";
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
 }

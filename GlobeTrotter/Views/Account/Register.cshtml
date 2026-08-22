@@ -1,43 +1,222 @@
-﻿@model GlobeTrotter.Models.RegisterViewModel
+@model GlobeTrotter.Models.RegisterViewModel
 @{
-    ViewBag.Title = "Register";
+    ViewBag.Title = "Create Traveler Account";
 }
 
-<main aria-labelledby="title">
-    <h2 id="title">@ViewBag.Title.</h2>
+<div class="gt-auth-page">
+    <div class="gt-hero-ambient-glow" style="top: 5%;"></div>
 
-    @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form" }))
-    {
-        @Html.AntiForgeryToken()
-        <h4>Create a new account.</h4>
-        <hr />
-        @Html.ValidationSummary("", new { @class = "text-danger" })
-        <div class="row">
-            @Html.LabelFor(m => m.Email, new { @class = "col-md-2 col-form-label" })
-            <div class="col-md-10">
-                @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+    <div class="gt-auth-card register-card">
+        <!-- Photo/Avatar Circle (Screen 2 Mockup) -->
+        <div class="gt-auth-photo-wrap">
+            <div class="gt-photo-circle" id="regPhotoCircle" onclick="cycleAvatarPreset()" title="Click to choose/cycle avatar photo">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" alt="Traveler Photo" id="regAvatarImg" />
+                <span class="gt-photo-badge">
+                    <i class="fa-solid fa-camera"></i>
+                </span>
             </div>
+            <span style="font-size: 11.5px; font-weight: 600; color: var(--gt-zinc-400); margin-top: 6px;">
+                Photo <span style="font-weight: 400;">(Click to change)</span>
+            </span>
         </div>
-        <div class="row">
-            @Html.LabelFor(m => m.Password, new { @class = "col-md-2 col-form-label" })
-            <div class="col-md-10">
-                @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+
+        <h2 class="gt-auth-title">Join GlobeTrotter</h2>
+        <p class="gt-auth-subtitle">Create your personalized travel profile and start designing multi-city adventures</p>
+
+        @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form", id = "regForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.AvatarUrl, new { id = "hiddenAvatarUrl", Value = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" })
+
+            if (!ViewData.ModelState.IsValid)
+            {
+                <div class="gt-val-summary">
+                    <i class="fa-solid fa-circle-exclamation"></i> Please correct the highlighted errors below.
+                    @Html.ValidationSummary(true, "")
+                </div>
+            }
+
+            <div class="gt-form-grid">
+                <!-- Row 1: First Name & Last Name -->
+                <div class="gt-form-group">
+                    <label class="gt-form-label" for="txtFirstName">First Name</label>
+                    <div class="gt-input-box">
+                        <i class="fa-regular fa-user input-icon"></i>
+                        @Html.TextBoxFor(m => m.FirstName, new { 
+                            @class = "gt-auth-input", 
+                            id = "txtFirstName", 
+                            placeholder = "Alex",
+                            required = "required"
+                        })
+                    </div>
+                    @Html.ValidationMessageFor(m => m.FirstName, "", new { @class = "field-validation-error" })
+                </div>
+
+                <div class="gt-form-group">
+                    <label class="gt-form-label" for="txtLastName">Last Name</label>
+                    <div class="gt-input-box">
+                        <i class="fa-regular fa-user input-icon"></i>
+                        @Html.TextBoxFor(m => m.LastName, new { 
+                            @class = "gt-auth-input", 
+                            id = "txtLastName", 
+                            placeholder = "Rivera",
+                            required = "required"
+                        })
+                    </div>
+                    @Html.ValidationMessageFor(m => m.LastName, "", new { @class = "field-validation-error" })
+                </div>
+
+                <!-- Row 2: Email Address & Phone Number -->
+                <div class="gt-form-group">
+                    <label class="gt-form-label" for="txtEmail">Email Address</label>
+                    <div class="gt-input-box">
+                        <i class="fa-regular fa-envelope input-icon"></i>
+                        @Html.TextBoxFor(m => m.Email, new { 
+                            @class = "gt-auth-input", 
+                            id = "txtEmail", 
+                            placeholder = "alex.traveler@globetrotter.com",
+                            type = "email",
+                            required = "required"
+                        })
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "field-validation-error" })
+                </div>
+
+                <div class="gt-form-group">
+                    <label class="gt-form-label" for="txtPhone">Phone Number</label>
+                    <div class="gt-input-box">
+                        <i class="fa-solid fa-phone input-icon"></i>
+                        @Html.TextBoxFor(m => m.PhoneNumber, new { 
+                            @class = "gt-auth-input", 
+                            id = "txtPhone", 
+                            placeholder = "+1 (555) 234-5678",
+                            type = "tel"
+                        })
+                    </div>
+                    @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "field-validation-error" })
+                </div>
+
+                <!-- Row 3: City & Country -->
+                <div class="gt-form-group">
+                    <label class="gt-form-label" for="txtCity">City</label>
+                    <div class="gt-input-box">
+                        <i class="fa-solid fa-city input-icon"></i>
+                        @Html.TextBoxFor(m => m.City, new { 
+                            @class = "gt-auth-input", 
+                            id = "txtCity", 
+                            placeholder = "San Francisco"
+                        })
+                    </div>
+                    @Html.ValidationMessageFor(m => m.City, "", new { @class = "field-validation-error" })
+                </div>
+
+                <div class="gt-form-group">
+                    <label class="gt-form-label" for="txtCountry">Country</label>
+                    <div class="gt-input-box">
+                        <i class="fa-solid fa-globe input-icon"></i>
+                        @Html.TextBoxFor(m => m.Country, new { 
+                            @class = "gt-auth-input", 
+                            id = "txtCountry", 
+                            placeholder = "United States"
+                        })
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Country, "", new { @class = "field-validation-error" })
+                </div>
+
+                <!-- Row 4: Password & Confirm Password -->
+                <div class="gt-form-group">
+                    <label class="gt-form-label" for="txtPassword">Password</label>
+                    <div class="gt-input-box">
+                        <i class="fa-solid fa-lock input-icon"></i>
+                        @Html.PasswordFor(m => m.Password, new { 
+                            @class = "gt-auth-input", 
+                            id = "txtPassword", 
+                            placeholder = "At least 6 characters",
+                            required = "required"
+                        })
+                        <button type="button" class="gt-pwd-toggle-btn" onclick="togglePasswordVisibility('txtPassword', this)" aria-label="Toggle password">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "field-validation-error" })
+                </div>
+
+                <div class="gt-form-group">
+                    <label class="gt-form-label" for="txtConfirmPassword">Confirm Password</label>
+                    <div class="gt-input-box">
+                        <i class="fa-solid fa-shield-check input-icon"></i>
+                        @Html.PasswordFor(m => m.ConfirmPassword, new { 
+                            @class = "gt-auth-input", 
+                            id = "txtConfirmPassword", 
+                            placeholder = "Re-enter password",
+                            required = "required"
+                        })
+                        <button type="button" class="gt-pwd-toggle-btn" onclick="togglePasswordVisibility('txtConfirmPassword', this)" aria-label="Toggle password">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
+                    @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "field-validation-error" })
+                </div>
+
+                <!-- Row 5: Additional Information (Full Width Textarea) -->
+                <div class="gt-form-group full-width">
+                    <label class="gt-form-label" for="txtAdditionalInfo">Additional Information ....</label>
+                    @Html.TextAreaFor(m => m.AdditionalInfo, new { 
+                        @class = "gt-auth-textarea", 
+                        id = "txtAdditionalInfo", 
+                        placeholder = "Tell us about your travel style, preferred pace, dream destinations, or dietary preferences...",
+                        rows = 3
+                    })
+                    @Html.ValidationMessageFor(m => m.AdditionalInfo, "", new { @class = "field-validation-error" })
+                </div>
             </div>
+
+            <!-- Submit Button (Screen 2: Register Users) -->
+            <button type="submit" class="gt-btn-auth-primary">
+                <span>Register Users</span>
+                <i class="fa-solid fa-user-plus"></i>
+            </button>
+        }
+
+        <div class="gt-auth-switch">
+            <span>Already have an account?</span>
+            <a href="@Url.Action("Login", "Account")">Log in here</a>
         </div>
-        <div class="row">
-            @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 col-form-label" })
-            <div class="col-md-10">
-                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
-            </div>
-        </div>
-        <div class="row">
-            <div class="offset-md-2 col-md-10">
-                <input type="submit" value="Register" class="btn btn-outline-dark" />
-            </div>
-        </div>
-    }
-</main>
+    </div>
+</div>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        // Avatar presets to cycle when clicking the photo circle
+        const avatarPresets = [
+            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+            "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80",
+            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
+            "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80"
+        ];
+        let avatarIndex = 0;
+
+        function cycleAvatarPreset() {
+            avatarIndex = (avatarIndex + 1) % avatarPresets.length;
+            const chosen = avatarPresets[avatarIndex];
+            document.getElementById('regAvatarImg').src = chosen;
+            document.getElementById('hiddenAvatarUrl').value = chosen;
+        }
+
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = "password";
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
 }
